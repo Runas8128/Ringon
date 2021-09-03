@@ -1,0 +1,18 @@
+{
+    "Add": {
+        "InList": "Huh? That person is already here! Please add a different person.",
+        "Bot": "Bot uses a pre-defined profile!",
+        "Success": "Successfully saved {}'s profile!",
+        "Usage": "Usage: !Profile creation @mention Class1 Class2(Optional)"
+    },
+    "Modify": {
+        "Usage": "Usage: !Profile edit [Class1/Class2] (`What to replace` or `'delete'`)",
+        "NotFoundProf": "I couldn't find the profile of {} :(",
+        "Success": "{}'s main class number {} was changed to {}!",
+        "Delete": "Successfully deleted {UserName}'s main class number 2!",
+        "InvalidClass": "Weren't you going to change your class? Please state the class!"
+    },
+    "View": {
+        "NotFound": "I haven't seen you before.. ~~Or maybe I just don't remember~~"
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "Add": {
+        "WrongChannel": "Please try again in the decklist channel!",
+        "NoImage": "To upload a deck, please attach the deck image!",
+        "Usage": "Usage: ***!adddeck* Name Class\nDescription**", 
+        "UsedName": "That deck already exists. Please choose another deck name!",
+        "WrongClass": "Please state the deck's class, such as Forestcraft, in the class section!",
+        "Success": "{} Deck is successfully saved!"
+    },
+    "Find": {
+        "NoWord": "Please add a search term!",
+        "NoMatchDeck": "I've looked through everything, but I haven't found a deck that fits your description (｡•́︿•̀｡)",
+        "TooManyDeck": "There are too many decks :( Please add more search terms!",
+        "SomeDeck": "That's a lot of decks! I'll give you a quick look.",
+        "SomeNotice": "I can tell you the deck's name, class, and format (rotation/unlimited) :D",
+        "SpecificDeck": "Here! I got just the deck!"
+    },
+    "Similar": {
+        "FindFail": "I couldn't find a deck with a name that exactly matches {} :("
+    },
+    "Delete": {
+        "Success": "The deck {} was successfully deleted!"
+    },
+    "Update": {
+        "SuccessDesc": "Successfully changed the description of the deck {}!",
+        "Success": "Successfully updated the deck {}!"
+    }
+}

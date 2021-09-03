@@ -1,0 +1,38 @@
+{
+    "Base": {
+        "Title": "Help Message",
+        "Basic": {
+            "Usage": "!help",
+            "Brief": "Show overall help"
+        },
+        "Category": {
+            "Usage": "!help (Category name)",
+            "Brief": "Show details of that category.\nTo get all categories, please type `!help`"
+        },
+        "Command": {
+            "Usage": "!help (Command)",
+            "Brief": "Show details of that command.\nTo get all commands, please type `!help`"
+        },
+        "Alias": {
+            "Usage": "!help alias",
+            "Brief": "Show aliases of commands.\nThis will show all aliases since that's not much"
+        }
+    },
+    "Basic": {
+        "Title": "Commands",
+        "Desc": "prefix is `!`",
+        "Field": "Commands in {} category"
+    },
+    "Category": {
+        "Title": "Category - {}"
+    },
+    "Command": {
+        "Title": "Command - {}",
+        "Usage": "Usage",
+        "Desc": "Description"
+    },
+    "Alias": {
+        "Title": "Alias List",
+        "Field": "Commands in {} category"
+    }
+}
