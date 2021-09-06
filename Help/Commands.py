@@ -73,9 +73,6 @@ class CogHelp(MyCog, name='도움말'):
             )
 
             for cogName in self.bot.cogs.keys():
-                if cogName in ['매니저', '디버그']:
-                    continue
-
                 command_list = self.getAllCommand(self.bot.get_cog(cogName), isAdmin, isOwner, lang)
 
                 if command_list:
