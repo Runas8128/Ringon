@@ -3,23 +3,33 @@ from traceback import format_exc
 
 from Common import *
 
+from Profile.Helper import profiles
 from Studied.Helper import studied
 from Detect.Helper  import detect
 
 class CogEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.ErrLogCh = None
     
     async def defaultError(self, ctx: commands.Context):
+        if not self.ErrLogCh:
+            self.ErrLogCh = self.bot.get_channel(863719856061939723)
         for ss in format_exc().split('\n\n'):
-            await self.bot.get_channel(863719856061939723).send(ss)
+            await self.ErrLogCh.send(ss)
+        await self.ErrLogCh.send('-'*40)
         await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 
     @commands.Cog.listener()
     async def on_ready(self):
         if not self.ReserveEvent.is_running():
             self.ReserveEvent.start()
-            await self.bot.change_presence(activity=discord.Game("덱, 프로필, 전적을 관리"))
+
+            await self.bot.change_presence(
+                status=discord.Status.online,
+                activity=discord.Game("덱, 프로필, 전적을 관리")
+            )
+
             print("Ringonbot ON")
 
     @commands.Cog.listener()
@@ -29,6 +39,7 @@ class CogEvent(commands.Cog):
 
         msg = message.content
         ch  = message.channel
+        atr = message.author
 
         if not msg.startswith('!금칙어'):
             block: str
@@ -38,7 +49,14 @@ class CogEvent(commands.Cog):
                     await message.delete()
                     return
 
-        if msg in studied.taughts:
+        # random ping
+        if msg.lower() == '@random':
+            await message.channel.trigger_typing()
+            await ch.send(f"<@!{choice([profile['id'] for profile in profiles.List])}> (RandomPing by {atr.mention})")
+            await message.delete()
+
+        # Alive Test
+        elif msg in studied.taughts:
             await message.channel.trigger_typing()
             await ch.send(studied.get(msg))
             
@@ -51,7 +69,6 @@ class CogEvent(commands.Cog):
             detect.start()
             for dtt in detect.detects:
                 if dtt in msg:
-                    await message.channel.trigger_typing()
                     await ch.send(detect.detects[dtt])
 
     @commands.Cog.listener()
@@ -93,10 +110,12 @@ class CogEvent(commands.Cog):
             await ctx.send("개발자 전용 명령어입니다! It's only for Bot owner")
         
         elif isinstance(error, commands.errors.UserNotFound):
-            await ctx.send("유저는 멘션이나 ID복사로 전달해주세요! Please send me it with mention or id")
+            await ctx.send("유저는 멘션이나 ID복사로 전달해주세요!")
         
         elif isinstance(error, discord.errors.HTTPException):
-            if error.code not in [429]:   # Too Many Requests
+            if error.code == 429:   # Too Many Requests
+                pass                # 가끔 이거 와도 정상작동할 때 있음
+            else:
                 await self.defaultError(ctx)
 
         else:
