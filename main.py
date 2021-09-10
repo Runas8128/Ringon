@@ -12,8 +12,9 @@ try:
         else:
             bot.load_extension('CogManager')
             bot.load_extension('Debug')
-
-            bot.run('ODUwMDE5MjEwODY3Mzc2MTU4.YLjoFA.R7p0s1IPLhQS6obhT-RbJCApeHo')
+            
+            from Common import TOKEN
+            bot.run(TOKEN)
 
 except discord.errors.HTTPException as E:
     from os import system

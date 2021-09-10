@@ -44,6 +44,9 @@ cmdList = List[commands.Command]
 if 'db' not in globals():
     db = {'event': [], 'HelpDft': {}, 'prof': {}, 'pack': '', 'taughts': {}, 'WordBlock': [], 'decks': [], 'maxPrize': 0, 'detect': {}, 'Help': {}, 'EventQueue': []}
 
+# TOKEN - Important variable
+TOKEN = 'ODUwMDE5MjEwODY3Mzc2MTU4.YLjoFA.R7p0s1IPLhQS6obhT-RbJCApeHo'
+
 # Regex
 reKR = re.compile(r"[ㄱ-ㅣ가-힣]")
 
