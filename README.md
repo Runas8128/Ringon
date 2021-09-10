@@ -32,10 +32,10 @@ Shadowverse Deck store/analyze bot, Ringon! Thanks you Thunderbull for helping w
 
 ### Help Command 도움말 명령어
 
-!help -> Show All commands by group
+`!help` -> Show All commands by group
 
-!help help -> Show what you can do with `!help` command
+`!help help` -> Show what you can do with `!help` command
 
 `!도움말` / `!명령어` -> 모든 커맨드를 그룹별로 정렬
 
-!도움말 명령어 -> `!도움말` 명령어로 할 수 있는 기능 정리 (`!도움말 도움말`의 경우 "도움말" 카테고리를 보여줌)
+`!도움말 명령어` -> `!도움말` 명령어로 할 수 있는 기능 정리 (`!도움말 도움말`의 경우 "도움말" 카테고리를 보여줌)
