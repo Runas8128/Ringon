@@ -1,4 +1,4 @@
-# Ringon / 링곤이
+# Ringon 링곤이
 
 Shadowverse Deck store/analyze bot, Ringon! Thanks you Thunderbull for helping with translation :)
 
@@ -10,13 +10,13 @@ Shadowverse Deck store/analyze bot, Ringon! Thanks you Thunderbull for helping w
 * Provide Profiles for Users 유저별 프로필
 * Schedule Changing Logo/Banner, and Writing Notices 로고/배너 변경 및 공지사항 작성 예약
 
-## 업데이트할 내용 목록
+## Upcoming contents 업데이트할 내용 목록
 
  - [x] Translate Commands 명령어 영문 번역
  - [ ] Translate Deck Names with Pre-defined values 미리 정의된 단어들을 기준으로 번역
  - [ ] More flexible translation system 더 유연한 번역 시스템
 
-## 알려진 버그 목록
+## Known Bugs 알려진 버그 목록
 
  - [x] Didn't storing decks and not showing Decks 덱 저장/검색이 안되는 버그
  - [x] Unnecessary charactors '<@!' in uploader mention 불필요한 문자 '<@!'가 업로더 멘션에 포함되는 버그
