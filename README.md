@@ -1,6 +1,7 @@
 # Ringon / 링곤이
 
 Shadowverse Deck store/analyze bot, Ringon! Thanks you Thunderbull for helping with translation :)
+
 섀도우버스 덱 저장/분석 봇, 링곤이입니다! 번역을 도와주신 천둥소님 감사드립니다 :)
 
 ## Key Features 주요 기능들
