@@ -79,7 +79,7 @@ class CogDeckList(MyCog, name="덱"):
 
             for scThing in scThings:
                 Class = strToClass(scThing)
-                user = await strToUser(ctx, scThing)
+                user = await strToUser(ctx, scThing, ctx.author)
                     
                 if   scThing.lower() in ['로테이션',   '로테', 'rotation', 'rt']:
                     scFuncS += " and deck['rtul'] == 'RT'"
@@ -94,7 +94,8 @@ class CogDeckList(MyCog, name="덱"):
 
                 else:
                     scFuncS += f" and '{scThing.upper()}' in deck['name']"
-
+            
+            print(scFuncS)
             foundDeck = dList.find(eval(scFuncS))
         
         if len(foundDeck) == 0:

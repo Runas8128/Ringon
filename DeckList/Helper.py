@@ -141,7 +141,7 @@ def makeEmbed(deck: Deck, KE: Lang = 'KR') -> discord.Embed:
         title=makeTitle(deck, KE),
         color=0x2b5468
     )
-    embed.add_field(name="업로더" if KE == 'KR' else "Uploader", value=f"<@!{deck['author']}", inline=False)
+    embed.add_field(name="업로더" if KE == 'KR' else "Uploader", value=f"{deck['author']}", inline=False)
     embed.add_field(name="클래스" if KE == 'KR' else "Class", value=deck['class'], inline=False)
     embed.add_field(name="덱 설명" if KE == 'KR' else "Description", value=desc, inline=False)
     

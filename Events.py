@@ -11,14 +11,6 @@ class CogEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.ErrLogCh = None
-    
-    async def defaultError(self, ctx: commands.Context):
-        if not self.ErrLogCh:
-            self.ErrLogCh = self.bot.get_channel(863719856061939723)
-        for ss in format_exc().split('\n\n'):
-            await self.ErrLogCh.send(ss)
-        await self.ErrLogCh.send('-'*40)
-        await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -116,10 +108,16 @@ class CogEvent(commands.Cog):
             if error.code == 429:   # Too Many Requests
                 pass                # 가끔 이거 와도 정상작동할 때 있음
             else:
-                await self.defaultError(ctx)
+                if not self.ErrLogCh:
+                    self.ErrLogCh = self.bot.get_channel(863719856061939723)
+                await self.ErrLogCh.send(str(error) + '\n' + '-'*40)
+                await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 
         else:
-            await self.defaultError(ctx)
+            if not self.ErrLogCh:
+                self.ErrLogCh = self.bot.get_channel(863719856061939723)
+            await self.ErrLogCh.send(str(error) + '\n' + '-'*40)
+            await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 
     @tasks.loop(minutes=5)
     async def ReserveEvent(self, util: Dict[str, Union[discord.Guild, discord.TextChannel]]={}):

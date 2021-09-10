@@ -107,15 +107,7 @@ madeDate = {
 }
 
 #--------------------------------------------------------------------------------------------------
-# Error
-
-class MyError(Exception):
-    def __init__(self, message: str, *args: object) -> None:
-        super().__init__(*args)
-        self.message = message
-    
-    def __str__(self) -> str:
-        return self.message
+# Cogs
 
 class MyCog(commands.Cog):
     bot: commands.Bot       # class' own Bot
@@ -142,13 +134,13 @@ def strToClass(name: str) -> str:
     if name in classes.keys():
         return classes[name]
     else:
-        raise MyError("올바르지 않은 클래스입니다!")
+        return name
 
 def ClassKrToEn(name: str) -> str:
     if name in OrgCls:
         return OrgClsEN[OrgCls.index(name)]
     else:
-        raise MyError("올바르지 않은 클래스입니다!")
+        return name
 
 def chToRTUL(chID: int) -> str:
     return {758479879418937374: 'RT', 758480189503832124: 'UL'}.get(chID, "RT")
