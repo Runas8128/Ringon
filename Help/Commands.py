@@ -113,6 +113,9 @@ class CogHelp(MyCog, name='도움말'):
 
             if ((not isAdmin) and (cmd in cmd.cog.AdminOnly)) or ((not isOwner) and (cmd in cmd.cog.OwnerOnly)):
                 await self.HelpBase(ctx, lang)
+            
+            elif cmd.name in ['도움말', 'help']:
+                await self.HelpBase(ctx, lang)
 
             else:
                 embed = discord.Embed(
