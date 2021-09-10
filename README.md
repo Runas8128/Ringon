@@ -7,28 +7,21 @@ Shadowverse Deck store/analyze bot, Ringon! Thanks you Thunderbull for helping w
 ## Key Features 주요 기능들
 
 * Store n Manage Decks 덱의 저장 및 관리
-
 * Provide Profiles for Users 유저별 프로필
-
 * Schedule Changing Logo/Banner, and Writing Notices 로고/배너 변경 및 공지사항 작성 예약
 
 ## 업데이트할 내용 목록
 
-[x] Translate Commands 명령어 영문 번역
-
-[ ] Translate Deck Names with Pre-defined values 미리 정의된 단어들을 기준으로 번역
-
-[ ] More flexible translation system 더 유연한 번역 시스템
+ - [x] Translate Commands 명령어 영문 번역
+ - [ ] Translate Deck Names with Pre-defined values 미리 정의된 단어들을 기준으로 번역
+ - [ ] More flexible translation system 더 유연한 번역 시스템
 
 ## 알려진 버그 목록
 
-[x] Didn't storing decks and not showing Decks 덱 저장/검색이 안되는 버그
-
-[x] Unnecessary charactors '<@!' in uploader mention 불필요한 문자 '<@!'가 업로더 멘션에 포함되는 버그
-
-[x] Not sending bug report properly 버그 리포트를 제대로 받지 못하는 버그
-
-[ ] Slash commands are not posted properly 슬래시 커맨드가 정상 추가되지 않는 버그
+ - [x] Didn't storing decks and not showing Decks 덱 저장/검색이 안되는 버그
+ - [x] Unnecessary charactors '<@!' in uploader mention 불필요한 문자 '<@!'가 업로더 멘션에 포함되는 버그
+ - [x] Not sending bug report properly 버그 리포트를 제대로 받지 못하는 버그
+ - [ ] Slash commands are not posted properly 슬래시 커맨드가 정상 추가되지 않는 버그
 
 ## Quick Example 예시
 
