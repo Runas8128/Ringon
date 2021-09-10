@@ -6,7 +6,7 @@ Shadowverse Deck store/analyze bot, Ringon! Thanks you Thunderbull for helping w
 
 ## Key Features 주요 기능들
 
-* Store n Manage Decks 덱의 저장 및 관리
+* Store & Manage Decks 덱의 저장 및 관리
 * Provide Profiles for Users 유저별 프로필
 * Schedule Changing Logo/Banner, and Writing Notices 로고/배너 변경 및 공지사항 작성 예약
 
