@@ -156,7 +156,7 @@ class CogOther(MyCog, name='기타'):
         usage='!코드보기'
     )
     async def ShowCode(self, ctx: commands.Context):
-        await ctx.send('https://replit.com/@Runas8128/Ringon')
+        await ctx.send('https://github.com/Runas8128/Ringon')
 
     # Reserve Changing Server
 
