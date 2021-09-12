@@ -21,6 +21,8 @@ async def strToUser(ctx: commands.Context, s: str, default: discord.Member=None,
 class DeckList:
     def __init__(self):
         self.List: List[Deck] = toGen(db['decks'])
+        for idx in range(len(self.List)):
+            self.List[idx]['class'] = strToClass(self.List[idx]['class'])
         self.List.sort(key=lambda deck: deck['name'])
         self.List.sort(key=lambda deck: OrgCls.index(deck['class']))
 

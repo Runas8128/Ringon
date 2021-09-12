@@ -51,7 +51,7 @@ class CogDeckList(MyCog, name="덱"):
                 desc += Class
                 Class = ls[0]
             else:
-                await ctx.send(self.T.translate('Add.WrongClass'))
+                await ctx.send(self.T.translate('Add.WrongClass', lang))
                 return
 
         deck: Deck = {
@@ -65,7 +65,7 @@ class CogDeckList(MyCog, name="덱"):
         }
 
         dList.append(deck)
-        await ctx.send(self.T.translate('Add.Success').format(Name))
+        await ctx.send(self.T.translate('Add.Success', lang).format(Name))
 
     async def Find(self, ctx: Context, scThings: List[str], lang: Lang):
         if not scThings:
