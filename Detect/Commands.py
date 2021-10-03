@@ -29,7 +29,7 @@ class CogDetect(MyCog, name='일부감지'):
         description='링곤이에게 특정 문장을 감지하게 합니다. 나중에 그 문장이 포함된 말이 챗에 올라오면 반응합니다.',
         usage='!감지 (배울 문장) = (반응할 문장)'
     )
-    async def RG_Detect(ctx: commands.Context, *seq: str):
+    async def RG_Detect(self, ctx: commands.Context, *seq: str):
         seq = ' '.join(seq)
 
         if seq.count('=') != 1:
@@ -46,7 +46,7 @@ class CogDetect(MyCog, name='일부감지'):
         description='링곤이가 감지할 특정 문장을 잊게 합니다. 이후에 해당 문장에 반응하지 않습니다.',
         usage='!감지취소 (배운 문장)'
     )
-    async def RG_NotDetect(ctx: commands.Context, *tar: str):
+    async def RG_NotDetect(self, ctx: commands.Context, *tar: str):
         tar: str = ' '.join(tar)
         
         if tar in detect.detects.keys():
@@ -61,7 +61,7 @@ class CogDetect(MyCog, name='일부감지'):
         description='링곤이가 감지할 총 문장의 개수를 보여줍니다.',
         usage='!센서민감도'
     )
-    async def RG_Neungji(ctx: commands.Context):
+    async def RG_Neungji(self, ctx: commands.Context):
         await ctx.send(f"링곤사전을 보니, 저의 센서민감도는 {len(detect.detects.keys())}이라고 하네요!")
 
     @commands.command(
@@ -70,7 +70,7 @@ class CogDetect(MyCog, name='일부감지'):
         description='링곤이가 감지할 문장을 모두 알려줍니다. 10개씩 끊어서 보여주며, 이모지를 눌러서 페이지별로 이동이 가능합니다.',
         usage='!센서기록'
     )
-    async def RG_Sensor(ctx: commands.Context):
+    async def RG_Sensor(self, ctx: commands.Context):
         iq = len(detect.detects)
 
         if iq == 0:
