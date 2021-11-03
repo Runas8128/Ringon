@@ -6,15 +6,6 @@ from Common import *
 
 Deck = Dict[str, Union[str, int]]
 
-async def strToUser(ctx: commands.Context, s: str, default: discord.Member=None, memory:List[commands.MemberConverter]=[]) -> discord.Member:
-	if not memory:
-		memory = [commands.MemberConverter()]
-	
-	try:
-		return await memory[0].convert(ctx, s)
-	except:
-		return default
-
 #--------------------------------------------------------------------------------------------------
 # Class
 
@@ -125,33 +116,3 @@ class DeckList:
         return embed
 
 dList = DeckList()
-
-#--------------------------------------------------------------------------------------------------
-# helper lambdas
-
-def makeTitle(deck: Deck, KE: Lang = 'KR') -> str:
-    name = deck['name']
-    ver  = '' if not deck.get('ver') else f" ver. {deck['ver']}"
-    rtul = eval(deck['rtul'])
-    pack = '' if deck['rtul'] == 'UL' else f", {db['pack']} {'팩' if KE == 'KR' else 'Pack'}"
-    return f"""{name}{ver}({rtul}{pack})"""
-
-def makeEmbed(deck: Deck, KE: Lang = 'KR') -> discord.Embed:
-    desc = deck['desc'] if len(deck['desc']) != 0 else ('(설명 없음)' if KE == 'KR' else '(No Desc Provided)')
-
-    embed = discord.Embed(
-        title=makeTitle(deck, KE),
-        color=0x2b5468
-    )
-    embed.add_field(name="업로더" if KE == 'KR' else "Uploader", value=f"{deck['author']}", inline=False)
-    embed.add_field(name="클래스" if KE == 'KR' else "Class", value=deck['class'], inline=False)
-    embed.add_field(name="덱 설명" if KE == 'KR' else "Description", value=desc, inline=False)
-    
-    if deck.get('date'):
-        embed.add_field(name='올린 날짜' if KE == 'KR' else 'Date', value=deck['date'])
-    if deck.get('cont'):
-        embed.add_field(name='기여자' if KE == 'KR' else 'Contributor', value=', '.join(deck['cont']))
-    
-    embed.set_image(url=deck['imgURL'])
-
-    return embed

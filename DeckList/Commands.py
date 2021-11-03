@@ -3,6 +3,48 @@
 from .Helper import *
 
 class CogDeckList(MyCog, name="덱"):
+    """
+    덱리를 저장하고 구경하는 카테고리입니다.
+    Command category for storing/viewing Decklist
+    """
+
+    def makeTitle(self, deck: Deck, KE: Lang = 'KR') -> str:
+        name = deck['name']
+        ver  = '' if not deck.get('ver') else f" ver. {deck['ver']}"
+        rtul = eval(deck['rtul'])
+        pack = '' if deck['rtul'] == 'UL' else f", {db['pack']} {'팩' if KE == 'KR' else 'Pack'}"
+        return f"""{name}{ver}({rtul}{pack})"""
+
+    def makeEmbed(self, deck: Deck, KE: Lang = 'KR') -> discord.Embed:
+        desc: str
+        uploader: str
+
+        if len(deck['desc']) != 0:
+            desc = deck['desc']
+        else:
+            desc = '(설명 없음)' if KE == 'KR' else '(No Desc Provided)'
+        
+        if deck['author'].startswith('<@!') or deck['author'].startswith('<@'):
+            uploader = deck['author']
+        else:
+            uploader = self.bot.get_user(int(deck['author'])).mention
+
+        embed = discord.Embed(
+            title=self.makeTitle(deck, KE),
+            color=0x2b5468
+        )
+        embed.add_field(name="업로더" if KE == 'KR' else "Uploader", value=uploader, inline=False)
+        embed.add_field(name="클래스" if KE == 'KR' else "Class", value=deck['class'], inline=False)
+        embed.add_field(name="덱 설명" if KE == 'KR' else "Description", value=desc, inline=False)
+        
+        if deck.get('date'):
+            embed.add_field(name='올린 날짜' if KE == 'KR' else 'Date', value=deck['date'])
+        if deck.get('cont'):
+            embed.add_field(name='기여자' if KE == 'KR' else 'Contributor', value=', '.join(deck['cont']))
+        
+        embed.set_image(url=deck['imgURL'])
+
+        return embed
 
     # ----- __init__ -----
     
@@ -79,15 +121,14 @@ class CogDeckList(MyCog, name="덱"):
 
             for scThing in scThings:
                 Class = strToClass(scThing)
-                user = await strToUser(ctx, scThing, ctx.author)
                     
                 if   scThing.lower() in ['로테이션',   '로테', 'rotation', 'rt']:
                     scFuncS += " and deck['rtul'] == 'RT'"
                 elif scThing.lower() in ['언리미티드', '언리', 'unlimited', 'ul']:
                     scFuncS += " and deck['rtul'] == 'UL'"
 
-                elif user != ctx.author:
-                    scFuncS += f''' and deck['author'] == "{user.id}"'''
+                elif scThing.startswith('<@'):
+                    scFuncS += f''' and deck['author'] == "{scThing[2:-1].replace('!', '')}"'''
 
                 elif Class in OrgCls:
                     scFuncS += f" and '{Class}' == deck['class']"
@@ -95,7 +136,6 @@ class CogDeckList(MyCog, name="덱"):
                 else:
                     scFuncS += f" and '{scThing.upper()}' in deck['name']"
             
-            print(scFuncS)
             foundDeck = dList.find(eval(scFuncS))
         
         if len(foundDeck) == 0:
@@ -113,14 +153,14 @@ class CogDeckList(MyCog, name="덱"):
 
                 for deck in foundDeck:
                     embed.add_field(
-                        name=makeTitle(deck, lang),
+                        name=self.makeTitle(deck, lang),
                         value=f"{'클래스' if lang == 'KR' else 'Class'}: {deck['class']}"
                     )
 
                 await ctx.send(embed=embed)
             else:
                 for deck in foundDeck:
-                    await ctx.send(self.T.translate('Find.SpecificDeck', lang), embed=makeEmbed(deck, lang))
+                    await ctx.send(self.T.translate('Find.SpecificDeck', lang), embed=self.makeEmbed(deck, lang))
 
     async def Similar(self, ctx: Context, Name: str, lang: Lang):
         await ctx.send(self.T.translate('Similar.FindFail', lang).format(Name))
@@ -133,7 +173,7 @@ class CogDeckList(MyCog, name="덱"):
             )
             for deck in similar:
                 embed.add_field(
-                    name=makeTitle(deck),
+                    name=self.makeTitle(deck),
                     value=f"{'클래스' if lang == 'KR' else 'Class'}: {deck['class']}"
                 )
             await ctx.send(embed=embed)
@@ -145,7 +185,7 @@ class CogDeckList(MyCog, name="덱"):
             if not dList.hisCh: # history channel is not made yet
                 dList.hisCh = self.bot.get_channel(804614670178320394)
 
-            embed = makeEmbed(dList.delete(Name), lang)
+            embed = self.makeEmbed(dList.delete(Name), lang)
 
             if SendHistory:
                 await dList.hisCh.send(embed=embed)
@@ -171,7 +211,7 @@ class CogDeckList(MyCog, name="덱"):
                 )
                 await ctx.send(self.T.translate('Update.SuccessDesc', lang).format(Name))
             else:
-                await dList.hisCh.send(embed=makeEmbed(dList.update(
+                await dList.hisCh.send(embed=self.makeEmbed(dList.update(
                     Name,
                     desc,
                     att[0].url,
@@ -377,4 +417,4 @@ class CogDeckList(MyCog, name="덱"):
             dList.hisCh = self.bot.get_channel(804614670178320394)
 
         for deck in dList.deleteRT():
-            await dList.hisCh.send(embed=makeEmbed(deck, 'KR'))
+            await dList.hisCh.send(embed=self.makeEmbed(deck, 'KR'))

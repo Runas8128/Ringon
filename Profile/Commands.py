@@ -73,7 +73,18 @@ class CogProfile(MyCog, name='프로필'):
         예시: !프로필 수정 클래스1 드래곤'''
     )
     async def RG_Profile_KR(self, ctx: commands.Context, arg1: str = '', arg2: str = '', arg3: str = '', arg4: str = ''):
-        tar = await strToUser(ctx, arg2, ctx.author)
+        tar: discord.Member
+        
+        if arg2.startswith('<@'):
+            tarID = arg2[2:-1].replace('!', '')
+            if tarID.isdigit():
+                message: discord.Message = ctx.message
+                tar = message.guild.get_member(int(tarID))
+        elif arg2.isdigit():
+            message: discord.Message = ctx.message
+            tar = message.guild.get_member(int(arg2))
+        else:
+            tar = None
 
         if arg1 in ['생성', '추가']:
             await self.Add(ctx, tar, strToClass(arg3), strToClass(arg4), 'KR')
@@ -92,7 +103,18 @@ class CogProfile(MyCog, name='프로필'):
         e.g. !profile modify class1 dragon'''
     )
     async def RG_Profile_EN(self, ctx: commands.Context, arg1: str = '', arg2: str = '', arg3: str = '', arg4: str = ''):
-        tar = await strToUser(ctx, arg2, ctx.author)
+        tar: discord.Member
+        
+        if arg2.startswith('<@'):
+            tarID = arg2[2:-1].replace('!', '')
+            if tarID.isdigit():
+                message: discord.Message = ctx.message
+                tar = message.guild.get_member(int(tarID))
+        elif arg2.isdigit():
+            message: discord.Message = ctx.message
+            tar = message.guild.get_member(int(arg2))
+        else:
+            tar = None
 
         if arg1.lower() in ['create', 'make', 'add']:
             await self.Add(ctx, tar, strToClass(arg3), strToClass(arg4), 'KR')
