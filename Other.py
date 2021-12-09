@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from Common import *
+from Events import CogEvent
 
 class CogOther(MyCog, name='기타'):
     """
@@ -192,6 +193,10 @@ class CogOther(MyCog, name='기타'):
                 await ctx.send("배너 사진을 첨부해주세요")
         else:
             await ctx.send("사용법: !예약 [공지/로고/배너] ...")
+    
+    @commands.command()
+    async def RG_TodayChatCnt(self, ctx: commands.Context):
+        await ctx.send(f"오늘 자정부터 지금까지는 봇을 제외하고 총 {CogEvent.msgCnt}개의 메시지가 오고 갔어요!")
 
 def setup(bot):
     bot.add_cog(CogOther(bot))

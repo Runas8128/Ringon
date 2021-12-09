@@ -63,7 +63,7 @@ class CogDeckList(MyCog, name="덱"):
     
     # ----- Command Helper -----
 
-    async def Add(self, ctx: Context, Name: str, Class: str, desc: str, lang: Lang):
+    async def Add(self, ctx: commands.Context, Name: str, Class: str, desc: str, lang: Lang):
         chID: int = ctx.channel.id
         att: List[discord.Attachment] = ctx.message.attachments
         atr: discord.User = ctx.author
@@ -109,7 +109,7 @@ class CogDeckList(MyCog, name="덱"):
         dList.append(deck)
         await ctx.send(self.T.translate('Add.Success', lang).format(Name))
 
-    async def Find(self, ctx: Context, scThings: List[str], lang: Lang):
+    async def Find(self, ctx: commands.Context, scThings: List[str], lang: Lang):
         if not scThings:
             await ctx.send(self.T.translate('Find.NoWord', lang))
             return
@@ -162,7 +162,7 @@ class CogDeckList(MyCog, name="덱"):
                 for deck in foundDeck:
                     await ctx.send(self.T.translate('Find.SpecificDeck', lang), embed=self.makeEmbed(deck, lang))
 
-    async def Similar(self, ctx: Context, Name: str, lang: Lang):
+    async def Similar(self, ctx: commands.Context, Name: str, lang: Lang):
         await ctx.send(self.T.translate('Similar.FindFail', lang).format(Name))
         
         similar = dList.similar(Name)
@@ -178,7 +178,7 @@ class CogDeckList(MyCog, name="덱"):
                 )
             await ctx.send(embed=embed)
 
-    async def Delete(self, ctx: Context, Name: str, SendHistory:bool, lang: Lang):
+    async def Delete(self, ctx: commands.Context, Name: str, SendHistory:bool, lang: Lang):
         delDeck = [deck for deck in dList.List if deck['name'] == Name]
 
         if delDeck: # Deck found
@@ -194,7 +194,7 @@ class CogDeckList(MyCog, name="덱"):
         else: # cannot find Deck
             await self.Similar(ctx, Name, lang)
 
-    async def Update(self, ctx: Context, Name: str, desc: str, lang: Lang):
+    async def Update(self, ctx: commands.Context, Name: str, desc: str, lang: Lang):
         att: List[discord.Attachment] = ctx.message.attachments
         
         upDeck = [deck for deck in dList.List if deck['name'] == Name]
@@ -264,36 +264,6 @@ class CogDeckList(MyCog, name="덱"):
     async def RG_Find_EN(self, ctx: commands.Context, *scThings: str):
         await self.Find(ctx, scThings, 'EN')
     
-    @cog_slash(
-        name="덱검색",
-        description="덱을 검색해줍니다",
-        options=[
-            create_option(
-                name="search",
-                description="검색할 것들입니다. 공백으로 분리해서 검색해주시면 됩니다 :)",
-                option_type=3,
-                required=True
-            )
-        ]
-    )
-    async def SC_Find_KR(self, ctx: discord_slash.SlashContext, search: str=''):
-        await self.Find(ctx, search.split(' '), 'KR')
-    
-    @cog_slash(
-        name="search",
-        description="search decks",
-        options=[
-            create_option(
-                name="search",
-                description="words for search. you can search for two or more words with space(ex: /search forest accel)",
-                option_type=3,
-                required=True
-            )
-        ]
-    )
-    async def SC_Find_EN(self, ctx: discord_slash.SlashContext, search: str=''):
-        await self.Find(ctx, search.split(' '), 'EN')
-    
     # Deck Deleter
 
     @commands.command(
@@ -313,36 +283,6 @@ class CogDeckList(MyCog, name="덱"):
     )
     async def RG_Delete_EN(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
         await self.Delete(ctx, Name, SendHistory, 'EN')
-    
-    @cog_slash(
-        name="덱삭제",
-        description="덱을 삭제합니다. 정확한 이름을 입력해야하며, 삭제된 덱은 복구가 어렵거나 귀찮을 수 있습니다",
-        options=[
-            create_option(
-                name="deckname",
-                description="지울 덱의 이름입니다. 풀네임을 입력해야하며, ver. 2 같은 경우는 제외해주시면 됩니다.",
-                option_type=3,
-                required=True
-            )
-        ]
-    )
-    async def SC_Delete_KR(self, ctx: discord_slash.SlashContext, deckname: str=None):
-        await self.Delete(ctx, deckname, True, 'KR')
-    
-    @cog_slash(
-        name="delete",
-        description="delete deck. Your input name should be perfectly matched, and recovering deleted deck can be difficult or boring",
-        options=[
-            create_option(
-                name="deckname",
-                description="Name of deck to be erased. It should be Full name, and just ignore version numbering: ex) ver.2",
-                option_type=3,
-                required=True
-            )
-        ]
-    )
-    async def SC_Delete_EN(self, ctx: discord_slash.SlashContext, deckname: str=None):
-        await self.Delete(ctx, deckname, True, 'EN')
 
     # Deck Updater
 
@@ -382,20 +322,6 @@ class CogDeckList(MyCog, name="덱"):
         usage='!analyze'
     )
     async def RG_Analyze_EN(self, ctx: commands.Context):
-        await ctx.send(embed=dList.analyze('EN'))
-    
-    @cog_slash(
-        name="덱분석",
-        description="덱을 분석해줍니다. 클래스별로 분류해줍니다."
-    )
-    async def SC_Analyze_KR(self, ctx: discord_slash.SlashContext):
-        await ctx.send(embed=dList.analyze('KR'))
-    
-    @cog_slash(
-        name="analyze",
-        description="Analyze deck. Classified by RT/UL, Class"
-    )
-    async def SC_Analyze_EN(self, ctx: discord_slash.SlashContext):
         await ctx.send(embed=dList.analyze('EN'))
 
     @commands.command(

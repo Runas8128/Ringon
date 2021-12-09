@@ -1,5 +1,4 @@
 from typing import Dict, Literal
-from traceback import format_exc
 
 from Common import *
 
@@ -8,6 +7,8 @@ from Studied.Helper import studied
 from Detect.Helper  import detect
 
 class CogEvent(commands.Cog):
+    msgCnt: int = 0
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.ErrLogCh = None
@@ -28,6 +29,8 @@ class CogEvent(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
+        
+        CogEvent.msgCnt += 1
 
         msg = message.content
         ch  = message.channel
@@ -143,6 +146,15 @@ class CogEvent(commands.Cog):
                 await util['Guild'].edit(banner=C)
                 
         db['EventQueue'] = []
+    
+    @tasks.loop(minutes=1)
+    async def CleanMessageCount(self):
+        _now = now()
+        delta = (_now - _now.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
+        if not(0 <= delta and delta < 60):
+            return
+
+        CogEvent.msgCnt = 0
 
 def setup(bot):
     bot.add_cog(CogEvent(bot))
