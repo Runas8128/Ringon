@@ -18,10 +18,7 @@ Shadowverse Deck store/analyze bot, Ringon! Thanks you Thunderbull for helping w
 
 ## Known Bugs 알려진 버그 목록
 
- - [x] Didn't storing decks and not showing Decks 덱 저장/검색이 안되는 버그
- - [x] Unnecessary charactors '<@!' in uploader mention 불필요한 문자 '<@!'가 업로더 멘션에 포함되는 버그
- - [x] Not sending bug report properly 버그 리포트를 제대로 받지 못하는 버그
- - [ ] Slash commands are not posted properly 슬래시 커맨드가 정상 추가되지 않는 버그
+ - [x] It seems everything was fixed, it's quiet... 모두 해결되었나보네요, 조용하네요...
 
 ## Quick Example 예시
 
