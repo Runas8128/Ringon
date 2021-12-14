@@ -12,8 +12,11 @@ Deck = Dict[str, Union[str, int]]
 class DeckList:
     def __init__(self):
         self.List: List[Deck] = toGen(db['decks'])
+        
         for idx in range(len(self.List)):
-            self.List[idx]['class'] = strToClass(self.List[idx]['class'])
+            deck = self.List[idx]
+            deck['class'] = strToClass(deck['class'])
+        
         self.List.sort(key=lambda deck: deck['name'])
         self.List.sort(key=lambda deck: OrgCls.index(deck['class']))
 
@@ -24,37 +27,37 @@ class DeckList:
         db['decks'] = self.List
 
     def update(self, name: str, desc: str, imgURL: str, contrib: str) -> Deck:
-        idx = [deck['name'] for deck in self.List].index(name)
-        prvDeck = self.List[idx].copy()
+        deck = self.List[[deck['name'] for deck in self.List].index(name)]
+        prvDeck = deck.copy()
 
-        self.List[idx]['desc'] = desc
-        self.List[idx]['imgURL'] = imgURL
-        self.List[idx]['date'] = now().strftime('%Y/%m/%d')
+        deck['desc'] = desc
+        deck['imgURL'] = imgURL
+        deck['date'] = now().strftime('%Y/%m/%d')
         
-        if not self.List[idx].get('ver'):
-            self.List[idx]['ver'] = 2
+        if not deck.get('ver'):
+            deck['ver'] = 2
         else:
-            self.List[idx]['ver'] += 1
+            deck['ver'] += 1
         
-        if contrib != self.List[idx]['author']:
-            if not self.List[idx].get('cont', None):
-                self.List[idx]['cont'] = [contrib]
-            elif contrib not in self.List[idx]['cont']:
-                self.List[idx]['cont'].add(contrib)
+        if contrib != deck['author']:
+            if not deck.get('cont', None):
+                deck['cont'] = [contrib]
+            elif contrib not in deck['cont']:
+                deck['cont'].append(contrib)
 
         db['decks'] = self.List
 
         return prvDeck
     
     def upDesc(self, name: str, desc: str, contrib: str) -> None:
-        idx = [deck['name'] for deck in self.List].index(name)
-        self.List[idx]['desc'] = desc
+        deck = self.List[[deck['name'] for deck in self.List].index(name)]
+        deck['desc'] = desc
 
-        if contrib != self.List[idx]['author']:
-            if not self.List[idx].get('cont'):
-                self.List[idx]['cont'] = {contrib}
-            else:
-                self.List[idx]['cont'].add(contrib)
+        if contrib != deck['author']:
+            if not deck.get('cont'):
+                deck['cont'] = [contrib]
+            elif contrib not in deck['cont']:
+                deck['cont'].append(contrib)
 
         db['decks'] = self.List
 
