@@ -15,8 +15,15 @@ class CogDebug(MyCog, name='디버그'):
         self.EngCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey]
         self.KorCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey, self.cmd_IssueError]
 
-        self.bugReportChannel: discord.TextChannel = None
-        self.MainNoticeChannel: discord.TextChannel = None
+        self.guild = bot.get_guild(758478112979288094)
+        self.bugReportChannel: discord.TextChannel = bot.get_channel(884356850248724490)
+        self.MainNoticeChannel: discord.TextChannel = bot.get_channel(864518975253119007)
+
+        self.IgnoreRole: List[discord.Role] = [
+            self.guild.get_role(924315254098387024), # Guest of Honor
+            self.guild.get_role(861883220722319391), # 군머
+            self.guild.get_role(805451727859613707)  # 고3
+        ]
     
     @commands.command(
         name='showAll'
@@ -74,8 +81,6 @@ class CogDebug(MyCog, name='디버그'):
         usage='!버그 (제보할 내용)'
     )
     async def cmd_IssueError(self, ctx: commands.Context, *content: str):
-        if not self.bugReportChannel:
-            self.bugReportChannel = self.bot.get_channel(884356850248724490)
         await self.bugReportChannel.send(' '.join(content))
         await ctx.send("버그를 제보했어요! 이미 제보된 내용일지는 저도 모르겠네요... 가끔 잠수함 패치로 고쳐질지도..?")
     
@@ -87,9 +92,6 @@ class CogDebug(MyCog, name='디버그'):
     )
     @commands.has_permissions(administrator=True)
     async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '시작', tarMsgID: int = 0):
-        if not self.MainNoticeChannel:
-            self.MainNoticeChannel = self.bot.get_channel(864518975253119007)
-
         if sted == '시작':
             tarMsg = await self.MainNoticeChannel.send("@everyone 인원점검을 시작합니다. 이 메시지에 아무 반응이나 달아주시면 되겠습니다.")
             await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')
@@ -107,6 +109,9 @@ class CogDebug(MyCog, name='디버그'):
                 notMsg = await ctx.send("인원점검중...")
                 userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
 
+                for ignoreRole in self.IgnoreRole:
+                    userList = [user for user in userList if ignoreRole not in user.roles]
+                    
                 react: discord.Reaction
                 for react in tarMsg.reactions:
                     async for user in react.users():
