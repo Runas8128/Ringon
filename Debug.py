@@ -19,12 +19,17 @@ class CogDebug(MyCog, name='디버그'):
         self.MainNoticeChannel: discord.TextChannel = None
     
     @commands.command(
+        name='showAll'
+    )
+    async def cmd_ShowAllDB(self, ctx: commands.Context):
+        print(db)
+    
+    @commands.command(
         name='show',
         brief='DB를 보여줍니다. 디버그용 명령어입니다.',
         description='DB의 내용을 보여줍니다. 디버그용 명령어로, 거의 쓸 일이 없는 명령어입니다.',
         usage='!show (키 나열)'
     )
-    @commands.is_owner()
     async def cmd_ShowDB(self, ctx: commands.Context, mainKey: str = 'None', *keys: str):
         if mainKey in db.keys():
             d = db[mainKey]
@@ -44,7 +49,6 @@ class CogDebug(MyCog, name='디버그'):
         description='DB의 키를 보여줍니다. 디버그용 명령어로, 거의 쓸 일이 없는 명령어입니다.',
         usage='!showKey (키 나열)'
     )
-    @commands.is_owner()
     async def cmd_ShowDBKey(self, ctx: commands.Context, mainKey: str = None, *keys: str):
         if mainKey in db.keys():
             d = db[mainKey]
@@ -84,7 +88,7 @@ class CogDebug(MyCog, name='디버그'):
     @commands.has_permissions(administrator=True)
     async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '시작', tarMsgID: int = 0):
         if not self.MainNoticeChannel:
-            self.MainNoticeChannel = self.bot.get_channel(783257655388012587)
+            self.MainNoticeChannel = self.bot.get_channel(864518975253119007)
 
         if sted == '시작':
             tarMsg = await self.MainNoticeChannel.send("@everyone 인원점검을 시작합니다. 이 메시지에 아무 반응이나 달아주시면 되겠습니다.")
@@ -100,6 +104,7 @@ class CogDebug(MyCog, name='디버그'):
             if tarMsg == None:
                 await ctx.send("잘못된 메시지 아이디 입니다.")
             else:
+                notMsg = await ctx.send("인원점검중...")
                 userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
 
                 react: discord.Reaction
@@ -109,10 +114,10 @@ class CogDebug(MyCog, name='디버그'):
                             userList.pop(userList.index(user))
 
                 if len(userList) == 0:
-                    await ctx.send("모든 분이 이번 인원 점검에 참여해주셨습니다!")
+                    await notMsg.edit(content="모든 분이 이번 인원 점검에 참여해주셨습니다!")
                 else:
-                    await ctx.send(
-                        "이번 인원점검에 참여하지 않은 분들입니다.\n" + \
+                    await notMsg.edit(
+                        content="이번 인원점검에 참여하지 않은 분들입니다.\n" + \
                             ', '.join([user.mention for user in userList])
                     )
         else:
