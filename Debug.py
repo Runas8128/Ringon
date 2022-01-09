@@ -83,27 +83,30 @@ class CogDebug(MyCog, name='디버그'):
     )
     @commands.has_permissions(administrator=True)
     async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '시작', tarMsgID: int = 0):
-        MainNoticeChannel = self.bot.get_channel(783257655388012587)
+        if not self.MainNoticeChannel:
+            self.MainNoticeChannel = self.bot.get_channel(783257655388012587)
 
         if sted == '시작':
-            tarMsg = await MainNoticeChannel.send("@everyone 인원점검을 시작합니다. 이 메시지에 아무 반응이나 달아주시면 되겠습니다.")
+            tarMsg = await self.MainNoticeChannel.send("@everyone 인원점검을 시작합니다. 이 메시지에 아무 반응이나 달아주시면 되겠습니다.")
             await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')
 
         elif sted == '끝' and tarMsgID != 0:
-            try:
-                tarMsg = await MainNoticeChannel.fetch_message(tarMsgID)
-            except discord.NotFound:
+            tarMsg: discord.Message = None
+            async for message in self.MainNoticeChannel.history():
+                if message.id == tarMsgID:
+                    tarMsg = message
+                    break
+                
+            if tarMsg == None:
                 await ctx.send("잘못된 메시지 아이디 입니다.")
             else:
                 userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
-                print('full list:', userList)
 
                 react: discord.Reaction
                 for react in tarMsg.reactions:
                     async for user in react.users():
                         if user in userList:
                             userList.pop(userList.index(user))
-                            print('pop!', user)
 
                 if len(userList) == 0:
                     await ctx.send("모든 분이 이번 인원 점검에 참여해주셨습니다!")
