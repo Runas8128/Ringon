@@ -344,3 +344,25 @@ class CogDeckList(MyCog, name="덱"):
 
         for deck in dList.deleteRT():
             await dList.hisCh.send(embed=self.makeEmbed(deck, 'KR'))
+    
+    @commands.command(name="세부분석")
+    async def RG_DeepAnalyze(self, ctx: commands.Context):
+        deckList: List[Deck] = dList.List
+        rt = [deck for deck in deckList if deck['rtul'] == 'RT']
+        ul = [deck for deck in deckList if deck['rtul'] == 'UL']
+
+        s = '**제작자 ID/멘션** - (추가 / 기여)\n'
+
+        s += '**로테이션**\n'
+        for author in set([deck['author'] for deck in rt]):
+            write = [1 if deck['author'] == author else 0 for deck in rt]
+            cont = [1 if ('cont' in deck and author in deck['cont']) else 0 for deck in rt]
+            s += f'{author} - {sum(write)} / {sum(cont)}\n'
+
+        s += '**언리미티드**\n'
+        for author in set([deck['author'] for deck in ul]):
+            write = [1 if deck['author'] == author else 0 for deck in ul]
+            cont = [1 if ('cont' in deck and author in deck['cont']) else 0 for deck in ul]
+            s += f'{author} - {sum(write)} / {sum(cont)}\n'
+        
+        await ctx.send(s)
