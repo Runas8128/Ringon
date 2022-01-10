@@ -1,5 +1,7 @@
 from Common import *
 
+import Events
+
 class CogDebug(MyCog, name='디버그'):
     """
     디버그용 커맨드 그룹입니다.
@@ -14,10 +16,12 @@ class CogDebug(MyCog, name='디버그'):
 
         self.EngCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey]
         self.KorCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey, self.cmd_IssueError]
-
-        self.guild = bot.get_guild(758478112979288094)
-        self.bugReportChannel: discord.TextChannel = bot.get_channel(884356850248724490)
-        self.MainNoticeChannel: discord.TextChannel = bot.get_channel(864518975253119007)
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.guild = self.bot.get_guild(758478112979288094)
+        self.bugReportChannel: discord.TextChannel = self.bot.get_channel(884356850248724490)
+        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(864518975253119007)
 
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
@@ -111,22 +115,47 @@ class CogDebug(MyCog, name='디버그'):
 
                 for ignoreRole in self.IgnoreRole:
                     userList = [user for user in userList if ignoreRole not in user.roles]
+
+                downUserList: List[discord.Member] = []
+                otherUserList: List[discord.Member] = []
+
+                embed = discord.Embed(title="인원점검")
                     
                 react: discord.Reaction
                 for react in tarMsg.reactions:
                     async for user in react.users():
                         if user in userList:
-                            userList.pop(userList.index(user))
-
-                if len(userList) == 0:
-                    await notMsg.edit(content="모든 분이 이번 인원 점검에 참여해주셨습니다!")
-                else:
-                    await notMsg.edit(
-                        content="이번 인원점검에 참여하지 않은 분들입니다.\n" + \
-                            ', '.join([user.mention for user in userList])
-                    )
+                            user = userList.pop(userList.index(user))
+                        if react.emoji == '👎':
+                            downUserList.append(user)
+                        else:
+                            otherUserList.append(user)
+                
+                embed.add_field(
+                    name="👎 반응",
+                    value=", ".join([user.mention for user in downUserList]) or "없음"
+                )
+                embed.add_field(
+                    name="그 외",
+                    value=", ".join([user.mention for user in otherUserList]) or "없음"
+                )
+                embed.add_field(
+                    name="반응 안함",
+                    value=", ".join([user.mention for user in userList]) or "없음"
+                )
+                
+                await notMsg.edit(content="", embed=embed)
         else:
             await ctx.send("사용법: `!인원점검 시작` / `!인원점검 끝 (메시지 아이디)`")
+    
+    @commands.command(name="!설정")
+    @commands.has_permissions(administrator=True)
+    async def cmd_Set(self, ctx: commands.Context, cnt: int=0):
+        if cnt == 0:
+            await ctx.send("사용법: !설정 (갯수)")
+        else:
+            Events.CogEvent.msgCnt = cnt
+            await ctx.send("설정했습니다")
 
 def setup(bot):
     bot.add_cog(CogDebug(bot))

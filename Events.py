@@ -11,7 +11,8 @@ class CogEvent(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.ErrLogCh = None
+        self.ErrLogCh: discord.TextChannel = None
+        self.AdminCh: discord.TextChannel = None
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -23,18 +24,28 @@ class CogEvent(commands.Cog):
                 activity=discord.Game("덱, 프로필, 전적을 관리")
             )
 
+            self.ErrLogCh = self.bot.get_channel(863719856061939723) # 783539105374928986
+            self.AdminCh = self.bot.get_channel(783539105374928986)
+
             print("Ringonbot ON")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-        
-        CogEvent.msgCnt += 1
 
         msg = message.content
         ch  = message.channel
         atr = message.author
+
+        if isinstance(ch, discord.channel.DMChannel):
+            await self.AdminCh.send(f"{atr.mention}님의 DM입니다!\n" + msg)
+            return
+        
+        CogEvent.msgCnt += 1
+
+        if CogEvent.msgCnt == 1_000_000:
+            await ch.send(f"축하합니다, {atr.mention}님! 이번 메시지는 1백만번째 메시지였어요!")
 
         if not msg.startswith('!금칙어'):
             block: str
@@ -111,14 +122,10 @@ class CogEvent(commands.Cog):
             if error.code == 429:   # Too Many Requests
                 pass                # 가끔 이거 와도 정상작동할 때 있음
             else:
-                if not self.ErrLogCh:
-                    self.ErrLogCh = self.bot.get_channel(863719856061939723)
                 await self.ErrLogCh.send(str(error) + '\n' + '-'*40)
                 await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 
         else:
-            if not self.ErrLogCh:
-                self.ErrLogCh = self.bot.get_channel(863719856061939723)
             await self.ErrLogCh.send(str(error) + '\n' + '-'*40)
             await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 

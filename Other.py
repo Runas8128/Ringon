@@ -194,9 +194,9 @@ class CogOther(MyCog, name='기타'):
         else:
             await ctx.send("사용법: !예약 [공지/로고/배너] ...")
     
-    @commands.command()
+    @commands.command(name='count')
     async def RG_TodayChatCnt(self, ctx: commands.Context):
-        await ctx.send(f"오늘 자정부터 지금까지는 봇을 제외하고 총 {CogEvent.msgCnt}개의 메시지가 오고 갔어요!")
+        await ctx.send(f"총 {CogEvent.msgCnt}개의 메시지가 오고 갔어요!")
 
 def setup(bot):
     bot.add_cog(CogOther(bot))
