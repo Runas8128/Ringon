@@ -5,24 +5,13 @@ from Common import *
 
 class Detect:
     def __init__(self):
-        self.detects: Dict[str, str] = toGen(db['detect'])
+        self.detects: Dict[str, str] = {
+            "멈춰": "멈춰!",
+            "무야호": "<:myuyaho:837932121653903371>",
+            "어림": "어림도 없지 ㄹㅇㅋㅋ"
+        }
         self.nowFirstLine: int = 0
         self.detectEmbedMsg: discord.Message = None
-        self._stop: bool = False
-    
-    def add(self, trg: str, msg: str) -> None:
-        self.detects[trg] = msg
-        db['detect'] = self.detects
-    
-    def rem(self, trg: str) -> None:
-        del self.detects[trg]
-        db['detect'] = self.detects
-    
-    def stop(self) -> None:
-        self._stop = True
-    
-    def start(self) -> None:
-        self._stop = False
     
     def MakeEmbed(self) -> discord.Embed:
         embed = discord.Embed(

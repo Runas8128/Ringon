@@ -1,5 +1,3 @@
-from typing import Dict, Literal
-
 from Common import *
 
 from Profile.Helper import profiles
@@ -7,8 +5,6 @@ from Studied.Helper import studied
 from Detect.Helper  import detect
 
 class CogEvent(commands.Cog):
-    msgCnt: int = 0
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.ErrLogCh: discord.TextChannel = None
@@ -16,18 +12,15 @@ class CogEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.ReserveEvent.is_running():
-            self.ReserveEvent.start()
+        await self.bot.change_presence(
+            status=discord.Status.online,
+            activity=discord.Game("덱, 프로필, 전적을 관리")
+        )
 
-            await self.bot.change_presence(
-                status=discord.Status.online,
-                activity=discord.Game("덱, 프로필, 전적을 관리")
-            )
+        self.ErrLogCh = self.bot.get_channel(863719856061939723)
+        self.AdminCh = self.bot.get_channel(783539105374928986)
 
-            self.ErrLogCh = self.bot.get_channel(863719856061939723) # 783539105374928986
-            self.AdminCh = self.bot.get_channel(783539105374928986)
-
-            print("Ringonbot ON")
+        print("Ringonbot ON")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -41,11 +34,6 @@ class CogEvent(commands.Cog):
         if isinstance(ch, discord.channel.DMChannel):
             await self.AdminCh.send(f"{atr.mention}님의 DM입니다!\n" + msg)
             return
-        
-        CogEvent.msgCnt += 1
-
-        if CogEvent.msgCnt == 1_000_000:
-            await ch.send(f"축하합니다, {atr.mention}님! 이번 메시지는 1백만번째 메시지였어요!")
 
         if not msg.startswith('!금칙어'):
             block: str
@@ -60,23 +48,18 @@ class CogEvent(commands.Cog):
             await message.channel.trigger_typing()
             await ch.send(f"<@!{choice([profile['id'] for profile in profiles.List])}> (RandomPing by {atr.mention})")
             await message.delete()
+            return
 
         # Alive Test
-        elif msg in studied.taughts:
+        if msg in studied.taughts:
             await message.channel.trigger_typing()
             await ch.send(studied.get(msg))
-            
-        else:
-            # Detect
-            if detect._stop:
-                detect.start()
-                return
-                
-            detect.start()
-            for dtt in detect.detects:
-                if dtt in msg:
-                    await ch.send(detect.detects[dtt])
+            return
 
+        for dtt in detect.detects:
+            if dtt in msg:
+                await ch.send(detect.detects[dtt])
+                
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
         if user.bot:
@@ -119,49 +102,22 @@ class CogEvent(commands.Cog):
             await ctx.send("유저는 멘션이나 ID복사로 전달해주세요!")
         
         elif isinstance(error, discord.errors.HTTPException):
-            if error.code == 429:   # Too Many Requests
-                pass                # 가끔 이거 와도 정상작동할 때 있음
-            else:
-                await self.ErrLogCh.send(str(error) + '\n' + '-'*40)
+            if error.code != 429:   # Too Many Requests
+                embed = discord.Embed(title="Bug report", timestamp=now())
+                embed.add_field(name="error string", value=str(error), inline=False)
+                embed.add_field(name="error invoked with", value=ctx.invoked_with, inline=False)
+                embed.add_field(name="full context", value=ctx.message.content, inline=False)
+                await self.ErrLogCh.send(embed=embed)
                 await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 
         else:
-            await self.ErrLogCh.send(str(error) + '\n' + '-'*40)
+            embed = discord.Embed(title="Bug report", timestamp=now())
+            embed.add_field(name="error string", value=str(error), inline=False)
+            embed.add_field(name="error invoked with", value=ctx.invoked_with, inline=False)
+            embed.add_field(name="full context", value=ctx.message.content, inline=False)
+            await self.ErrLogCh.send(embed=embed)
             await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
-
-    @tasks.loop(minutes=5)
-    async def ReserveEvent(self, util: Dict[str, Union[discord.Guild, discord.TextChannel]]={}):
-        _now = now()
-        delta = (_now - _now.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
-        if not(0 <= delta and delta < 5 * 60):
-            return
-
-        T: Literal['Notice', 'Logo', 'Banner']
-        C: Union[str, bytes]
-        for T, C in db['EventQueue']: # Type, Content
-            if T == 'Notice':
-                if 'Notice' not in util.keys():
-                    util['Notice'] = self.bot.get_channel(864518975253119007)
-                await util['Notice'].send(C)
-            elif T == 'Logo':
-                if 'Guild' not in util.keys():
-                    util['Guild'] = self.bot.get_guild(758478112979288094)
-                await util['Guild'].edit(icon=C)
-            elif T == 'Banner':
-                if 'Guild' not in util.keys():
-                    util['Guild'] = self.bot.get_guild(758478112979288094)
-                await util['Guild'].edit(banner=C)
-                
-        db['EventQueue'] = []
-    
-    @tasks.loop(minutes=1)
-    async def CleanMessageCount(self):
-        _now = now()
-        delta = (_now - _now.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
-        if not(0 <= delta and delta < 60):
-            return
-
-        CogEvent.msgCnt = 0
 
 def setup(bot):
     bot.add_cog(CogEvent(bot))
+    

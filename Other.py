@@ -158,41 +158,6 @@ class CogOther(MyCog, name='기타'):
     )
     async def ShowCode(self, ctx: commands.Context):
         await ctx.send('https://github.com/Runas8128/Ringon')
-
-    # Reserve Changing Server
-
-    @commands.command(
-        name='예약',
-        brief='공지를 쓰거나 로고/배너 수정을 예약할 수 있습니다. 관리자용 명령어입니다.',
-        description='공지를 쓰거나 로고/배너 수정을 예약할 수 있습니다. 다음날 오전 12시(00:00)에 해당 예약을 실행합니다. 관리자용 명령어입니다.',
-        usage='!예약 [공지/로고/배너]'
-    )
-    @commands.has_permissions(administrator=True)
-    async def RG_Reserve(self, ctx: commands.Context, Type: str='', *content: str):
-        d: List[Tuple[str, Union[str, bytes]]] = db['EventQueue']
-        content: str = ' '.join(content).replace('\\n', '\n')
-        atts: List[discord.Attachment] = ctx.message.attachments
-
-        if Type == '공지':
-            if content:
-                d.append(('Notice', (' '.join(content)).replace('\\n', '\n')))
-                await ctx.message.add_reaction("<:comfortable:781545336291197018>")
-            else:
-                await ctx.send("공지 내용을 작성해주세요")
-        elif Type == '로고':
-            if atts:
-                d.append(('Logo', await atts[0].read()))
-                await ctx.message.add_reaction("<:comfortable:781545336291197018>")
-            else:
-                await ctx.send("로고 사진을 첨부해주세요")
-        elif Type == '배너':
-            if atts:
-                d.append(('Banner', await atts[0].read()))
-                await ctx.message.add_reaction("<:comfortable:781545336291197018>")
-            else:
-                await ctx.send("배너 사진을 첨부해주세요")
-        else:
-            await ctx.send("사용법: !예약 [공지/로고/배너] ...")
     
     @commands.command(name='count')
     async def RG_TodayChatCnt(self, ctx: commands.Context):

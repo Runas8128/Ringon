@@ -3,7 +3,7 @@ from Common import *
 class CogManager(MyCog, name='매니저'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.all_cog = ['Events', 'Help', 'DeckList', 'Profile', 'Studied', 'Detect', 'Other']
+        self.all_cog = ['Events', 'Help', 'DeckList', 'Profile', 'Studied', 'Detect', 'Other', 'NLBEvent']
 
         for cogName in self.all_cog:
             self.bot.load_extension(cogName)

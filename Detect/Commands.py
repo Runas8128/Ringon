@@ -19,41 +19,17 @@ class CogDetect(MyCog, name='일부감지'):
         self.OwnerOnly = []
 
         self.EngCmd = []
-        self.KorCmd = [self.RG_Detect, self.RG_Neungji, self.RG_NotDetect, self.RG_Sensor]
+        self.KorCmd = [self.RG_Neungji, self.RG_Sensor]
     
     # ----- Commands -----
 
-    @commands.command(
-        name='감지',
-        brief='링곤이에게 특정 문장을 감지하게 합니다.',
-        description='링곤이에게 특정 문장을 감지하게 합니다. 나중에 그 문장이 포함된 말이 챗에 올라오면 반응합니다.',
-        usage='!감지 (배울 문장) = (반응할 문장)'
-    )
-    async def RG_Detect(self, ctx: commands.Context, *seq: str):
-        seq = ' '.join(seq)
+    @commands.command(name='감지')
+    async def RG_Detect(self, ctx: commands.Context):
+        await ctx.send("이 명령어는 더 이상 작동하지 않습니다. 관리자분들께 직접 건의해주세요!")
 
-        if seq.count('=') != 1:
-            await ctx.send('사용법: `!감지 __ = __`')
-        else:
-            src, dst = seq.split('=')
-            detect.add(src.strip(), dst.strip())
-            detect.stop()
-            await ctx.send(f'{src}를 감지하면 {dst}라고 할게요!')
-
-    @commands.command(
-        name='감지취소',
-        brief='링곤이가 감지할 특정 문장을 잊게 합니다.',
-        description='링곤이가 감지할 특정 문장을 잊게 합니다. 이후에 해당 문장에 반응하지 않습니다.',
-        usage='!감지취소 (배운 문장)'
-    )
-    async def RG_NotDetect(self, ctx: commands.Context, *tar: str):
-        tar: str = ' '.join(tar)
-        
-        if tar in detect.detects.keys():
-            detect.rem(tar)
-            await ctx.send(f'앞으로 {tar}에 반응하지 않을게요!')
-        else:
-            await ctx.send('원래 있지도 않았어요 그런거..')
+    @commands.command(name='감지취소')
+    async def RG_NotDetect(self, ctx: commands.Context):
+        await ctx.send("이 명령어는 더 이상 작동하지 않습니다. 관리자분들께 직접 건의해주세요!")
 
     @commands.command(
         name='센서민감도',
