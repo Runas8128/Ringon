@@ -3,7 +3,7 @@
 from typing import Optional, Union, Dict, List
 
 from Common import *
-from DeckList.Helper import *
+from DeckList.Helper import DeckList
 
 Profile = Dict[str, Optional[str]]
 
@@ -85,12 +85,12 @@ class Profiles:
 			)
 			embed.add_field(
 				name='추가한 로테이션 덱(이번 팩)' if lang == 'KR' else "His or Her Deck in Rotation(This pack)",
-				value=dList.GetCount(tar.id, 'RT'),
+				value=DeckList.GetCount(tar.id, 'RT'),
 				inline=False
 			)
 			embed.add_field(
 				name='추가한 언리미티드 덱' if lang == 'KR' else "His or Her Deck in Unlimited",
-				value=dList.GetCount(tar.id, 'UL'),
+				value=DeckList.GetCount(tar.id, 'UL'),
 				inline=False
 			)
 			return embed

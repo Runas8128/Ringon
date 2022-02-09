@@ -13,21 +13,19 @@ class CogDeckList(MyCog, name="덱"):
         ver  = '' if not deck.get('ver') else f" ver. {deck['ver']}"
         rtul = eval(deck['rtul'])
         pack = '' if deck['rtul'] == 'UL' else f", {db['pack']} {'팩' if KE == 'KR' else 'Pack'}"
-        return f"""{name}{ver}({rtul}{pack})"""
+        return f"{name}{ver}({rtul}{pack})"
 
     def makeEmbed(self, deck: Deck, KE: Lang = 'KR') -> discord.Embed:
         desc: str
-        uploader: str
-
         if len(deck['desc']) != 0:
             desc = deck['desc']
         else:
-            desc = '(설명 없음)' if KE == 'KR' else '(No Desc Provided)'
+            if KE == 'KR':
+                desc = '(설명 없음)'
+            else:
+                desc = '(No Desc Provided)'
         
-        if deck['author'].startswith('<@!') or deck['author'].startswith('<@'):
-            uploader = deck['author']
-        else:
-            uploader = self.bot.get_user(int(deck['author'])).mention
+        uploader = self.bot.get_user(int(deck['author'])).mention
 
         embed = discord.Embed(
             title=self.makeTitle(deck, KE),
@@ -40,7 +38,9 @@ class CogDeckList(MyCog, name="덱"):
         if deck.get('date'):
             embed.add_field(name='올린 날짜' if KE == 'KR' else 'Date', value=deck['date'])
         if deck.get('cont'):
-            embed.add_field(name='기여자' if KE == 'KR' else 'Contributor', value=', '.join(deck['cont']))
+            embed.add_field(name='기여자' if KE == 'KR' else 'Contributor', value=', '.join(
+                [deck['cont']]
+            ))
         
         embed.set_image(url=deck['imgURL'])
 
@@ -49,9 +49,6 @@ class CogDeckList(MyCog, name="덱"):
     # ----- __init__ -----
     
     def __init__(self, bot: commands.Bot):
-        global dList
-        dList = DeckList()
-
         self.bot = bot
         self.T = Translator('DeckList')
 
@@ -60,6 +57,10 @@ class CogDeckList(MyCog, name="덱"):
 
         self.EngCmd = [self.RG_Add_EN, self.RG_Analyze_EN, self.RG_Delete_EN, self.RG_Find_EN, self.RG_Update_EN]
         self.KorCmd = [self.RG_Add_KR, self.RG_Analyze_KR, self.RG_Delete_KR, self.RG_Find_KR, self.RG_Update_KR, self.RG_Pack]
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        DeckList.load(self.bot)
     
     # ----- Command Helper -----
 
@@ -80,8 +81,7 @@ class CogDeckList(MyCog, name="덱"):
             await ctx.send(self.T.translate('Add.Usage', lang))
             return
         
-        if Name in [deck['name'] for deck in dList.List]:
-            print([deck for deck in dList.List if deck['name'] == Name][0])
+        if Name in [deck['name'] for deck in DeckList.List]:
             await ctx.send(self.T.translate('Add.UsedName', lang))
             return
 
@@ -106,7 +106,7 @@ class CogDeckList(MyCog, name="덱"):
             'date'  : now().strftime('%Y/%m/%d')
         }
 
-        dList.append(deck)
+        DeckList.append(deck)
         await ctx.send(self.T.translate('Add.Success', lang).format(Name))
 
     async def Find(self, ctx: commands.Context, scThings: List[str], lang: Lang):
@@ -114,7 +114,7 @@ class CogDeckList(MyCog, name="덱"):
             await ctx.send(self.T.translate('Find.NoWord', lang))
             return
 
-        foundDeck = dList.find(lambda deck: deck['name'] == scThings[0].upper())
+        foundDeck = DeckList.find(lambda deck: deck['name'] == scThings[0].upper())
 
         if not foundDeck:
             scFuncS = "lambda deck: True"
@@ -136,7 +136,7 @@ class CogDeckList(MyCog, name="덱"):
                 else:
                     scFuncS += f" and '{scThing.upper()}' in deck['name']"
             
-            foundDeck = dList.find(eval(scFuncS))
+            foundDeck = DeckList.find(eval(scFuncS))
         
         if len(foundDeck) == 0:
             await ctx.send(self.T.translate('Find.NoMatchDeck', lang))
@@ -158,14 +158,16 @@ class CogDeckList(MyCog, name="덱"):
                     )
 
                 await ctx.send(embed=embed)
+
             else:
+                await ctx.send(self.T.translate('Find.SpecificDeck', lang))
                 for deck in foundDeck:
-                    await ctx.send(self.T.translate('Find.SpecificDeck', lang), embed=self.makeEmbed(deck, lang))
+                    await ctx.send(embed=self.makeEmbed(deck, lang))
 
     async def Similar(self, ctx: commands.Context, Name: str, lang: Lang):
         await ctx.send(self.T.translate('Similar.FindFail', lang).format(Name))
         
-        similar = dList.similar(Name)
+        similar = DeckList.similar(Name)
         if similar:
             embed = discord.Embed(
                 title='이런 덱을 찾으셨나요?' if lang == 'KR' else 'Did you find...',
@@ -179,16 +181,11 @@ class CogDeckList(MyCog, name="덱"):
             await ctx.send(embed=embed)
 
     async def Delete(self, ctx: commands.Context, Name: str, SendHistory:bool, lang: Lang):
-        delDeck = [deck for deck in dList.List if deck['name'] == Name]
+        delDeck = [deck for deck in DeckList.List if deck['name'] == Name]
 
         if delDeck: # Deck found
-            if not dList.hisCh: # history channel is not made yet
-                dList.hisCh = self.bot.get_channel(804614670178320394)
-
-            embed = self.makeEmbed(dList.delete(Name), lang)
-
-            if SendHistory:
-                await dList.hisCh.send(embed=embed)
+            embed = self.makeEmbed(DeckList.delete(Name), lang)
+            await DeckList.hisCh.send(embed=embed)
             await ctx.send(self.T.translate('Delete.Success', lang).format(Name))
 
         else: # cannot find Deck
@@ -197,26 +194,19 @@ class CogDeckList(MyCog, name="덱"):
     async def Update(self, ctx: commands.Context, Name: str, desc: str, lang: Lang):
         att: List[discord.Attachment] = ctx.message.attachments
         
-        upDeck = [deck for deck in dList.List if deck['name'] == Name]
+        upDeck = [deck for deck in DeckList.List if deck['name'] == Name]
 
         if upDeck: # Deck found
-            if not dList.hisCh:
-                dList.hisCh = self.bot.get_channel(804614670178320394)
+            if not DeckList.hisCh:
+                DeckList.hisCh = self.bot.get_channel(804614670178320394)
 
             if len(att) != 1:
-                dList.upDesc(
-                    Name,
-                    desc,
-                    ctx.author.mention.replace('!', '')
-                )
+                DeckList.upDesc(Name, desc, ctx.author.id)
                 await ctx.send(self.T.translate('Update.SuccessDesc', lang).format(Name))
             else:
-                await dList.hisCh.send(embed=self.makeEmbed(dList.update(
-                    Name,
-                    desc,
-                    att[0].url,
-                    ctx.author.mention.replace('!', '')
-                ), lang))
+                await DeckList.hisCh.send(embed=self.makeEmbed(
+                    DeckList.update(Name, desc, att[0].url, ctx.author.id), lang
+                ))
 
                 await ctx.send(self.T.translate('Update.Success', lang).format(Name))
         
@@ -313,7 +303,7 @@ class CogDeckList(MyCog, name="덱"):
         usage='!덱분석'
     )
     async def RG_Analyze_KR(self, ctx: commands.Context):
-        await ctx.send(embed=dList.analyze('KR'))
+        await ctx.send(embed=DeckList.analyze('KR'))
     
     @commands.command(
         name='analyze',
@@ -322,7 +312,7 @@ class CogDeckList(MyCog, name="덱"):
         usage='!analyze'
     )
     async def RG_Analyze_EN(self, ctx: commands.Context):
-        await ctx.send(embed=dList.analyze('EN'))
+        await ctx.send(embed=DeckList.analyze('EN'))
 
     @commands.command(
         name='팩이름',
@@ -339,15 +329,15 @@ class CogDeckList(MyCog, name="덱"):
         db['pack'] = newPack
         await ctx.send(f'팩 이름을 {newPack}으로 바꿨어요!')
 
-        if not dList.hisCh:
-            dList.hisCh = self.bot.get_channel(804614670178320394)
+        if not DeckList.hisCh:
+            DeckList.hisCh = self.bot.get_channel(804614670178320394)
 
-        for deck in dList.deleteRT():
-            await dList.hisCh.send(embed=self.makeEmbed(deck, 'KR'))
+        for deck in DeckList.deleteRT():
+            await DeckList.hisCh.send(embed=self.makeEmbed(deck, 'KR'))
     
     @commands.command(name="세부분석")
     async def RG_DeepAnalyze(self, ctx: commands.Context):
-        deckList: List[Deck] = dList.List
+        deckList: List[Deck] = DeckList.List
         rt = [deck for deck in deckList if deck['rtul'] == 'RT']
         ul = [deck for deck in deckList if deck['rtul'] == 'UL']
 

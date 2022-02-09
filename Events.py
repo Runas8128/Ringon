@@ -43,13 +43,6 @@ class CogEvent(commands.Cog):
                     await message.delete()
                     return
 
-        # random ping
-        if msg.lower() == '@random':
-            await message.channel.trigger_typing()
-            await ch.send(f"<@!{choice([profile['id'] for profile in profiles.List])}> (RandomPing by {atr.mention})")
-            await message.delete()
-            return
-
         # Alive Test
         if msg in studied.taughts:
             await message.channel.trigger_typing()

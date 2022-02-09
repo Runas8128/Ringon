@@ -1,9 +1,10 @@
 import discord
+from discord.ext import commands
 
 Debugging = False
 addingDB = False
 
-bot = discord.ext.commands.Bot(command_prefix='@', help_command=None, intents=discord.Intents.all(), case_insensitive=True)
+bot = commands.Bot(command_prefix='@', help_command=None, intents=discord.Intents.all(), case_insensitive=True)
 
 try:
     if __name__ == '__main__':
