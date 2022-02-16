@@ -1,3 +1,5 @@
+import io
+
 from Common import *
 
 from Profile.Helper import profiles
@@ -36,10 +38,10 @@ class CogEvent(commands.Cog):
             if len(att) == 0:
                 await self.AdminCh.send(f"{atr.mention}님의 DM입니다!\n" + msg)
             elif len(att) == 1:
-                file = discord.File(await att[0].read(), att[0].filename)
+                file = discord.File(io.BytesIO(await att[0].read()), att[0].filename)
                 await self.AdminCh.send(f"{atr.mention}님의 DM입니다!\n" + msg, file=file)
             else:
-                files = [discord.File(await att[idx].read(), att[idx].filename) for idx in range(len(att))]
+                files = [discord.File(io.BytesIO(await att[idx].read()), att[idx].filename) for idx in range(len(att))]
                 await self.AdminCh.send(f"{atr.mention}님의 DM입니다!\n" + msg, files=files)
             return
 
