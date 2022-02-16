@@ -97,8 +97,8 @@ class CogDebug(MyCog, name='디버그'):
     )
     @commands.has_permissions(administrator=True)
     async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '없음', tarMsgID: int = 0):
-        if sted == '시작':        
-            try:
+        if sted == '시작':
+            """try:
                 def check(msg: discord.Message):
                     return msg.channel == ctx.channel and msg.content == "확인"
 
@@ -112,7 +112,8 @@ class CogDebug(MyCog, name='디버그'):
                 await ctx.send("명령어 실행을 취소합니다.")
             else:
                 tarMsg = await ctx.send("에블핑 뺀 인원점검 메시지")
-                await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')
+                await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')"""
+            await ctx.send("아직 추가되지 않았습니다.")
 
         elif sted == '끝' and tarMsgID != 0:
             tarMsg: discord.Message = await self.MainNoticeChannel.fetch_message(tarMsgID)
