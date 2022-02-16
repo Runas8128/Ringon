@@ -18,7 +18,7 @@ class CogEvent(commands.Cog):
         )
 
         self.ErrLogCh = self.bot.get_channel(863719856061939723)
-        self.AdminCh = self.bot.get_channel(783539105374928986)
+        self.AdminCh = self.bot.get_channel(783257655388012587) #783539105374928986
 
         print("Ringonbot ON")
 
