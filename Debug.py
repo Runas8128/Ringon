@@ -1,3 +1,4 @@
+import asyncio
 from Common import *
 
 import Events
@@ -19,9 +20,9 @@ class CogDebug(MyCog, name='디버그'):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = self.bot.get_guild(758478112979288094)
+        self.guild = self.bot.get_guild(783257655388012584) #758478112979288094
         self.bugReportChannel: discord.TextChannel = self.bot.get_channel(884356850248724490)
-        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(864518975253119007)
+        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(783257655388012587) #864518975253119007
 
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
@@ -89,24 +90,33 @@ class CogDebug(MyCog, name='디버그'):
         await ctx.send("버그를 제보했어요! 이미 제보된 내용일지는 저도 모르겠네요... 가끔 잠수함 패치로 고쳐질지도..?")
     
     @commands.command(
-        name='인원점검',
+        name='인원1점검',
         brief='인원점검 공지를 올립니다. 관리자 권한입니다.',
         description='인원점검 공지를 올립니다. 관리자 권한입니다.',
         usage='!인원점검'
     )
     @commands.has_permissions(administrator=True)
-    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '시작', tarMsgID: int = 0):
-        if sted == '시작':
-            tarMsg = await self.MainNoticeChannel.send("@everyone 인원점검을 시작합니다. 이 메시지에 아무 반응이나 달아주시면 되겠습니다.")
-            await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')
+    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '없음', tarMsgID: int = 0):
+        if sted == '시작':        
+            try:
+                def check(msg: discord.Message):
+                    return msg.channel == ctx.channel and msg.content == "확인"
+
+                embed = discord.Embed(
+                    title="※ 경고 ※",
+                    description="해당 명령어는 공지에 쓰는 에블핑을 포함하고 있습니다.\n사용하시려면 `확인`을 30초 안에 입력해주세요."
+                )
+                await ctx.send(embed=embed)
+                await self.bot.wait_for('message', timeout=30, check=check)
+            except asyncio.TimeoutError:
+                await ctx.send("명령어 실행을 취소합니다.")
+            else:
+                tarMsg = await ctx.send("에블핑 뺀 인원점검 메시지")
+                await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')
 
         elif sted == '끝' and tarMsgID != 0:
-            tarMsg: discord.Message = None
-            async for message in self.MainNoticeChannel.history():
-                if message.id == tarMsgID:
-                    tarMsg = message
-                    break
-                
+            tarMsg: discord.Message = await self.MainNoticeChannel.fetch_message(tarMsgID)
+            
             if tarMsg == None:
                 await ctx.send("잘못된 메시지 아이디 입니다.")
             else:
@@ -119,18 +129,18 @@ class CogDebug(MyCog, name='디버그'):
                 downUserList: List[discord.Member] = []
                 otherUserList: List[discord.Member] = []
 
-                embed = discord.Embed(title="인원점검")
-                    
                 react: discord.Reaction
                 for react in tarMsg.reactions:
                     async for user in react.users():
                         if user in userList:
                             user = userList.pop(userList.index(user))
-                        if react.emoji == '👎':
-                            downUserList.append(user)
-                        else:
-                            otherUserList.append(user)
-                
+                            if react.emoji == '👎':
+                                downUserList.append(user)
+                            else:
+                                otherUserList.append(user)
+
+                embed = discord.Embed(title="인원점검")
+
                 embed.add_field(
                     name="👎 반응",
                     value=", ".join([user.mention for user in downUserList]) or "없음"
