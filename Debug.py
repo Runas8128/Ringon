@@ -116,9 +116,9 @@ class CogDebug(MyCog, name='디버그'):
             await ctx.send("아직 추가되지 않았습니다.")
 
         elif sted == '끝' and tarMsgID != 0:
-            tarMsg: discord.Message = await self.MainNoticeChannel.fetch_message(tarMsgID)
-            
-            if tarMsg == None:
+            try:
+                tarMsg: discord.Message = await self.MainNoticeChannel.fetch_message(tarMsgID)
+            except discord.NotFound:
                 await ctx.send("잘못된 메시지 아이디 입니다.")
             else:
                 notMsg = await ctx.send("인원점검중...")
