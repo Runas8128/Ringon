@@ -2,7 +2,6 @@ import io
 
 from Common import *
 
-from Profile.Helper import profiles
 from Studied.Helper import studied
 from Detect.Helper  import detect
 

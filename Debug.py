@@ -1,7 +1,4 @@
-import asyncio
 from Common import *
-
-import Events
 
 class CogDebug(MyCog, name='디버그'):
     """
@@ -158,15 +155,6 @@ class CogDebug(MyCog, name='디버그'):
                 await notMsg.edit(content="", embed=embed)
         else:
             await ctx.send("사용법: `!인원점검 시작` / `!인원점검 끝 (메시지 아이디)`")
-    
-    @commands.command(name="!설정")
-    @commands.has_permissions(administrator=True)
-    async def cmd_Set(self, ctx: commands.Context, cnt: int=0):
-        if cnt == 0:
-            await ctx.send("사용법: !설정 (갯수)")
-        else:
-            Events.CogEvent.msgCnt = cnt
-            await ctx.send("설정했습니다")
 
 def setup(bot):
     bot.add_cog(CogDebug(bot))
