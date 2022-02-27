@@ -137,17 +137,6 @@ class CogOther(MyCog, name='기타'):
         tE = time()
         await msg.edit(content=f'Now delay is {round((tE - tB) * 1000, 2)}ms!')
     
-    # Save Command
-    
-    @commands.command(
-        name='저장',
-        brief='다음 업데이트때 삭제될 명령어입니다.',
-        description='이미 저장값이 바뀔때마다 저장하게 해놔서 다음 업데이트때 삭제될 명령어입니다.',
-        usage='!저장'
-    )
-    async def RG_Save(self, ctx: commands.Context):
-        await ctx.send("이 명령어는 다음 업데이트때 삭제될 명령어입니다. (이미 저장값이 바뀔 때 마다 db에 저장함)")
-    
     # Show This Repl
     
     @commands.command(
@@ -193,10 +182,6 @@ class CogOther(MyCog, name='기타'):
                 await ctx.send("배너 사진을 첨부해주세요")
         else:
             await ctx.send("사용법: !예약 [공지/로고/배너] ...")
-    
-    @commands.command(name='count')
-    async def RG_TodayChatCnt(self, ctx: commands.Context):
-        await ctx.send(f"총 {CogEvent.msgCnt}개의 메시지가 오고 갔어요!")
 
 def setup(bot):
     bot.add_cog(CogOther(bot))

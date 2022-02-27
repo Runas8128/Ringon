@@ -20,14 +20,6 @@ class CogDetect(MyCog, name='일부감지'):
     
     # ----- Commands -----
     
-    @commands.command(name='감지')
-    async def RG_Detect(self, ctx: commands.Context):
-        await ctx.send("이 명령어는 더 이상 작동하지 않습니다. 관리자분들께 직접 건의해주세요!")
-    
-    @commands.command(name='감지취소')
-    async def RG_NotDetect(self, ctx: commands.Context):
-        await ctx.send("이 명령어는 더 이상 작동하지 않습니다. 관리자분들께 직접 건의해주세요!")
-    
     @commands.command(
         name='센서민감도',
         brief='링곤이가 감지할 총 문장의 개수를 보여줍니다.',

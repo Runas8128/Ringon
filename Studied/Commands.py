@@ -14,16 +14,7 @@ class CogStudied(MyCog, name='전체감지'):
         self.OwnerOnly = []
         
         self.EngCmd = []
-        self.KorCmd = [self.RG_Teach, self.RG_Forget, self.RG_Neungji, self.RG_Studied]
-    
-    @commands.command(
-        name='배워',
-        brief='[삭제됨] 링곤이에게 특정 문장을 배우게 합니다.',
-        description='[삭제된 명령어입니다] 링곤이에게 특정 문장을 배우게 합니다. 나중에 정확히 그 문장이 챗에 올라오면 반응합니다.',
-        usage='[삭제된 명령어]'
-    )
-    async def RG_Teach(self, ctx: commands.Context):
-        await ctx.send('이 명령어는 투표에 의해 삭제된 명령어입니다!')
+        self.KorCmd = [self.RG_Forget, self.RG_Neungji, self.RG_Studied]
     
     @commands.command(
         name='잊어',
