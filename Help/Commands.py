@@ -91,9 +91,6 @@ class CogHelp(MyCog, name='도움말'):
             )
 
             for cogName in self.bot.cogs.keys():
-                if cogName in ['매니저', '디버그']:
-                    continue
-
                 command_list = [
                     command for command in self.getAllCommand(self.bot.get_cog(cogName), isAdmin, isOwner, lang)
                     if len(command.aliases) > 0
@@ -114,7 +111,7 @@ class CogHelp(MyCog, name='도움말'):
             if ((not isAdmin) and (cmd in cmd.cog.AdminOnly)) or ((not isOwner) and (cmd in cmd.cog.OwnerOnly)):
                 await self.HelpBase(ctx, lang)
             
-            elif cmd.name in ['도움말', 'help']:
+            elif cmd.name in ['명령어', 'help']:
                 await self.HelpBase(ctx, lang)
 
             else:
@@ -136,16 +133,19 @@ class CogHelp(MyCog, name='도움말'):
         
                 await ctx.send(embed=embed)
         
-        elif cmd in self.bot.cogs.keys() and (cmd not in ['매니저, 디버그'] or atr.id == 449837429885763584):
+        elif cmd in self.bot.cogs.keys():
             cog: commands.Cog = self.bot.get_cog(cmd)
+            commands = self.getAllCommand(cog, isAdmin, isOwner, lang)
             
             embed = discord.Embed(
                 title=self.T.translate('Category.Title', lang).format(cmd),
                 description=cog.description,
                 color=RGColHex
             )
-            for command in self.getAllCommand(cog, isAdmin, isOwner, lang):
+            for command in commands:
                 embed.add_field(name='!' + command.name, value=command.brief, inline=False)
+            if not commands:
+                embed.add_field(name='명령어가 없어요!', value='아마 관리자 전용 명령어인가봐요..')
 
             await ctx.send(embed=embed)
         

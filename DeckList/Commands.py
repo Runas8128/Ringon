@@ -17,15 +17,17 @@ class CogDeckList(MyCog, name="덱"):
 
     def makeEmbed(self, deck: Deck, KE: Lang = 'KR') -> discord.Embed:
         desc: str
+        uploader: str
+
         if len(deck['desc']) != 0:
             desc = deck['desc']
         else:
-            if KE == 'KR':
-                desc = '(설명 없음)'
-            else:
-                desc = '(No Desc Provided)'
+            desc = '(설명 없음)' if KE == 'KR' else '(No Desc Provided)'
         
-        uploader = self.bot.get_user(int(deck['author'])).mention
+        if deck['author'].startswith('<@!') or deck['author'].startswith('<@'):
+            uploader = deck['author']
+        else:
+            uploader = self.bot.get_user(int(deck['author'])).mention
 
         embed = discord.Embed(
             title=self.makeTitle(deck, KE),
@@ -38,9 +40,7 @@ class CogDeckList(MyCog, name="덱"):
         if deck.get('date'):
             embed.add_field(name='올린 날짜' if KE == 'KR' else 'Date', value=deck['date'])
         if deck.get('cont'):
-            embed.add_field(name='기여자' if KE == 'KR' else 'Contributor', value=', '.join(
-                [deck['cont']]
-            ))
+            embed.add_field(name='기여자' if KE == 'KR' else 'Contributor', value=', '.join(deck['cont']))
         
         embed.set_image(url=deck['imgURL'])
 
@@ -184,8 +184,13 @@ class CogDeckList(MyCog, name="덱"):
         delDeck = [deck for deck in DeckList.List if deck['name'] == Name]
 
         if delDeck: # Deck found
+            if not DeckList.hisCh: # history channel is not made yet
+                DeckList.hisCh = self.bot.get_channel(804614670178320394)
+
             embed = self.makeEmbed(DeckList.delete(Name), lang)
-            await DeckList.hisCh.send(embed=embed)
+
+            if SendHistory:
+                await DeckList.hisCh.send(embed=embed)
             await ctx.send(self.T.translate('Delete.Success', lang).format(Name))
 
         else: # cannot find Deck

@@ -10,10 +10,6 @@ class Studied:
         self.nowFirstLine: int = 0
         self.StudiedEmbedMsg: discord.Message = None
     
-    def add(self, trg: str, msg: str) -> None:
-        self.taughts[trg] = msg
-        db['taughts'] = self.taughts
-    
     def rem(self, trg: str) -> None:
         del self.taughts[trg]
         db['taughts'] = self.taughts

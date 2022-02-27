@@ -8,9 +8,6 @@ class CogStudied(MyCog, name='전체감지'):
     """
     
     def __init__(self, bot):
-        global studied
-        studied = Studied()
-        
         self.bot = bot
         
         self.AdminOnly = []
@@ -21,19 +18,12 @@ class CogStudied(MyCog, name='전체감지'):
 
     @commands.command(
         name='배워',
-        brief='링곤이에게 특정 문장을 배우게 합니다.',
-        description='링곤이에게 특정 문장을 배우게 합니다. 나중에 정확히 그 문장이 챗에 올라오면 반응합니다.',
-        usage='!배워 (배울 문장) = (반응할 문장)'
+        brief='[삭제됨] 링곤이에게 특정 문장을 배우게 합니다.',
+        description='[삭제된 명령어입니다] 링곤이에게 특정 문장을 배우게 합니다. 나중에 정확히 그 문장이 챗에 올라오면 반응합니다.',
+        usage='[삭제된 명령어]'
     )
-    async def RG_Teach(self, ctx: commands.Context, *seq: str):
-        seq: str = ' '.join(seq)
-        if seq.count('=') != 1:
-            await ctx.send('사용법: `!배워 __ = __`')
-            return
-
-        src, dst = seq.split('=')
-        studied.add(src.strip(), dst.strip())
-        await ctx.send(f'{src}는 {dst}라는걸 배웠어요!')
+    async def RG_Teach(self, ctx: commands.Context):
+        await ctx.send('이 명령어는 투표에 의해 삭제된 명령어입니다!')
 
     @commands.command(
         name='잊어',

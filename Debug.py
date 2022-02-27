@@ -1,5 +1,7 @@
 from Common import *
 
+import Events
+
 class CogDebug(MyCog, name='디버그'):
     """
     디버그용 커맨드 그룹입니다.
@@ -17,9 +19,9 @@ class CogDebug(MyCog, name='디버그'):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = self.bot.get_guild(783257655388012584) #758478112979288094
+        self.guild = self.bot.get_guild(823359663973072957) #758478112979288094
         self.bugReportChannel: discord.TextChannel = self.bot.get_channel(884356850248724490)
-        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(783257655388012587) #864518975253119007
+        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(854716123458043935) #864518975253119007
 
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
@@ -87,13 +89,13 @@ class CogDebug(MyCog, name='디버그'):
         await ctx.send("버그를 제보했어요! 이미 제보된 내용일지는 저도 모르겠네요... 가끔 잠수함 패치로 고쳐질지도..?")
     
     @commands.command(
-        name='인원1점검',
+        name='인원점검',
         brief='인원점검 공지를 올립니다. 관리자 권한입니다.',
         description='인원점검 공지를 올립니다. 관리자 권한입니다.',
         usage='!인원점검'
     )
     @commands.has_permissions(administrator=True)
-    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '없음', tarMsgID: int = 0):
+    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '끝', tarMsgID: int = 0):
         if sted == '시작':
             """try:
                 def check(msg: discord.Message):

@@ -6,12 +6,12 @@ class OpenCog(MyCog, name='오픈'):
     """
 
     @commands.command(
-        name="찾기", aliases=['find'],
+        name="찾기", aliases=['검색', 'find'],
         brief='오픈 정보에서 플레이어를 검색합니다.',
         description='오픈 정보에서 플레이어를 검색합니다.',
         usage='!찾기/!find (이름)'
     )
-    async def find(ctx: commands.Context, *name: str):
+    async def find(self, ctx: commands.Context, *name: str):
         name = ' '.join(name)
 
         if name in table['A'].players:
@@ -32,12 +32,12 @@ class OpenCog(MyCog, name='오픈'):
             await ctx.send("닉네임을 찾지 못했습니다")
 
     @commands.command(
-        name="참가자", aliases=['player', 'players'],
+        name="참가자", aliases=['플레이어', 'player', 'players'],
         brief='A/B조의 참가자를 모두 보여줍니다.',
         description='A/B조의 참가자를 모두 보여줍니다.',
         usage='!참가자/!player A/B'
     )
-    async def player(ctx: commands.Context, AB: str = ""):
+    async def player(self, ctx: commands.Context, AB: str = ""):
         AB = AB.upper()[0]
         if AB == 'A':
             players = list(table['A'].players.keys())

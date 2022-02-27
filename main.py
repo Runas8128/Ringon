@@ -1,10 +1,9 @@
 import discord
-from discord.ext import commands
+from discord.ext.commands import Bot
 
-Debugging = False
 addingDB = False
 
-bot = commands.Bot(command_prefix='@', help_command=None, intents=discord.Intents.all(), case_insensitive=True)
+bot = Bot(command_prefix='!', help_command=None, intents=discord.Intents.all(), case_insensitive=True)
 
 try:
     if __name__ == '__main__':
@@ -14,7 +13,10 @@ try:
             bot.load_extension('CogManager')
             bot.load_extension('Debug')
             
-            from Common import TOKEN
+            import keep_alive
+            
+            from os import environ
+            TOKEN = environ['TOKEN']
             bot.run(TOKEN)
 
 except discord.errors.HTTPException as E:
