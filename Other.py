@@ -11,22 +11,22 @@ class CogOther(MyCog, name='기타'):
     """
     
     # __init__
-
+    
     def __init__(self, bot):
         self.bot = bot
         
         self.AdminOnly = [self.RG_BlockWordAdd, self.RG_BlockWordRem, self.RG_PrizeSet, self.RG_Reserve]
         self.OwnerOnly = []
-
+        
         self.EngCmd = [self.RG_Ping_EN]
         self.KorCmd = [
             self.RG_BlockWordAdd, self.RG_BlockWordRem, self.RG_BlockWordView,
             self.RG_MaxPrize, self.RG_Prize, self.RG_PrizeSet,
             self.RG_Ping_KR, self.ShowCode, self.RG_Reserve, self.RG_Save
         ]
-
+    
     # Block Words
-
+    
     @commands.command(
         name='금칙어추가',
         brief='금칙어를 추가합니다. 관리자용 명령어입니다.',
@@ -36,13 +36,13 @@ class CogOther(MyCog, name='기타'):
     @commands.has_permissions(administrator=True)
     async def RG_BlockWordAdd(self, ctx: commands.Context, *block: str):
         block: str = ' '.join(block)
-
+        
         if block not in db['WordBlock']:
             db['WordBlock'].insert(len(db['WordBlock']), block) # same with list.append(Any)
             await ctx.send(f'{block} 단어를 금칙어로 설정했어요!')
         else:
             await ctx.send('이미 금칙어로 정해진 단어입니다!')
-
+    
     @commands.command(
         name='금칙어제거',
         brief='금칙어를 제거합니다. 관리자용 명령어입니다.',
@@ -52,13 +52,13 @@ class CogOther(MyCog, name='기타'):
     @commands.has_permissions(administrator=True)
     async def RG_BlockWordRem(self, ctx: commands.Context, *block: str):
         block: str = ' '.join(block)
-
+        
         if block in db['WordBlock']:
             db['WordBlock'].remove(block)
             await ctx.send(f'{block} 단어를 금칙어에서 제외했어요!')
         else:
             await ctx.send('금칙어가 아닌 단어입니다!')
-
+    
     @commands.command(
         name='금칙어',
         brief='현재 등록된 금칙어를 제공합니다.',
@@ -71,9 +71,9 @@ class CogOther(MyCog, name='기타'):
             f"현재 금칙어 목록(5초 후 삭제됩니다.)\n```{s}```",
             delete_after=5
         )
-
+    
     # Prizes
-
+    
     @commands.command(
         name='상금',
         brief='우승자와 준우승자의 상금 금액을 뽑아줍니다.',
@@ -83,9 +83,9 @@ class CogOther(MyCog, name='기타'):
     async def RG_Prize(self, ctx: commands.Context):
         w = int(random() * db['maxPrize'] + 1)
         pw = int(random() * (w - 1) + 1)
-
+        
         await ctx.send(f'우승자 상금은 {w}만원, 준우승자 상금은 {pw}만원이 좋겠어요!')
-
+    
     @commands.command(
         name='최대상금',
         brief='우승자의 상금으로 나올 수 있는 최댓값을 보여줍니다.',
@@ -94,7 +94,7 @@ class CogOther(MyCog, name='기타'):
     )
     async def RG_MaxPrize(self, ctx: commands.Context):
         await ctx.send(f"현재 최대상금은 {db['maxPrize']}만원이에요!")
-
+    
     @commands.command(
         name='상금지정',
         brief='우승자의 최대 상금을 지정합니다. 관리자용 명령어입니다.',
@@ -110,9 +110,9 @@ class CogOther(MyCog, name='기타'):
             await ctx.send("사용법: !상금지정 (새 상금: 정수)")
         else:
             await ctx.send(f'우승자가 {new}만원 가져가면 준우승자는요..?')
-
+    
     # PING Command
-
+    
     @commands.command(
         name='지연시간',
         brief='현재 봇이 메시지를 보내는데 걸린 시간을 측정합니다.',
@@ -136,9 +136,9 @@ class CogOther(MyCog, name='기타'):
         msg = await ctx.send('Getting delay...')
         tE = time()
         await msg.edit(content=f'Now delay is {round((tE - tB) * 1000, 2)}ms!')
-
+    
     # Save Command
-
+    
     @commands.command(
         name='저장',
         brief='다음 업데이트때 삭제될 명령어입니다.',
@@ -147,9 +147,9 @@ class CogOther(MyCog, name='기타'):
     )
     async def RG_Save(self, ctx: commands.Context):
         await ctx.send("이 명령어는 다음 업데이트때 삭제될 명령어입니다. (이미 저장값이 바뀔 때 마다 db에 저장함)")
-
+    
     # Show This Repl
-
+    
     @commands.command(
         name='코드보기',
         brief='링곤이의 코드를 볼 수 있습니다.',
@@ -158,9 +158,9 @@ class CogOther(MyCog, name='기타'):
     )
     async def ShowCode(self, ctx: commands.Context):
         await ctx.send('https://github.com/Runas8128/Ringon')
-
+    
     # Reserve Changing Server
-
+    
     @commands.command(
         name='예약',
         brief='공지를 쓰거나 로고/배너 수정을 예약할 수 있습니다. 관리자용 명령어입니다.',
@@ -172,7 +172,7 @@ class CogOther(MyCog, name='기타'):
         d: List[Tuple[str, Union[str, bytes]]] = db['EventQueue']
         content: str = ' '.join(content).replace('\\n', '\n')
         atts: List[discord.Attachment] = ctx.message.attachments
-
+        
         if Type == '공지':
             if content:
                 d.append(('Notice', (' '.join(content)).replace('\\n', '\n')))

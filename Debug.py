@@ -7,13 +7,13 @@ class CogDebug(MyCog, name='디버그'):
     디버그용 커맨드 그룹입니다.
     개발자 전용 커맨드 그룹이며, 굳이 써봐야 볼 내용도 많이 없습니다.
     """
-
+    
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         
         self.AdminOnly = []
         self.OwnerOnly = [self.cmd_ShowDB, self.cmd_ShowDBKey]
-
+        
         self.EngCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey]
         self.KorCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey, self.cmd_IssueError]
     
@@ -22,7 +22,7 @@ class CogDebug(MyCog, name='디버그'):
         self.guild = self.bot.get_guild(823359663973072957) #758478112979288094
         self.bugReportChannel: discord.TextChannel = self.bot.get_channel(884356850248724490)
         self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(854716123458043935) #864518975253119007
-
+        
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
             self.guild.get_role(861883220722319391), # 군머
@@ -53,7 +53,7 @@ class CogDebug(MyCog, name='디버그'):
             await ctx.send(d)
         else:
             await ctx.send(f'{mainKey} not in {db.keys()}')
-
+    
     @commands.command(
         name='showKey',
         brief='DB의 키를 보여줍니다. 디버그용 명령어입니다.',
@@ -77,7 +77,7 @@ class CogDebug(MyCog, name='디버그'):
             await ctx.send(db.keys())
         else:
             await ctx.send(f'{mainKey} not in {db.keys()}')
-
+    
     @commands.command(
         name='버그',
         brief='버그를 제보합니다.',
@@ -122,13 +122,13 @@ class CogDebug(MyCog, name='디버그'):
             else:
                 notMsg = await ctx.send("인원점검중...")
                 userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
-
+                
                 for ignoreRole in self.IgnoreRole:
                     userList = [user for user in userList if ignoreRole not in user.roles]
-
+                
                 downUserList: List[discord.Member] = []
                 otherUserList: List[discord.Member] = []
-
+                
                 react: discord.Reaction
                 for react in tarMsg.reactions:
                     async for user in react.users():
@@ -138,9 +138,9 @@ class CogDebug(MyCog, name='디버그'):
                                 downUserList.append(user)
                             else:
                                 otherUserList.append(user)
-
+                
                 embed = discord.Embed(title="인원점검")
-
+                
                 embed.add_field(
                     name="👎 반응",
                     value=", ".join([user.mention for user in downUserList]) or "없음"

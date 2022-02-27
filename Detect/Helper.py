@@ -20,28 +20,28 @@ class Detect:
         )
         for src in [k for k in list(self.detects.keys())[self.nowFirstLine:self.nowFirstLine+10]]:
             embed.add_field(name=src, value=self.detects[src], inline=False)
-
+        
         return embed
-
+    
     def Top(self) -> discord.Embed:
         self.nowFirstLine = 0
         
         return self.MakeEmbed()
-
+    
     def Up(self) -> discord.Embed:
         self.nowFirstLine -= 10
         if self.nowFirstLine < 0:
             self.nowFirstLine = 0
         
         return self.MakeEmbed()
-
+    
     def Down(self) -> discord.Embed:
         self.nowFirstLine += 10
         if self.nowFirstLine > len(self.detects) - 10:
             self.nowFirstLine = len(self.detects) - 10
         
         return self.MakeEmbed()
-
+    
     def Bottom(self) -> discord.Embed:
         self.nowFirstLine = len(self.detects) - 10
         

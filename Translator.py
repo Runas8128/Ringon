@@ -20,13 +20,13 @@ Lang = Literal['KR', 'EN']
 class Translator:
     Kor: Dict[str, str]
     Eng: Dict[str, str]
-
+    
     def __init__(self, Name: str):
         with open(f'{Name}/lang/kor.json', 'r', encoding='UTF-8') as KorFile:
             self.Kor = json.load(KorFile)
         with open(f'{Name}/lang/eng.json', 'r', encoding='UTF-8') as EngFile:
             self.Eng = json.load(EngFile)
-
+    
     def translate(self, string: str, lang: Lang) -> str:
         if lang == 'KR':
             return reduce(dict.get, string.split('.'), self.Kor) or (string + '.NotTranslated')

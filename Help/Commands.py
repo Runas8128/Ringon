@@ -6,32 +6,32 @@ class CogHelp(MyCog, name='도움말'):
     """
     
     # ----- __init__ -----
-
+    
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.T = Translator('Help')
-
+        
         self.AdminOnly = []
         self.OwnerOnly = []
-
+        
         self.EngCmd = [self.RG_Help_EN]
         self.KorCmd = [self.RG_Help_KR]
-
+    
     # ----- Command helper -----
-
+    
     def getAllCommand(self, cog: MyCog, isAdmin: bool, isOwner: bool, lang: Lang):
         command_list: cmdList = [
             command for command in cog.get_commands()
             if (lang == 'KR') == (command in cog.KorCmd)
         ]
-
+        
         if not isAdmin:
             command_list = [command for command in command_list if command not in cog.AdminOnly]
         if not isOwner:
             command_list = [command for command in command_list if command not in cog.OwnerOnly]
         
         return command_list
-
+    
     async def HelpBase(self, ctx:commands.Context, lang: Lang):
         embed = discord.Embed(
             title=self.T.translate('Base.Title', lang),
@@ -57,31 +57,31 @@ class CogHelp(MyCog, name='도움말'):
             value=self.T.translate('Base.Alias.Brief', lang),
             inline=False
         )
-
+        
         await ctx.send(embed=embed)
-
+    
     async def Help(self, ctx: commands.Context, cmd: str, lang: Lang):
         atr: discord.Member = ctx.author
         isAdmin: bool = atr.guild_permissions.administrator
         isOwner: bool = atr.id == self.bot.owner_id
-
+        
         if cmd == '':
             embed = discord.Embed(
                 title=self.T.translate('Basic.Title', lang),
                 description=self.T.translate('Basic.Desc', lang),
                 color=RGColHex
             )
-
+            
             for cogName in self.bot.cogs.keys():
                 command_list = self.getAllCommand(self.bot.get_cog(cogName), isAdmin, isOwner, lang)
-
+                
                 if command_list:
                     embed.add_field(
                         name=self.T.translate('Basic.Field', lang).format(cogName),
                         value=' '.join([command.name for command in command_list]),
                         inline=False
                     )
-
+            
             await ctx.send(embed=embed)
         
         elif cmd in ['별명', 'alias']:
@@ -89,31 +89,31 @@ class CogHelp(MyCog, name='도움말'):
                 title=self.T.translate('Alias.Title', lang),
                 color=RGColHex
             )
-
+            
             for cogName in self.bot.cogs.keys():
                 command_list = [
                     command for command in self.getAllCommand(self.bot.get_cog(cogName), isAdmin, isOwner, lang)
                     if len(command.aliases) > 0
                 ]
-
+                
                 if command_list:
                     embed.add_field(
                         name=self.T.translate('Alias.Field', lang).format(cogName),
                         value='\n'.join([command.name + ' : ' + ', '.join(command.aliases) for command in command_list]),
                         inline=False
                     )
-
+            
             await ctx.send(embed=embed)
-
+        
         elif cmd in [c.name for c in self.bot.commands]:
             cmd: commands.Command = self.bot.get_command(cmd)
-
+            
             if ((not isAdmin) and (cmd in cmd.cog.AdminOnly)) or ((not isOwner) and (cmd in cmd.cog.OwnerOnly)):
                 await self.HelpBase(ctx, lang)
             
             elif cmd.name in ['명령어', 'help']:
                 await self.HelpBase(ctx, lang)
-
+            
             else:
                 embed = discord.Embed(
                     title=self.T.translate('Command.Title', lang).format(cmd),
@@ -130,7 +130,7 @@ class CogHelp(MyCog, name='도움말'):
                     value=cmd.description,
                     inline=False
                 )
-        
+                
                 await ctx.send(embed=embed)
         
         elif cmd in self.bot.cogs.keys():
@@ -146,14 +146,14 @@ class CogHelp(MyCog, name='도움말'):
                 embed.add_field(name='!' + command.name, value=command.brief, inline=False)
             if not commands:
                 embed.add_field(name='명령어가 없어요!', value='아마 관리자 전용 명령어인가봐요..')
-
+            
             await ctx.send(embed=embed)
         
         else:
             await self.HelpBase(ctx, lang)
-
-    # ----- Commands
-
+    
+    # ----- Commands -----
+    
     @commands.command(
         name='명령어', aliases=['도움말'],
         brief='도움말을 보여줍니다.',

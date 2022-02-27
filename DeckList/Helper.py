@@ -27,20 +27,20 @@ class DeckList:
         
         cls.List.sort(key=lambda deck: deck['name'])
         cls.List.sort(key=lambda deck: OrgCls.index(deck['class']))
-
+        
         # this must be called after bot is ready
         cls.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
-
+    
     @classmethod
     def append(cls, dc: Deck) -> None:
         cls.List.append(dc)
         db['decks'] = cls.List
-
+    
     @classmethod
     def update(cls, name: str, desc: str, imgURL: str, contrib: str) -> Deck:
         deck = cls.List[[deck['name'] for deck in cls.List].index(name)]
         prvDeck = deck.copy()
-
+        
         deck['desc'] = desc
         deck['imgURL'] = imgURL
         deck['date'] = now().strftime('%Y/%m/%d')
@@ -55,42 +55,42 @@ class DeckList:
                 deck['cont'] = [contrib]
             elif contrib not in deck['cont']:
                 deck['cont'].append(contrib)
-
+        
         db['decks'] = cls.List
-
+        
         return prvDeck
-
+    
     @classmethod
     def upDesc(cls, name: str, desc: str, contrib: str) -> None:
         deck = cls.List[[deck['name'] for deck in cls.List].index(name)]
         deck['desc'] = desc
-
+        
         if contrib != deck['author']:
             if not deck.get('cont'):
                 deck['cont'] = [contrib]
             elif contrib not in deck['cont']:
                 deck['cont'].append(contrib)
-
+        
         db['decks'] = cls.List
     
     @classmethod
     def find(cls, rule: Callable[[Deck], bool]) -> List[Deck]:
         return [deck for deck in cls.List if rule(deck)]
-
+    
     @classmethod
     def delete(cls, Name: str) -> Deck:
         idx = [deck['name'] for deck in cls.List].index(Name)
         rt = cls.List.pop(idx)
         db['decks'] = cls.List
         return rt
-
+    
     @classmethod
     def deleteRT(cls) -> List[Deck]:
         rt = [deck for deck in cls.List if deck['rtul'] == 'RT']
         cls.List = [deck for deck in cls.List if deck['rtul'] == 'UL']
         db['decks'] = cls.List
         return rt
-
+    
     @classmethod
     def similar(cls, Name: str) -> List[Deck]:
         return [deck for deck in cls.List if Name in deck['name']]
@@ -101,16 +101,16 @@ class DeckList:
             return f'{val:2}개 (점유율: {round(val / len(cls.List) * 100, 2):5.2f}%)'
         else:
             return f'{val:2} Decks (Rate: {round(val / len(cls.List) * 100, 2):5.2f}%)'
-
+    
     @classmethod
     def GetStat(cls, field: str, value: str, lang: Lang = 'KR') -> str:
         return cls.get_asdf(sum([deck[field] == value for deck in cls.List]), lang)
-
+    
     @classmethod
     def GetCount(cls, _id: int, RTUL: str, lang: Lang = 'KR') -> str:
         val = sum([(deck['author'][2:-1] == str(_id) and deck['rtul'] == RTUL) for deck in cls.List])
         return cls.get_asdf(val, lang)
-
+    
     @classmethod
     def analyze(cls, lang: Lang = 'KR') -> discord.Embed:
         embed = discord.Embed(
@@ -126,15 +126,14 @@ class DeckList:
             name='언리미티드' if lang == 'KR' else 'Unlimited',
             value=cls.GetStat('rtul', 'UL', lang) + '\n'
         )
-
-        # Used Zero-Width space to split contents
+        
+        # Use Zero-Width space to split contents
         embed.add_field(name='​', value='​', inline=False)
-
+        
         for cls in OrgCls:
             embed.add_field(
                 name=cls,
                 value=cls.GetStat('class', cls)
             )
-            
+        
         return embed
-

@@ -4,7 +4,7 @@ class OpenCog(MyCog, name='오픈'):
     """
     이번 오픈에 대한 정보를 가져옵니다.
     """
-
+    
     @commands.command(
         name="찾기", aliases=['검색', 'find'],
         brief='오픈 정보에서 플레이어를 검색합니다.',
@@ -13,24 +13,24 @@ class OpenCog(MyCog, name='오픈'):
     )
     async def find(self, ctx: commands.Context, *name: str):
         name = ' '.join(name)
-
+        
         if name in table['A'].players:
             cls1, cls2 = table['A'].players[name]
-
+            
             embed = discord.Embed(title=name + "님의 덱입니다", description=name + "님은 A조입니다.")
             embed.add_field(name=cls1[0], value=cls1[1])
             embed.add_field(name=cls2[0], value=cls2[1])
             await ctx.send(embed=embed)
         elif name in table['B'].players:
             cls1, cls2 = table['B'].players[name]
-
+            
             embed = discord.Embed(title=name + "님의 덱입니다", description=name + "님은 B조입니다.")
             embed.add_field(name=cls1[0], value=cls1[1])
             embed.add_field(name=cls2[0], value=cls2[1])
             await ctx.send(embed=embed)
         else:
             await ctx.send("닉네임을 찾지 못했습니다")
-
+    
     @commands.command(
         name="참가자", aliases=['플레이어', 'player', 'players'],
         brief='A/B조의 참가자를 모두 보여줍니다.',
