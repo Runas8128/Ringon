@@ -4,6 +4,14 @@ class OpenCog(MyCog, name='오픈'):
     """
     이번 오픈에 대한 정보를 가져옵니다.
     """
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        
+        self.AdminOnly = []
+        self.OwnerOnly = []
+        
+        self.EngCmd = []
+        self.KorCmd = [self.find, self.player]
     
     @commands.command(
         name="찾기", aliases=['검색', 'find'],

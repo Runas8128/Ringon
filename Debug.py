@@ -11,11 +11,11 @@ class CogDebug(MyCog, name='디버그'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         
-        self.AdminOnly = []
-        self.OwnerOnly = [self.cmd_ShowDB, self.cmd_ShowDBKey]
+        self.AdminOnly = [self.cmd_CheckMembers]
+        self.OwnerOnly = [self.cmd_ShowAllDB, self.cmd_ShowDB, self.cmd_ShowDBKey]
         
-        self.EngCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey]
-        self.KorCmd = [self.cmd_ShowDB, self.cmd_ShowDBKey, self.cmd_IssueError]
+        self.EngCmd = []
+        self.KorCmd = [self.cmd_IssueError, self.cmd_CheckMembers, self.cmd_ShowAllDB, self.cmd_ShowDB, self.cmd_ShowDBKey]
     
     @commands.Cog.listener()
     async def on_ready(self):

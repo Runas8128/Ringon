@@ -22,7 +22,7 @@ class CogOther(MyCog, name='기타'):
         self.KorCmd = [
             self.RG_BlockWordAdd, self.RG_BlockWordRem, self.RG_BlockWordView,
             self.RG_MaxPrize, self.RG_Prize, self.RG_PrizeSet,
-            self.RG_Ping_KR, self.ShowCode, self.RG_Reserve, self.RG_Save
+            self.RG_Ping_KR, self.ShowCode, self.RG_Reserve
         ]
     
     # Block Words
