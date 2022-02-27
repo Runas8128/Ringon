@@ -36,19 +36,4 @@ class CogDetect(MyCog, name='일부감지'):
         usage='!센서기록'
     )
     async def RG_Sensor(self, ctx: commands.Context):
-        iq = len(detect.detects)
-        
-        if iq == 0:
-            detect.detectEmbedMsg = None
-            await ctx.send('링곤이 멍청하당.. 헣허')
-        
-        else:
-            detect.detectEmbedMsg = await ctx.send(embed=detect.Top())
-            
-            if iq > 10:
-                await detect.detectEmbedMsg.add_reaction('🔼')
-                await detect.detectEmbedMsg.add_reaction('🔽')
-            
-            if iq > 20:
-                await detect.detectEmbedMsg.add_reaction('⏫')
-                await detect.detectEmbedMsg.add_reaction('⏬')
+        await ctx.send(embed=detect.MakeEmbed())
