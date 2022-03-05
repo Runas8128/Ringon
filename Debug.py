@@ -1,7 +1,5 @@
 from Common import *
 
-import Events
-
 class CogDebug(MyCog, name='디버그'):
     """
     디버그용 커맨드 그룹입니다.

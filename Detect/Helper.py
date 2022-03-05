@@ -1,6 +1,5 @@
-#-*- coding: utf-8 -*-
-
 from typing import Dict
+
 from Common import *
 
 class Detect:

@@ -1,8 +1,9 @@
-from Common import *
-
 from typing import Dict, List, Literal, Tuple
+
 import requests
 from bs4 import BeautifulSoup, Tag
+
+from Common import *
 
 class Table:
     players: Dict[str, List[Tuple[str, str]]] = {}

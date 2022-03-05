@@ -1,8 +1,6 @@
-#-*- coding: utf-8 -*-
+from typing import Dict, List
 
 from Common import *
-
-from typing import Dict, List
 
 class Studied:
     def __init__(self):

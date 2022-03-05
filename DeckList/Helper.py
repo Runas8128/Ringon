@@ -1,5 +1,3 @@
-#-*- coding: utf-8 -*-
-
 from typing import Union, Callable, Dict, List
 
 from Common import *

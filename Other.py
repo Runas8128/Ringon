@@ -1,7 +1,6 @@
-from typing import List, Tuple
+from typing import List, Union, Tuple
 
 from Common import *
-from Events import CogEvent
 
 class CogOther(MyCog, name='기타'):
     """

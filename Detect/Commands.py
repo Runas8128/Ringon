@@ -1,5 +1,3 @@
-#-*- coding: utf-8 -*-
-
 from .Helper import *
 
 class CogDetect(MyCog, name='일부감지'):

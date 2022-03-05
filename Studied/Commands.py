@@ -1,5 +1,3 @@
-#-*- coding: utf-8 -*-
-
 from .Helper import *
 
 class CogStudied(MyCog, name='전체감지'):

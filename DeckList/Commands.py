@@ -1,5 +1,3 @@
-#-*- coding: utf-8 -*-
-
 from .Helper import *
 
 class CogDeckList(MyCog, name="덱"):
