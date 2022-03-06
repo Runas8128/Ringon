@@ -78,16 +78,6 @@ class CogEvent(commands.Cog):
                 await studied.StudiedEmbedMsg.edit(embed=studied.Down())
             elif reaction.emoji == '⏬':
                 await studied.StudiedEmbedMsg.edit(embed=studied.Bottom())
-        
-        elif detect.detectEmbedMsg and _id == detect.detectEmbedMsg.id:
-            if reaction.emoji == '⏫':
-                await detect.detectEmbedMsg.edit(embed=detect.Top())
-            elif reaction.emoji == '🔼':
-                await detect.detectEmbedMsg.edit(embed=detect.Up())
-            elif reaction.emoji == '🔽':
-                await detect.detectEmbedMsg.edit(embed=detect.Down())
-            elif reaction.emoji == '⏬':
-                await detect.detectEmbedMsg.edit(embed=detect.Bottom())
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
