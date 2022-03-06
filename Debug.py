@@ -13,7 +13,7 @@ class CogDebug(MyCog, name='디버그'):
         self.OwnerOnly = []
         
         self.EngCmd = []
-        self.KorCmd = [self.cmd_IssueError, self.cmd_CheckMembers]
+        self.KorCmd = [self.cmd_CheckMembers]
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -26,16 +26,6 @@ class CogDebug(MyCog, name='디버그'):
             self.guild.get_role(861883220722319391), # 군머
             self.guild.get_role(805451727859613707)  # 고3
         ]
-    
-    @commands.command(
-        name='버그',
-        brief='버그를 제보합니다.',
-        description='개발자가 쉬는동안 가끔 하고싶을때 고칠 버그를 알려줍니다.',
-        usage='!버그 (제보할 내용)'
-    )
-    async def cmd_IssueError(self, ctx: commands.Context, *content: str):
-        await self.bugReportChannel.send(' '.join(content))
-        await ctx.send("버그를 제보했어요! 이미 제보된 내용일지는 저도 모르겠네요... 가끔 잠수함 패치로 고쳐질지도..?")
     
     @commands.command(
         name='인원점검',
