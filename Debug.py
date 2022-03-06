@@ -10,10 +10,10 @@ class CogDebug(MyCog, name='디버그'):
         self.bot = bot
         
         self.AdminOnly = [self.cmd_CheckMembers]
-        self.OwnerOnly = [self.cmd_ShowAllDB, self.cmd_ShowDB, self.cmd_ShowDBKey]
+        self.OwnerOnly = []
         
         self.EngCmd = []
-        self.KorCmd = [self.cmd_IssueError, self.cmd_CheckMembers, self.cmd_ShowAllDB, self.cmd_ShowDB, self.cmd_ShowDBKey]
+        self.KorCmd = [self.cmd_IssueError, self.cmd_CheckMembers]
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -26,55 +26,6 @@ class CogDebug(MyCog, name='디버그'):
             self.guild.get_role(861883220722319391), # 군머
             self.guild.get_role(805451727859613707)  # 고3
         ]
-    
-    @commands.command(
-        name='showAll'
-    )
-    async def cmd_ShowAllDB(self, ctx: commands.Context):
-        print(db)
-    
-    @commands.command(
-        name='show',
-        brief='DB를 보여줍니다. 디버그용 명령어입니다.',
-        description='DB의 내용을 보여줍니다. 디버그용 명령어로, 거의 쓸 일이 없는 명령어입니다.',
-        usage='!show (키 나열)'
-    )
-    async def cmd_ShowDB(self, ctx: commands.Context, mainKey: str = 'None', *keys: str):
-        if mainKey in db.keys():
-            d = db[mainKey]
-            for key in keys:
-                if isinstance(d, dict) and (key in d.keys()):
-                    d = d[key]
-                else:
-                    await ctx.send(f'{key} not in {d}')
-                    return
-            await ctx.send(d)
-        else:
-            await ctx.send(f'{mainKey} not in {db.keys()}')
-    
-    @commands.command(
-        name='showKey',
-        brief='DB의 키를 보여줍니다. 디버그용 명령어입니다.',
-        description='DB의 키를 보여줍니다. 디버그용 명령어로, 거의 쓸 일이 없는 명령어입니다.',
-        usage='!showKey (키 나열)'
-    )
-    async def cmd_ShowDBKey(self, ctx: commands.Context, mainKey: str = None, *keys: str):
-        if mainKey in db.keys():
-            d = db[mainKey]
-            for key in keys:
-                if isinstance(d, dict) and (key in d.keys()):
-                    d = d[key]
-                else:
-                    await ctx.send(f'{key} not in {d}')
-                    return
-            if isinstance(d, dict):
-                await ctx.send(d.keys())
-            else:
-                await ctx.send(d)
-        elif mainKey == None:
-            await ctx.send(db.keys())
-        else:
-            await ctx.send(f'{mainKey} not in {db.keys()}')
     
     @commands.command(
         name='버그',
