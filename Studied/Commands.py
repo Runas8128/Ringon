@@ -5,6 +5,8 @@ class CogStudied(MyCog, name='전체감지'):
     메시지의 전체를 감지하게 하는 명령어 카테고리입니다.
     """
     
+    # ----- __init__ -----
+    
     def __init__(self, bot):
         self.bot = bot
         
@@ -13,6 +15,36 @@ class CogStudied(MyCog, name='전체감지'):
         
         self.EngCmd = []
         self.KorCmd = [self.RG_Forget, self.RG_Neungji, self.RG_Studied]
+        
+    # ----- Events -----
+        
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        msg = message.content
+        
+        if msg in studied.taughts:
+            await message.channel.trigger_typing()
+            await message.channel.send(studied.get(msg))
+            return
+    
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
+        if user.bot:
+            return
+        
+        _id = reaction.message.id
+        
+        if studied.StudiedEmbedMsg and _id == studied.StudiedEmbedMsg.id:
+            if reaction.emoji == '⏫':
+                await studied.StudiedEmbedMsg.edit(embed=studied.Top())
+            elif reaction.emoji == '🔼':
+                await studied.StudiedEmbedMsg.edit(embed=studied.Up())
+            elif reaction.emoji == '🔽':
+                await studied.StudiedEmbedMsg.edit(embed=studied.Down())
+            elif reaction.emoji == '⏬':
+                await studied.StudiedEmbedMsg.edit(embed=studied.Bottom())
+    
+    # ----- Commands -----
     
     @commands.command(
         name='잊어',

@@ -2,8 +2,6 @@ import io
 
 from Common import *
 
-from Studied.Helper import studied
-
 class CogEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -50,29 +48,6 @@ class CogEvent(commands.Cog):
                     await ch.send(f'금칙어 {block[0]}읍읍이 포함되었습니다', delete_after=5)
                     await message.delete()
                     return
-        
-        # Alive Test
-        if msg in studied.taughts:
-            await message.channel.trigger_typing()
-            await ch.send(studied.get(msg))
-            return
-    
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
-        if user.bot:
-            return
-        
-        _id = reaction.message.id
-        
-        if studied.StudiedEmbedMsg and _id == studied.StudiedEmbedMsg.id:
-            if reaction.emoji == '⏫':
-                await studied.StudiedEmbedMsg.edit(embed=studied.Top())
-            elif reaction.emoji == '🔼':
-                await studied.StudiedEmbedMsg.edit(embed=studied.Up())
-            elif reaction.emoji == '🔽':
-                await studied.StudiedEmbedMsg.edit(embed=studied.Down())
-            elif reaction.emoji == '⏬':
-                await studied.StudiedEmbedMsg.edit(embed=studied.Bottom())
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
