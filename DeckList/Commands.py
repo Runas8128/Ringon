@@ -14,13 +14,7 @@ class CogDeckList(MyCog, name="덱"):
         return f"{name}{ver}({rtul}{pack})"
     
     def makeEmbed(self, deck: Deck, KE: Lang = 'KR') -> discord.Embed:
-        desc: str
         uploader: str
-        
-        if len(deck['desc']) != 0:
-            desc = deck['desc']
-        else:
-            desc = '(설명 없음)' if KE == 'KR' else '(No Desc Provided)'
         
         if deck['author'].startswith('<@!') or deck['author'].startswith('<@'):
             uploader = deck['author']
@@ -33,7 +27,6 @@ class CogDeckList(MyCog, name="덱"):
         )
         embed.add_field(name="업로더" if KE == 'KR' else "Uploader", value=uploader, inline=False)
         embed.add_field(name="클래스" if KE == 'KR' else "Class", value=deck['class'], inline=False)
-        embed.add_field(name="덱 설명" if KE == 'KR' else "Description", value=desc, inline=False)
         
         if deck.get('date'):
             embed.add_field(name='올린 날짜' if KE == 'KR' else 'Date', value=deck['date'])
@@ -62,7 +55,7 @@ class CogDeckList(MyCog, name="덱"):
     
     # ----- Command Helper -----
     
-    async def Add(self, ctx: commands.Context, Name: str, Class: str, desc: str, lang: Lang):
+    async def Add(self, ctx: commands.Context, Name: str, Class: str, lang: Lang):
         chID: int = ctx.channel.id
         att: List[discord.Attachment] = ctx.message.attachments
         atr: discord.User = ctx.author
@@ -88,7 +81,6 @@ class CogDeckList(MyCog, name="덱"):
         if Class not in OrgCls:
             ls = [_cls for _cls in classes.keys() if _cls in Name] # Check if name implies class
             if len(ls) == 1:
-                desc += Class
                 Class = ls[0]
             else:
                 await ctx.send(self.T.translate('Add.WrongClass', lang))
@@ -98,7 +90,6 @@ class CogDeckList(MyCog, name="덱"):
             'author': str(atr.id),
             'name'  : Name.upper(),
             'class' : Class,
-            'desc'  : desc,
             'imgURL': att[0].url,
             'rtul'  : chToRTUL(chID),
             'date'  : now().strftime('%Y/%m/%d')
@@ -194,7 +185,7 @@ class CogDeckList(MyCog, name="덱"):
         else: # cannot find Deck
             await self.Similar(ctx, Name, lang)
     
-    async def Update(self, ctx: commands.Context, Name: str, desc: str, lang: Lang):
+    async def Update(self, ctx: commands.Context, Name: str, lang: Lang):
         att: List[discord.Attachment] = ctx.message.attachments
         
         upDeck = [deck for deck in DeckList.List if deck['name'] == Name]
@@ -204,11 +195,10 @@ class CogDeckList(MyCog, name="덱"):
                 DeckList.hisCh = self.bot.get_channel(804614670178320394)
             
             if len(att) != 1:
-                DeckList.upDesc(Name, desc, ctx.author.id)
-                await ctx.send(self.T.translate('Update.SuccessDesc', lang).format(Name))
+                raise ValueError
             else:
                 await DeckList.hisCh.send(embed=self.makeEmbed(
-                    DeckList.update(Name, desc, att[0].url, ctx.author.id), lang
+                    DeckList.update(Name, att[0].url, ctx.author.id), lang
                 ))
                 
                 await ctx.send(self.T.translate('Update.Success', lang).format(Name))
@@ -224,18 +214,18 @@ class CogDeckList(MyCog, name="덱"):
         name='덱추가', aliases=['덱등록'],
         brief='서버에 덱을 추가합니다.',
         description='서버에 덱을 추가합니다.',
-        usage='!덱추가 (덱 이름) (클래스) (설명 - 생략 가능) `+ 덱 사진 첨부`'
+        usage='!덱추가 (덱 이름) (클래스) `+ 덱 사진 첨부`'
     )
-    async def RG_Add_KR(self, ctx: commands.Context, Name: str = '', Class: str = '', *desc: str):
-        await self.Add(ctx, Name, Class, ' '.join(desc), 'KR')
+    async def RG_Add_KR(self, ctx: commands.Context, Name: str = '', Class: str = ''):
+        await self.Add(ctx, Name, Class, 'KR')
     
     @commands.command(
         name='add',
         brief='Add Deck in server',
         description='Add Deck in server',
-        usage='!add (deck Name) (Class) (Description - can be skiped) `+ attach deck image`')
-    async def RG_Add_EN(self, ctx: commands.Context, Name: str = '', Class: str = '', *desc: str):
-        await self.Add(ctx, Name, Class, ' '.join(desc), 'EN')
+        usage='!add (deck Name) (Class) `+ attach deck image`')
+    async def RG_Add_EN(self, ctx: commands.Context, Name: str = '', Class: str = ''):
+        await self.Add(ctx, Name, Class, 'EN')
     
     # Deck Finder
     
@@ -282,20 +272,20 @@ class CogDeckList(MyCog, name="덱"):
     @commands.command(
         name='덱업뎃',
         brief='덱을 업데이트합니다.',
-        description='덱을 업데이트합니다. 설명만 업데이트할 경우 사진은 첨부하지 않으셔도 됩니다.',
-        usage='!덱업뎃 (덱 이름) (설명 - 생략 가능)'
+        description='덱을 업데이트합니다.',
+        usage='!덱업뎃 (덱 이름)'
     )
-    async def RG_Update_KR(self, ctx: commands.Context, Name: str = '', *desc: str):
-        await self.Update(ctx, Name, ' '.join(desc), 'KR')
+    async def RG_Update_KR(self, ctx: commands.Context, Name: str = ''):
+        await self.Update(ctx, Name, 'KR')
     
     @commands.command(
         name='update', aliases=['up'],
         brief='Update Deck',
-        description='Update Deck\'s description/image. If you update description only, you don\'t have to attach deck image',
-        usage='!update (Deck name) (Description - can be skiped)'
+        description='Update Deck\'s description/image.',
+        usage='!update (Deck name)'
     )
-    async def RG_Update_EN(self, ctx: commands.Context, Name: str = '', *desc: str):
-        await self.Update(ctx, Name, ' '.join(desc), 'EN')
+    async def RG_Update_EN(self, ctx: commands.Context, Name: str = ''):
+        await self.Update(ctx, Name, 'EN')
     
     # Deck Analyzer
     

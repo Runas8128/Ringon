@@ -35,11 +35,10 @@ class DeckList:
         db['decks'] = cls.List
     
     @classmethod
-    def update(cls, name: str, desc: str, imgURL: str, contrib: str) -> Deck:
+    def update(cls, name: str, imgURL: str, contrib: str) -> Deck:
         deck = cls.List[[deck['name'] for deck in cls.List].index(name)]
         prvDeck = deck.copy()
         
-        deck['desc'] = desc
         deck['imgURL'] = imgURL
         deck['date'] = now().strftime('%Y/%m/%d')
         
@@ -57,19 +56,6 @@ class DeckList:
         db['decks'] = cls.List
         
         return prvDeck
-    
-    @classmethod
-    def upDesc(cls, name: str, desc: str, contrib: str) -> None:
-        deck = cls.List[[deck['name'] for deck in cls.List].index(name)]
-        deck['desc'] = desc
-        
-        if contrib != deck['author']:
-            if not deck.get('cont'):
-                deck['cont'] = [contrib]
-            elif contrib not in deck['cont']:
-                deck['cont'].append(contrib)
-        
-        db['decks'] = cls.List
     
     @classmethod
     def find(cls, rule: Callable[[Deck], bool]) -> List[Deck]:
