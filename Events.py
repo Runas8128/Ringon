@@ -3,7 +3,6 @@ import io
 from Common import *
 
 from Studied.Helper import studied
-from Detect.Helper  import detect
 
 class CogEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -57,10 +56,6 @@ class CogEvent(commands.Cog):
             await message.channel.trigger_typing()
             await ch.send(studied.get(msg))
             return
-        
-        for dtt in detect.detects:
-            if dtt in msg:
-                await ch.send(detect.detects[dtt])
     
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):

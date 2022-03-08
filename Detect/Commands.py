@@ -15,6 +15,15 @@ class CogDetect(MyCog, name='일부감지'):
         
         self.EngCmd = []
         self.KorCmd = [self.RG_Neungji, self.RG_Sensor]
+        
+    # ----- Events -----
+    
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        msg: str = message.content
+        for dtt in detect.detects:
+            if dtt in msg:
+                await message.channel.send(detect.detects[dtt])
     
     # ----- Commands -----
     
