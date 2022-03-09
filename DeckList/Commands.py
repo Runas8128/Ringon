@@ -1,3 +1,5 @@
+import asyncio
+
 from .Helper import *
 
 class CogDeckList(MyCog, name="덱"):
@@ -55,25 +57,28 @@ class CogDeckList(MyCog, name="덱"):
     
     # ----- Command Helper -----
     
-    async def Add(self, ctx: commands.Context, Name: str, Class: str, lang: Lang):
-        chID: int = ctx.channel.id
-        att: List[discord.Attachment] = ctx.message.attachments
-        atr: discord.User = ctx.author
+    async def Add(self, msg: discord.Message, Name: str, Class: str, lang: Lang):
+        # TODO: Add info to `Add.Usage` - To Update that deck, remove class info
+        # TODO: Add Double check
+        
+        chID: int = msg.channel.id
+        att: List[discord.Attachment] = msg.attachments
+        atr: discord.User = msg.author
         
         if chID not in [758479879418937374, 758480189503832124]:
-            await ctx.send(self.T.translate('Add.WrongChannel', lang))
+            await msg.channel.send(self.T.translate('Add.WrongChannel', lang))
             return
         
         if len(att) != 1:
-            await ctx.send(self.T.translate('Add.NoImage', lang))
+            await msg.channel.send(self.T.translate('Add.NoImage', lang))
             return
         
         if not Name:
-            await ctx.send(self.T.translate('Add.Usage', lang))
+            await msg.channel.send(self.T.translate('Add.Usage', lang))
             return
         
         if Name in [deck['name'] for deck in DeckList.List]:
-            await ctx.send(self.T.translate('Add.UsedName', lang))
+            await msg.channel.send(self.T.translate('Add.UsedName', lang))
             return
         
         Class = strToClass(Class)
@@ -83,7 +88,7 @@ class CogDeckList(MyCog, name="덱"):
             if len(ls) == 1:
                 Class = ls[0]
             else:
-                await ctx.send(self.T.translate('Add.WrongClass', lang))
+                await msg.channel.send(self.T.translate('Add.WrongClass', lang))
                 return
         
         deck: Deck = {
@@ -96,11 +101,13 @@ class CogDeckList(MyCog, name="덱"):
         }
         
         DeckList.append(deck)
-        await ctx.send(self.T.translate('Add.Success', lang).format(Name))
+        await msg.channel.send(self.T.translate('Add.Success', lang).format(Name))
     
-    async def Find(self, ctx: commands.Context, scThings: List[str], lang: Lang):
+    async def Find(self, msg: discord.Message, lang: Lang):
+        scThings = msg.content.split(' ')
+        
         if not scThings:
-            await ctx.send(self.T.translate('Find.NoWord', lang))
+            await msg.channel.send(self.T.translate('Find.NoWord', lang))
             return
         
         foundDeck = DeckList.find(lambda deck: deck['name'] == scThings[0].upper())
@@ -128,10 +135,10 @@ class CogDeckList(MyCog, name="덱"):
             foundDeck = DeckList.find(eval(scFuncS))
         
         if len(foundDeck) == 0:
-            await ctx.send(self.T.translate('Find.NoMatchDeck', lang))
+            await msg.channel.send(self.T.translate('Find.NoMatchDeck', lang))
         else:
             if len(foundDeck) > 25:
-                await ctx.send(self.T.translate('Find.TooManyDeck', lang))
+                await msg.channel.send(self.T.translate('Find.TooManyDeck', lang))
             
             elif len(foundDeck) > 3:
                 embed = discord.Embed(
@@ -146,14 +153,14 @@ class CogDeckList(MyCog, name="덱"):
                         value=f"{'클래스' if lang == 'KR' else 'Class'}: {deck['class']}"
                     )
                 
-                await ctx.send(embed=embed)
+                await msg.channel.send(embed=embed)
             
             else:
-                await ctx.send(self.T.translate('Find.SpecificDeck', lang))
+                await msg.channel.send(self.T.translate('Find.SpecificDeck', lang))
                 for deck in foundDeck:
-                    await ctx.send(embed=self.makeEmbed(deck, lang))
+                    await msg.channel.send(embed=self.makeEmbed(deck, lang))
     
-    async def Similar(self, ctx: commands.Context, Name: str, lang: Lang):
+    async def Similar(self, ctx: Union[commands.Context, discord.TextChannel], Name: str, lang: Lang):
         await ctx.send(self.T.translate('Similar.FindFail', lang).format(Name))
         
         similar = DeckList.similar(Name)
@@ -170,6 +177,7 @@ class CogDeckList(MyCog, name="덱"):
             await ctx.send(embed=embed)
     
     async def Delete(self, ctx: commands.Context, Name: str, SendHistory:bool, lang: Lang):
+        # TODO: 
         delDeck = [deck for deck in DeckList.List if deck['name'] == Name]
         
         if delDeck: # Deck found
@@ -185,8 +193,10 @@ class CogDeckList(MyCog, name="덱"):
         else: # cannot find Deck
             await self.Similar(ctx, Name, lang)
     
-    async def Update(self, ctx: commands.Context, Name: str, lang: Lang):
-        att: List[discord.Attachment] = ctx.message.attachments
+    async def Update(self, msg: discord.Message, Name: str, lang: Lang):
+        # TODO: Add Double check
+        
+        att: List[discord.Attachment] = msg.attachments
         
         upDeck = [deck for deck in DeckList.List if deck['name'] == Name]
         
@@ -198,59 +208,42 @@ class CogDeckList(MyCog, name="덱"):
                 raise ValueError
             else:
                 await DeckList.hisCh.send(embed=self.makeEmbed(
-                    DeckList.update(Name, att[0].url, ctx.author.id), lang
+                    DeckList.update(Name, att[0].url, msg.author.id), lang
                 ))
                 
-                await ctx.send(self.T.translate('Update.Success', lang).format(Name))
+                await msg.channel.send(self.T.translate('Update.Success', lang).format(Name))
         
         else: # cannot find deck
-            await self.Similar(ctx, Name, lang)
+            await self.Similar(msg.channel, Name, lang)
+    
+    # ----- Events -----
+    
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.channel.category.id == 758478112979288095: # DeckList Category
+            content = message.content
+            isKR = 'KR' in [role.name for role in message.author.roles]
+            lang = 'KR' if isKR else 'EN'
+            
+            if '/' in content:
+                name, cls = content.rsplit('/', 1)
+                
+                await self.Add(message, name, cls, lang)
+            else:
+                name = content
+                if name in [deck['name'] for deck in DeckList.List] and len(message.attachments) > 1:
+                    await self.Update(message, name, lang)
+                else:
+                    await self.Find(message, lang)
+        else:
+            await self.Find(message, lang)
     
     # ----- Command -----
-    
-    # Deck Adder
-    
-    @commands.command(
-        name='덱추가', aliases=['덱등록'],
-        brief='서버에 덱을 추가합니다.',
-        description='서버에 덱을 추가합니다.',
-        usage='!덱추가 (덱 이름) (클래스) `+ 덱 사진 첨부`'
-    )
-    async def RG_Add_KR(self, ctx: commands.Context, Name: str = '', Class: str = ''):
-        await self.Add(ctx, Name, Class, 'KR')
-    
-    @commands.command(
-        name='add',
-        brief='Add Deck in server',
-        description='Add Deck in server',
-        usage='!add (deck Name) (Class) `+ attach deck image`')
-    async def RG_Add_EN(self, ctx: commands.Context, Name: str = '', Class: str = ''):
-        await self.Add(ctx, Name, Class, 'EN')
-    
-    # Deck Finder
-    
-    @commands.command(
-        name='덱검색',
-        brief='덱을 검색합니다',
-        description='서버에서 덱을 검색합니다. 여러개의 검색어를 공백으로 구분해 전달할 수 있습니다.',
-        usage='!덱검색 (검색어)'
-    )
-    async def RG_Find_KR(self, ctx: commands.Context, *scThings: str):
-        await self.Find(ctx, scThings, 'KR')
-    
-    @commands.command(
-        name='search', aliases=['sc'],
-        brief='Search Deck',
-        description='Search Deck in server. You can search two or more words separated by spaces',
-        usage='!search (search words)'
-    )
-    async def RG_Find_EN(self, ctx: commands.Context, *scThings: str):
-        await self.Find(ctx, scThings, 'EN')
     
     # Deck Deleter
     
     @commands.command(
-        name='덱삭제',
+        name='덱삭제', aliases=['delete', 'remove', 'del', 'rem'],
         brief='덱을 삭제합니다',
         description='덱을 삭제합니다. 해당 덱을 업로드하신 분만 삭제하실 수 있습니다. 처음 등록한 이름을 정확히 적어주셔야 합니다.',
         usage='!덱삭제 (덱 이름)'
@@ -266,26 +259,6 @@ class CogDeckList(MyCog, name="덱"):
     )
     async def RG_Delete_EN(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
         await self.Delete(ctx, Name, SendHistory, 'EN')
-    
-    # Deck Updater
-    
-    @commands.command(
-        name='덱업뎃',
-        brief='덱을 업데이트합니다.',
-        description='덱을 업데이트합니다.',
-        usage='!덱업뎃 (덱 이름)'
-    )
-    async def RG_Update_KR(self, ctx: commands.Context, Name: str = ''):
-        await self.Update(ctx, Name, 'KR')
-    
-    @commands.command(
-        name='update', aliases=['up'],
-        brief='Update Deck',
-        description='Update Deck\'s description/image.',
-        usage='!update (Deck name)'
-    )
-    async def RG_Update_EN(self, ctx: commands.Context, Name: str = ''):
-        await self.Update(ctx, Name, 'EN')
     
     # Deck Analyzer
     
