@@ -243,7 +243,7 @@ class CogDeckList(MyCog, name="덱"):
     # Deck Deleter
     
     @commands.command(
-        name='덱삭제', aliases=['delete', 'remove', 'del', 'rem'],
+        name='덱삭제',
         brief='덱을 삭제합니다',
         description='덱을 삭제합니다. 해당 덱을 업로드하신 분만 삭제하실 수 있습니다. 처음 등록한 이름을 정확히 적어주셔야 합니다.',
         usage='!덱삭제 (덱 이름)'
