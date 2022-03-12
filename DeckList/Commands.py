@@ -48,8 +48,8 @@ class CogDeckList(MyCog, name="덱"):
         self.AdminOnly = [self.RG_Pack]
         self.OwnerOnly = []
         
-        self.EngCmd = [self.RG_Add_EN, self.RG_Analyze_EN, self.RG_Delete_EN, self.RG_Find_EN, self.RG_Update_EN]
-        self.KorCmd = [self.RG_Add_KR, self.RG_Analyze_KR, self.RG_Delete_KR, self.RG_Find_KR, self.RG_Update_KR, self.RG_Pack, self.RG_DeepAnalyze]
+        self.EngCmd = [self.RG_Analyze_EN, self.RG_Delete_EN]
+        self.KorCmd = [self.RG_Analyze_KR, self.RG_Delete_KR, self.RG_Pack, self.RG_DeepAnalyze]
     
     @commands.Cog.listener()
     async def on_ready(self):
