@@ -1,4 +1,5 @@
 from .Commands import OpenCog
 
 def setup(bot):
-    bot.add_cog(OpenCog(bot))
+    raise DeprecationWarning("This Cog is deprecated: Please do not use this cog")
+    # bot.add_cog(OpenCog(bot))
