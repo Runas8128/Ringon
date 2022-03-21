@@ -220,10 +220,13 @@ class CogDeckList(MyCog, name="덱"):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        if message.author.bot: return
+        
+        isKR = 'KR' in [role.name for role in message.author.roles]
+        lang = 'KR' if isKR else 'EN'
+    
         if message.channel.category.id == 758478112979288095: # DeckList Category
             content = message.content
-            isKR = 'KR' in [role.name for role in message.author.roles]
-            lang = 'KR' if isKR else 'EN'
             
             if '/' in content:
                 name, cls = content.rsplit('/', 1)
@@ -235,8 +238,6 @@ class CogDeckList(MyCog, name="덱"):
                     await self.Update(message, name, lang)
                 else:
                     await self.Find(message, lang)
-        else:
-            await self.Find(message, lang)
     
     # ----- Command -----
     
