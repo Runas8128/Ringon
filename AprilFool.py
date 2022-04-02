@@ -2,17 +2,125 @@ from typing import List, Union, Tuple
 
 from Common import *
 
+class OverWrite:
+    def __init__(
+        self,
+        noChangeCh: List[int],
+        view_channel: bool = None, connect: bool = None, send_messages: bool = None
+    ):
+        self.view_channel = view_channel
+        self.connect = connect
+        self.send_messages = send_messages
+        self.noChangeCh = noChangeCh
+    
+    def toDict(self, revert: bool):
+        dc = {}
+        if self.view_channel != None:
+            dc['view_channel'] = self.view_channel if not revert else not self.view_channel
+        if self.connect != None:
+            dc['connect'] = self.connect if not revert else not self.connect
+        if self.send_messages != None:
+            dc['send_messages'] = self.send_messages if not revert else not self.send_messages
+        
+        return dc
+
 class AprilFoolCog(MyCog, name="만우절"):
     """
     만우절 커맨드를 담고 있는 파일입니다.
     장난식의 커맨드이니, 주의해주세요!
     """
 
-    async def Execute(self, guild: discord.Guild):
-        pass
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.updateList = {
+            758478112979288094: {
+                None: OverWrite(
+                    noChangeCh=[
+                        864518975253119007
+                    ],
+                    send_messages=True
+                ),
+                843796108345081856: OverWrite(
+                    noChangeCh=[
+                        844229601504133150
+                    ],
+                    view_channel=True, connect=True
+                ),
+                764819837305749514: OverWrite(
+                    noChangeCh=[],
+                    view_channel=False
+                ),
+                758478112979288099: OverWrite(
+                    noChangeCh=[],
+                    view_channel=False, connect=False
+                ),
+                891697283702345798: OverWrite(
+                    noChangeCh=[],
+                    view_channel=False
+                ),
+                758478112979288095: OverWrite(noChangeCh=[]), # No Change
+                789732418378006538: OverWrite(
+                    noChangeCh=[
+                        790850193649696768,
+                        765958359382884402,
+                        957912662551961661,
+                        809342346466557952
+                    ],
+                    view_channel=True, connect=True, send_messages=True
+                ),
+                870332556132896769: OverWrite(noChangeCh=[]), # No Change
+                864155712988905472: OverWrite(noChangeCh=[]), # No Change
+                902845024176312420: OverWrite(noChangeCh=[]), # No Change
+            },
+            783257655388012584: {
+                None: OverWrite(
+                    noChangeCh=[
+                        959078169980321792
+                    ],
+                    connect=True, send_messages=True
+                ),
+                958338514238464010: OverWrite(
+                    noChangeCh=[
+                        783257655388012587
+                    ],
+                    view_channel=False, connect=False, send_messages=False
+                ),
+                958689840680013856: OverWrite(
+                    noChangeCh=[
+                        955800123089256468
+                    ],
+                    view_channel=True, send_messages=True, connect=True
+                ),
+                843797752739266560: OverWrite(
+                    noChangeCh=[
+                        843797755704770601,
+                        843797758602510338,
+                        843797761652162580
+                    ],
+                    view_channel=True, connect=True
+                )
+            }
+        }
 
-    async def Undo(self, guild: discord.Guild):
-        pass
+    async def Execute(self, guild: discord.Guild, revert: bool):
+        overWriteList = self.updateList[guild.id]
+        default_role = guild.default_role
+
+        for channel in guild.channels:
+            category = channel.category
+            if category != None:
+                overWrite = overWriteList[channel.category_id]
+            else:
+                overWrite = overWriteList[None]
+            
+            if channel.id in overWrite.noChangeCh and not revert:
+                continue
+
+            await channel.set_permissions(
+                target=default_role,
+                overwrite=discord.PermissionOverwrite(**overWrite.toDict(revert=revert))
+            )
+            print(f'set #{channel.name}: {overWrite.toDict(revert=revert)}')
 
     @commands.command(
         name='만우절',
@@ -24,47 +132,15 @@ class AprilFoolCog(MyCog, name="만우절"):
     async def RG_AprilFool(self, ctx: commands.Context, run: str=''):
         guild: discord.Guild = ctx.guild
 
-        if guild.id not in [783257655388012584, 823359663973072957]:
-            print('guild is not test server')
+        if self.updateList.get(guild.id, None) == None:
+            print('This guild is not allowed')
             return
 
         if run == '실행':
-            for ch in guild.channels:
-                overwrite = ch.overwrites_for(guild.default_role)
-                
-                # 채널이 주요 관리자실인 경우
-                if ch.id in [955800123089256468]:
-                    newOverwrite = discord.PermissionOverwrite()
-                    newOverwrite.view_channel = True
-                    newOverwrite.send_messages = True
-                    await ch.set_permissions(guild.default_role, overwrite=newOverwrite)
-                    print(f'channel {ch.name}: view_channel: False -> True')
-                
-                # 채널이 모두가 쓸 수 있는 경우
-                elif overwrite.send_messages in [True, None]:
-                    newOverwrite = discord.PermissionOverwrite()
-                    newOverwrite.send_messages = False
-                    await ch.set_permissions(guild.default_role, overwrite=newOverwrite)
-                    print(f'channel {ch.name}: send_message: True -> False')
+            await self.Execute(guild, False)
             
         elif run == '실행취소':
-            for ch in guild.channels:
-                overwrite = ch.overwrites_for(guild.default_role)
-                
-                # 채널이 주요 관리자실인 경우
-                if ch.id in [955800123089256468]:
-                    newOverwrite = discord.PermissionOverwrite()
-                    newOverwrite.view_channel = False
-                    newOverwrite.send_messages = False
-                    await ch.set_permissions(guild.default_role, overwrite=newOverwrite)
-                    print(f'channel {ch.name}: view_channel: True -> False')
-                
-                # 채널이 모두가 쓸 수 있는 경우
-                elif overwrite.send_messages == False:
-                    newOverwrite = discord.PermissionOverwrite()
-                    newOverwrite.send_messages = True
-                    await ch.set_permissions(guild.default_role, overwrite=newOverwrite)
-                    print(f'channel {ch.name}: send_message: False -> True')
+            await self.Execute(guild, True)
 
 def setup(bot):
     bot.add_cog(AprilFoolCog(bot))
