@@ -2,19 +2,6 @@ from typing import Union
 
 import sqlite3
 
-class _dbCon:
-    def __init__(self):
-        self.con = sqlite3.connect('.db')
-    
-    def __enter__(self):
-        return self.con.cursor()
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.con.commit()
-    
-    def close(self):
-        self.con.close()
-
 class SQLGen:
     def __init__(self):
         self.query = ''
@@ -24,13 +11,19 @@ class SQLGen:
 
 class DB:
     def __init__(self):
-        self.con = _dbCon()
+        self.con = sqlite3.connect('.db')
     
     def run(self, sql: Union[str, SQLGen]):
-        with self.con as con:
-            if isinstance(sql, SQLGen):
-                sql = sql.getQuery()
-            return con.execute(sql)
+        cur = self.con.cursor()
+
+        if isinstance(sql, SQLGen):
+            sql = sql.getQuery()
+        
+        result = cur.execute(sql)
+
+        self.con.commit()
+
+        return result
 
 class DataType:
     NUL  = 'NULL'
