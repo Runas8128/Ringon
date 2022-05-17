@@ -1,4 +1,5 @@
 from typing import List, Union, Tuple
+from asyncio import TimeoutError
 
 from Common import *
 
@@ -11,7 +12,7 @@ class CogOther(MyCog, name='기타'):
     
     # __init__
     
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         
         self.AdminOnly = [self.RG_BlockWordAdd, self.RG_BlockWordRem, self.RG_PrizeSet, self.RG_Reserve]
@@ -146,6 +147,36 @@ class CogOther(MyCog, name='기타'):
     )
     async def ShowCode(self, ctx: commands.Context):
         await ctx.send('https://github.com/Runas8128/Ringon')
+    
+    @commands.command(
+        name='dmAll',
+        brief = '서버 인원 모두에게 DM을 보냅니다. 관리자용 명령어입니다.',
+        description='서버 인원중 DM을 보낼 수 있는 모든 분들에게 DM을 보냅니다. 관리자용 명령어입니다.',
+        usage='!dmAll (내용) / 사진 등 첨부 가능'
+    )
+    @commands.has_permissions(administrator=True)
+    async def dmAll(self, ctx: commands.Context):
+        try:
+            def check(msg: discord.Message):
+                return msg.author == ctx.author
+            msg: discord.Message = await self.bot.wait_for('message', check=check)
+        except TimeoutError:
+            await ctx.send("취소")
+        else:
+            if msg.content == '취소':
+                await ctx.send("취소")
+                return
+            guild: discord.Guild = ctx.Guild
+            content = msg.content
+            files = [await attch.to_file() for attch in msg.attachments]
+            for member in guild.members:
+                try:
+                    await member.send(content, files=files)
+                except discord.Forbidden:
+                    await ctx.send("실행에 실패했습니다: 권한이 부족합니다.")
+                except discord.HTTPException as e:
+                    reason = e.response.reason
+                    await ctx.send(f"실행에 실패했습니다: {reason}")
     
     # Reserve Changing Server
     
