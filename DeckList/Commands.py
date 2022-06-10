@@ -1,4 +1,5 @@
 import asyncio
+import requests
 
 from .Helper import *
 
@@ -323,3 +324,24 @@ class CogDeckList(MyCog, name="덱"):
             s += f'{author} - {sum(write)} / {sum(cont)}\n'
         
         await ctx.send(s)
+
+    @commands.command(name="po")
+    async def RG_LinkPortal(self, ctx: commands.Context, DeckCode: str):
+        response = requests.get(
+            'https://shadowverse-portal.com/api/v1/deck/import',
+            params={'format': 'json', 'deck_code': DeckCode}
+        )
+        d = response.json()['data']
+        if len(d['errors']) > 0:
+            await ctx.send("덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.")
+            return
+        
+        clan, hash = d['clan'], d['hash']
+        deckURL, imageURL = f'https://shadowverse-portal.com/deck/{hash}', f'https://shadowverse-portal.com/image/{hash}'
+
+        portalEmbed = discord.Embed(title="포탈로 연결!")\
+            .add_field(name='덱 코드', value=DeckCode)\
+            .add_field(name='포탈 링크', value=f'[여기를 클릭해주세요!]({deckURL})')\
+            .set_image(url=imageURL)
+        
+        await ctx.send(embed=portalEmbed)

@@ -148,7 +148,7 @@ class CogOther(MyCog, name='기타'):
     async def ShowCode(self, ctx: commands.Context):
         await ctx.send('https://github.com/Runas8128/Ringon')
     
-    @commands.command(
+    """@commands.command(
         name='dmAll',
         brief = '서버 인원 모두에게 DM을 보냅니다. 관리자용 명령어입니다.',
         description='서버 인원중 DM을 보낼 수 있는 모든 분들에게 DM을 보냅니다. 관리자용 명령어입니다.',
@@ -176,7 +176,7 @@ class CogOther(MyCog, name='기타'):
                     await ctx.send("실행에 실패했습니다: 권한이 부족합니다.")
                 except discord.HTTPException as e:
                     reason = e.response.reason
-                    await ctx.send(f"실행에 실패했습니다: {reason}")
+                    await ctx.send(f"실행에 실패했습니다: {reason}")"""
     
     # Reserve Changing Server
     
