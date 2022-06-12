@@ -21,7 +21,11 @@ class CogDeckList(MyCog, name="덱"):
         if deck['author'].startswith('<@!') or deck['author'].startswith('<@'):
             uploader = deck['author']
         else:
-            uploader = self.bot.get_user(int(deck['author'])).mention
+            uploader: discord.User = self.bot.get_user(int(deck['author']))
+            if uploader == None:
+                uploader = '서버에 안계시네요...'
+            else:
+                uploader = uploader.mention
         
         embed = discord.Embed(
             title=self.makeTitle(deck, KE),
