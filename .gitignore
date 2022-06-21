@@ -1,6 +1,5 @@
 *.pyc
-Common.py
-test.py
+test*
 .db
 
 *_Old
