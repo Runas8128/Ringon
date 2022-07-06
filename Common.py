@@ -17,13 +17,6 @@ from Translator import Translator, Lang
 # --------------------------------------------------------------------------------------------------
 # Variables
 
-# TypeAliases
-Context = commands.Context
-cmdList = List[commands.Command]
-
-# Regex
-reKR = re.compile(r"[ㄱ-ㅣ가-힣]")
-
 # RT/UL
 RT = '로테이션'
 UL = '언리미티드'
@@ -70,19 +63,6 @@ classes = {
     'portal': '네메시스'
 }
 
-maker = {
-    765462304350666762: 449837429885763584,
-    235088799074484224: 166179284266778624,
-    831418476211863552: 739801106703712288,
-    850029959153319968: 739801106703712288
-}
-madeDate = {
-    765462304350666762: '2020-10-13',
-    235088799074484224: '2016-10-11',
-    831418476211863552: '2021-05-10',
-    850029959153319968: '2021-07-18'
-}
-
 #--------------------------------------------------------------------------------------------------
 # Cogs
 
@@ -96,9 +76,6 @@ class MyCog(commands.Cog):
 def now():
     return datetime.now(timezone(timedelta(hours=9)))
 
-def isKR(s: str) -> bool:
-    return reKR.search(s) is not None
-
 def strToClass(name: str) -> str:
     name = name.lower()
     
@@ -107,20 +84,8 @@ def strToClass(name: str) -> str:
     else:
         return name
 
-def ClassKrToEn(name: str) -> str:
-    if name in OrgCls:
-        return OrgClsEN[OrgCls.index(name)]
-    else:
-        return name
-
 def chToRTUL(chID: int) -> str:
     return {758479879418937374: 'RT', 758480189503832124: 'UL'}.get(chID, "RT")
-
-def fixRTUL(rtul: str) -> str:
-    return {
-        '로테': RT, '로테이션': RT, 'Rotation': RT, 'RT': RT,
-        '언리': UL, '언리미티드': UL, 'Unlimited': UL, 'UL': UL
-    }.get(rtul, rtul)
 
 def toGen(tmp: Any) -> Any:
     if isinstance(tmp, ObservedList):
