@@ -10,12 +10,6 @@ class CogDetect(MyCog, name='일부감지'):
     def __init__(self, bot):
         self.bot = bot
         
-        self.AdminOnly = []
-        self.OwnerOnly = []
-        
-        self.EngCmd = []
-        self.KorCmd = [self.RG_Neungji, self.RG_Sensor]
-        
     # ----- Events -----
     
     @commands.Cog.listener()

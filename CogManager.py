@@ -7,12 +7,6 @@ class CogManager(MyCog, name='매니저'):
         
         for cogName in self.all_cog:
             self.bot.load_extension(cogName)
-        
-        self.AdminOnly = []
-        self.OwnerOnly = [self.load, self.unload, self.reload, self.debug]
-        
-        self.EngCmd = [self.load, self.unload, self.reload, self.debug]
-        self.KorCmd = [self.load, self.unload, self.reload, self.debug]
     
     @commands.command()
     @commands.is_owner()

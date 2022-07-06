@@ -10,12 +10,6 @@ class CogHelp(MyCog, name='도움말'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.T = Translator('Help')
-        
-        self.AdminOnly = []
-        self.OwnerOnly = []
-        
-        self.EngCmd = [self.RG_Help_EN]
-        self.KorCmd = [self.RG_Help_KR]
     
     # ----- Command helper -----
     

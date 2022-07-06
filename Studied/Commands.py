@@ -10,12 +10,6 @@ class CogStudied(MyCog, name='전체감지'):
     def __init__(self, bot):
         self.bot = bot
         
-        self.AdminOnly = []
-        self.OwnerOnly = []
-        
-        self.EngCmd = []
-        self.KorCmd = [self.RG_Forget, self.RG_Neungji, self.RG_Studied]
-        
     # ----- Events -----
         
     @commands.Cog.listener()

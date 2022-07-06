@@ -45,12 +45,6 @@ class CogDeckList(MyCog, name="덱"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.T = Translator('DeckList')
-        
-        self.AdminOnly = [self.RG_Pack]
-        self.OwnerOnly = []
-        
-        self.EngCmd = [self.RG_Analyze_EN, self.RG_Delete_EN]
-        self.KorCmd = [self.RG_Analyze_KR, self.RG_Delete_KR, self.RG_Pack, self.RG_DeepAnalyze]
     
     @commands.Cog.listener()
     async def on_ready(self):

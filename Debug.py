@@ -8,12 +8,6 @@ class CogDebug(MyCog, name='디버그'):
     
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        
-        self.AdminOnly = [self.cmd_CheckMembers]
-        self.OwnerOnly = []
-        
-        self.EngCmd = []
-        self.KorCmd = [self.cmd_CheckMembers]
     
     @commands.Cog.listener()
     async def on_ready(self):

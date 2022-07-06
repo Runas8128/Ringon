@@ -14,16 +14,6 @@ class CogOther(MyCog, name='기타'):
     
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        
-        self.AdminOnly = [self.RG_BlockWordAdd, self.RG_BlockWordRem, self.RG_PrizeSet, self.RG_Reserve]
-        self.OwnerOnly = []
-        
-        self.EngCmd = [self.RG_Ping_EN]
-        self.KorCmd = [
-            self.RG_BlockWordAdd, self.RG_BlockWordRem, self.RG_BlockWordView,
-            self.RG_MaxPrize, self.RG_Prize, self.RG_PrizeSet,
-            self.RG_Ping_KR, self.ShowCode, self.RG_Reserve
-        ]
     
     # Block Words
     

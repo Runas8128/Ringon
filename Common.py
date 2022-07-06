@@ -89,12 +89,6 @@ madeDate = {
 class MyCog(commands.Cog):
     bot: commands.Bot       # class' own Bot
     T: Optional[Translator] # translator - optional variable
-    
-    AdminOnly: cmdList
-    OwnerOnly: cmdList
-    
-    EngCmd: cmdList
-    KorCmd: cmdList
 
 #--------------------------------------------------------------------------------------------------
 # functions
