@@ -1,4 +1,5 @@
 from typing import Union, Callable, Dict, List
+import sqlite3
 
 from Common import *
 
@@ -7,6 +8,22 @@ Deck = Dict[str, Union[str, int]]
 #--------------------------------------------------------------------------------------------------
 # Class
 
+class _DeckList:
+    def __init__(self):
+        self.dbCon = sqlite3.connect('db/decklist.db')
+    
+    def _runSQL(self, query, *parameters):
+        cur = self.dbCon.cursor()
+        cur.execute(query, parameters=parameters)
+        self.dbCon.commit()
+        return cur.fetchall()
+    
+    def loadHistCh(self, bot: commands.Bot):
+        self.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
+
+DeckList = _DeckList()
+
+"""
 class DeckList:
     @classmethod
     def load(cls, bot: commands.Bot):
@@ -121,3 +138,4 @@ class DeckList:
             )
         
         return embed
+"""
