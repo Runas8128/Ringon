@@ -20,6 +20,9 @@ class _DeckList:
     
     def loadHistCh(self, bot: commands.Bot):
         self.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
+    
+    def searchDeckByID(self, id: int):
+        return self._runSQL("SELECT * FROM DECKLIST WHERE ID=?", id)
 
 DeckList = _DeckList()
 
