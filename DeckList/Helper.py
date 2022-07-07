@@ -30,10 +30,28 @@ class _DeckList:
             VALUES(?,?,?,?,?)
         """, name, clazz, desc, imageURL, author)
 
-        deckID = self._runSQL("""
-            SELECT (ID) FROM DECKLIST
-            WHERE name=?
-        """, name)[0]
+        deckID = self._runSQL("SELECT ID FROM DECKLIST WHERE name=?", name)[0]
+
+    def updateDeck(self, name: str, contrib: int, imageURL: str = '', desc: str = ''):
+        query = "UPDATE DECKLIST SET "
+        if imageURL == '':
+            if desc == '':
+                raise ValueError("Both imageURL and desc are all empty")
+            else:
+                query += "description=?"
+                self._runSQL(query, desc)
+        else:
+            if desc == '':
+                query += "imageURL=?"
+                self._runSQL(query, imageURL)
+            else:
+                query += "imageURL=?, description=?"
+                self._runSQL(query, imageURL, desc)
+
+        deckID = self._runSQL("SELECT ID FROM DECKLIST WHERE name=?", name)[0]
+        author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)
+        if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTERS WHERE name=?", name) == []:
+            self._runSQL("INSERT INTO CONTRIBUTERS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
 
 DeckList = _DeckList()
 
