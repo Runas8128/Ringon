@@ -14,7 +14,7 @@ class _DeckList:
     
     def _runSQL(self, query, *parameters):
         cur = self.dbCon.cursor()
-        cur.execute(query, parameters=parameters)
+        cur.execute(query, parameters)
         self.dbCon.commit()
         return cur.fetchall()
     
