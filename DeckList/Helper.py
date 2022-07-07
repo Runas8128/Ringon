@@ -22,7 +22,18 @@ class _DeckList:
         self.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
     
     def searchDeckByID(self, id: int):
-        return self._runSQL("SELECT * FROM DECKLIST WHERE ID=?", id)
+        return self._runSQL("SELECT name, class, description, imageURL, author FROM DECKLIST WHERE ID=?", id)
+    
+    def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
+        self._runSQL("""
+            INSERT INTO DECKLIST (name, class, description, imageURL, author)
+            VALUES(?,?,?,?,?)
+        """, name, clazz, desc, imageURL, author)
+
+        deckID = self._runSQL("""
+            SELECT (ID) FROM DECKLIST
+            WHERE name=?
+        """, name)[0]
 
 DeckList = _DeckList()
 
