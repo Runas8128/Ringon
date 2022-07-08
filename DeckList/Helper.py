@@ -75,6 +75,9 @@ class _DeckList:
         shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{today}.db")
         self._runSQL("DELETE FROM DECKLIST")
         self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
+    
+    def similar(self, name: str):
+        return self._runSQL("SELECT name FROM DECKLIST WHERE name LIKE ?", f"%{name}%")
 
 DeckList = _DeckList()
 
@@ -125,10 +128,6 @@ class DeckList:
     @classmethod
     def find(cls, rule: Callable[[Deck], bool]) -> List[Deck]:
         return [deck for deck in cls.List if rule(deck)]
-    
-    @classmethod
-    def similar(cls, Name: str) -> List[Deck]:
-        return [deck for deck in cls.List if Name in deck['name']]
     
     @classmethod
     def get_asdf(cls, val: int, lang: Lang) -> str:
