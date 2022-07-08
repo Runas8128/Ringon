@@ -1,5 +1,7 @@
 from typing import Union, Callable, Dict, List
 import sqlite3
+import shutil
+from datetime import datetime
 
 from Common import *
 
@@ -68,6 +70,12 @@ class _DeckList:
         self._runSQL("DELETE FROM DECKLIST WHERE name=?", name)
         return deckInfo
 
+    def deleteAll(self):
+        today = datetime.now().strftime("%Y%m%d")
+        shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{today}.db")
+        self._runSQL("DELETE FROM DECKLIST")
+        self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
+
 DeckList = _DeckList()
 
 """
@@ -117,13 +125,6 @@ class DeckList:
     @classmethod
     def find(cls, rule: Callable[[Deck], bool]) -> List[Deck]:
         return [deck for deck in cls.List if rule(deck)]
-    
-    @classmethod
-    def deleteRT(cls) -> List[Deck]:
-        rt = [deck for deck in cls.List if deck['rtul'] == 'RT']
-        cls.List = [deck for deck in cls.List if deck['rtul'] == 'UL']
-        db['decks'] = cls.List
-        return rt
     
     @classmethod
     def similar(cls, Name: str) -> List[Deck]:
