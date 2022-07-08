@@ -38,7 +38,7 @@ class _DeckList:
 
         if imageURL == '':
             if desc == '':
-                raise ValueError("Both imageURL and desc are all empty")
+                raise ValueError("이미지파일과 설명이 모두 비어있습니다!")
             
             query += "description=?"
             param.append(desc)
@@ -54,9 +54,17 @@ class _DeckList:
         self._runSQL(query, *param)
 
         deckID = self._runSQL("SELECT ID FROM DECKLIST WHERE name=?", name)[0][0]
-        author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)
+        author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)[0][0]
         if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTERS WHERE DeckID=?", deckID) == []:
             self._runSQL("INSERT INTO CONTRIBUTERS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
+
+    def deleteDeck(self, name: str, reqID: int):
+        author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)[0][0]
+        if author != reqID:
+            raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
+        deckInfo = self._runSQL("SELECT name, author, class, description, imageURL FROM DECKLIST WHERE name=?", name)[0]
+        self._runSQL("DELETE FROM DECKLIST WHERE name=?", name)
+        return deckInfo
 
 DeckList = _DeckList()
 
@@ -83,13 +91,6 @@ class DeckList:
         # this must be called after bot is ready
         cls.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
     
-    @classmethod
-    def append(cls, dc: Deck) -> None:
-        cls.List.append(dc)
-        db['decks'] = cls.List
-    
-    @classmethod
-    def update(cls, name: str, imgURL: str, contrib: str) -> Deck:
         deck = cls.List[[deck['name'] for deck in cls.List].index(name)]
         prvDeck = deck.copy()
         
