@@ -22,7 +22,9 @@ class _DeckList:
         self.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
     
     def searchDeckByID(self, id: int):
-        return self._runSQL("SELECT name, class, description, imageURL, author FROM DECKLIST WHERE ID=?", id)
+        deckInfo = self._runSQL("SELECT name, class, description, imageURL, author FROM DECKLIST WHERE ID=?", id)[0]
+        contribs = self._runSQL("SELECT ContribID FROM CONTRIBUTERS WHERE DeckID=?", id)
+        return (*deckInfo, contribs)
     
     def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
         self._runSQL("""
@@ -115,13 +117,6 @@ class DeckList:
     @classmethod
     def find(cls, rule: Callable[[Deck], bool]) -> List[Deck]:
         return [deck for deck in cls.List if rule(deck)]
-    
-    @classmethod
-    def delete(cls, Name: str) -> Deck:
-        idx = [deck['name'] for deck in cls.List].index(Name)
-        rt = cls.List.pop(idx)
-        db['decks'] = cls.List
-        return rt
     
     @classmethod
     def deleteRT(cls) -> List[Deck]:
