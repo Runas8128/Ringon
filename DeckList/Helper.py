@@ -34,23 +34,28 @@ class _DeckList:
 
     def updateDeck(self, name: str, contrib: int, imageURL: str = '', desc: str = ''):
         query = "UPDATE DECKLIST SET "
+        param = []
+
         if imageURL == '':
             if desc == '':
                 raise ValueError("Both imageURL and desc are all empty")
-            else:
-                query += "description=?"
-                self._runSQL(query, desc)
+            
+            query += "description=?"
+            param.append(desc)
         else:
-            if desc == '':
-                query += "imageURL=?"
-                self._runSQL(query, imageURL)
-            else:
-                query += "imageURL=?, description=?"
-                self._runSQL(query, imageURL, desc)
+            query += "imageURL=?"
+            param.append(imageURL)
+            if desc != '':
+                query += ", description=?"
+                param.append(desc)
+        
+        query += " WHERE name=?"
+        param.append(name)
+        self._runSQL(query, *param)
 
-        deckID = self._runSQL("SELECT ID FROM DECKLIST WHERE name=?", name)[0]
+        deckID = self._runSQL("SELECT ID FROM DECKLIST WHERE name=?", name)[0][0]
         author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)
-        if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTERS WHERE name=?", name) == []:
+        if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTERS WHERE DeckID=?", deckID) == []:
             self._runSQL("INSERT INTO CONTRIBUTERS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
 
 DeckList = _DeckList()
