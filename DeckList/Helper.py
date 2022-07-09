@@ -78,6 +78,21 @@ class _DeckList:
     
     def similar(self, name: str):
         return self._runSQL("SELECT name FROM DECKLIST WHERE name LIKE ?", f"%{name}%")
+    
+    def analyze(self):
+        data = {k: v for k, v in self._runSQL("SELECT class, COUNT(*) FROM DECKLIST GROUP BY class")}
+        total = sum(deck.values())
+
+        embed = discord.Embed(
+            title=f'총 {total}개 덱 분석 결과',
+            color=RGColHex
+        )
+        for clazz in data.keys():
+            embed.add_field(
+                name=clazz,
+                value=f"{count:2}개 (점유율: {round(data[clazz]/total*100):5.2f}%)"
+            )
+        return embed
 
 DeckList = _DeckList()
 
@@ -128,47 +143,4 @@ class DeckList:
     @classmethod
     def find(cls, rule: Callable[[Deck], bool]) -> List[Deck]:
         return [deck for deck in cls.List if rule(deck)]
-    
-    @classmethod
-    def get_asdf(cls, val: int, lang: Lang) -> str:
-        if lang == 'KR':
-            return f'{val:2}개 (점유율: {round(val / len(cls.List) * 100, 2):5.2f}%)'
-        else:
-            return f'{val:2} Decks (Rate: {round(val / len(cls.List) * 100, 2):5.2f}%)'
-    
-    @classmethod
-    def GetStat(cls, field: str, value: str, lang: Lang = 'KR') -> str:
-        return cls.get_asdf(sum([deck[field] == value for deck in cls.List]), lang)
-    
-    @classmethod
-    def GetCount(cls, _id: int, RTUL: str, lang: Lang = 'KR') -> str:
-        val = sum([(deck['author'][2:-1] == str(_id) and deck['rtul'] == RTUL) for deck in cls.List])
-        return cls.get_asdf(val, lang)
-    
-    @classmethod
-    def analyze(cls, lang: Lang = 'KR') -> discord.Embed:
-        embed = discord.Embed(
-            title=f'총 {len(cls.List)}개 덱분석 결과' if lang == 'KR' else f'Analyze result for {len(cls.List)} Decks',
-            color=0x2b5468
-        )
-        
-        embed.add_field(
-            name='로테이션' if lang == 'KR' else 'Rotation',
-            value=cls.GetStat('rtul', 'RT', lang) + '\n'
-        )
-        embed.add_field(
-            name='언리미티드' if lang == 'KR' else 'Unlimited',
-            value=cls.GetStat('rtul', 'UL', lang) + '\n'
-        )
-        
-        # Use Zero-Width space to split contents
-        embed.add_field(name='​', value='​', inline=False)
-        
-        for cls in OrgCls:
-            embed.add_field(
-                name=cls,
-                value=cls.GetStat('class', cls)
-            )
-        
-        return embed
 """
