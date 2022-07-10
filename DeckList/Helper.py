@@ -11,6 +11,8 @@ class _DeckList:
         self.dbCon = sqlite3.connect('db/decklist.db')
     
     def _runSQL(self, query: str, *parameters):
+        if isinstance(parameters, (dict, list, tuple)):
+            parameters = parameters[0]
         cur = self.dbCon.cursor()
         cur.execute(query, parameters)
         self.dbCon.commit()
