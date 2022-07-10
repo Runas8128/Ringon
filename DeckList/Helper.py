@@ -1,20 +1,16 @@
 from typing import Union, Callable, Dict, List
 import sqlite3
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
-from Common import *
-
-Deck = Dict[str, Union[str, int]]
-
-#--------------------------------------------------------------------------------------------------
-# Class
+import discord
+from discord.ext import commands
 
 class _DeckList:
     def __init__(self):
         self.dbCon = sqlite3.connect('db/decklist.db')
     
-    def _runSQL(self, query, *parameters):
+    def _runSQL(self, query: str, *parameters):
         cur = self.dbCon.cursor()
         cur.execute(query, parameters)
         self.dbCon.commit()
@@ -92,7 +88,7 @@ class _DeckList:
         return deckInfo
 
     def deleteAll(self):
-        today = datetime.now().strftime("%Y%m%d")
+        today = datetime.now(timezone(timedelta(hours=9))).strftime("%Y%m%d")
         shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{today}.db")
         self._runSQL("DELETE FROM DECKLIST")
         self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
