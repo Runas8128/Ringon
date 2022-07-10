@@ -28,6 +28,26 @@ class _DeckList:
         contribs = self._runSQL("SELECT ContribID FROM CONTRIBUTERS WHERE DeckID=?", id)
         return (*deckInfo, contribs)
     
+    def _searchDeck(self, kw: str):
+        return set(self._runSQL("""
+            SELECT ID FROM DECKLIST WHERE author=:key OR class=:key
+            UNION
+            SELECT ID FROM DECKLIST WHERE name LIKE :keyLike
+            UNION
+            SELECT DeckID FROM CONTRIBUTORS WHERE ContribID=:key
+            UNION
+            SELECT DeckID FROM HASHTAG WHERE tag LIKE :keyLike
+        """, {"key": kw, "keyLike": f"%{kw}%"}))
+
+    def searchDeck(self, searchKeywords: List[str]):
+        if len(searchKeywords) == 0:
+            raise ValueError("검색할 단어를 입력해주세요")
+        
+        rst = self._searchDeck(searchKeywords.pop())
+        for kw in searchKeywords:
+            rst &= self._searchDeck(kw)
+        return [id for tp in rst for id in tp]
+
     def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
         self._runSQL("""
             INSERT INTO DECKLIST (name, class, description, imageURL, author)
