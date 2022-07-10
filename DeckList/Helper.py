@@ -81,6 +81,7 @@ class _DeckList:
         author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)[0][0]
         if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTERS WHERE DeckID=?", deckID) == []:
             self._runSQL("INSERT INTO CONTRIBUTERS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
+        self._runSQL("UPDATE DECKLIST SET version = version + 1 WHERE ID=?", deckID)
 
     def deleteDeck(self, name: str, reqID: int):
         author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)[0][0]
