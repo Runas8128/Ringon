@@ -9,6 +9,68 @@ class CogDeckList(MyCog, name="덱"):
     Command category for storing/viewing Decklist
     """
     
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.T = Translator('DeckList')
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.channel.category_id != 891697283702345798:
+            # This auto-add logic only deal with `Lab` category
+            return
+        if len(message.attachments) == 0:
+            # This auto-add logic triggered when the message has at least one attachment
+            return
+        if message.channel.id in [984745573406085160, 984746283430469652, 984746309573550080]:
+            return # This auto-add Logic is not triggered in above channels
+        await message.add_reaction("<:Tldlr:805678671527936010>")
+    
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        if not isinstance(payload.emoji, discord.Emoji) or payload.emoji.id != 805678671527936010:
+            return # This auto-add Logic triggered with this emoji
+        
+        channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
+        msgOrg = await channel.fetch_message(payload.message_id)
+        
+        if msgOrg.author != payload.member:
+            # This auto-add Logic triggered when author add reaction
+            return
+        
+        while True:
+            try:
+                def check(msg: discord.Message):
+                    return msgOrg.author == msg.author
+
+                await message.reply("덱의 이름을 입력해주세요 (시간 제한: 1분)")
+                msgName: discord.Message = await self.bot.wait_for(
+                    'message', check=check, timeout=60.0
+                )
+            except asyncio.TimeoutError:
+                await channel.send("시간 초과, 덱 등록을 취소합니다.")
+                return
+            
+            name = msgName.content
+            # TODO: Add name duplicate check
+            self._addDeck(name)
+        
+    async def _addDeck(self, name: str):
+        try:
+            await message.reply("덱의 설명을 입력해주세요 (시간 제한: 15분)")
+            msgDesc: discord.Message = await self.bot.wait_for(
+                'message', check=check, timeout=60.0 * 15
+            )
+        except asyncio.TimeoutError:
+            await channel.send("시간 초과, 덱 등록을 취소합니다.")
+            return
+
+        clazz = channel.name
+        desc = msgDesc.content
+        imageURL = msgOrg.attachments[0].url
+        author = msgOrg.author.id
+
+        DeckList.addDeck(name, clazz, desc, imageURL, author)
+"""
     def makeTitle(self, deck: Deck, KE: Lang = 'KR') -> str:
         name = deck['name']
         ver  = '' if not deck.get('ver') else f" ver. {deck['ver']}"
@@ -367,3 +429,4 @@ class CogDeckList(MyCog, name="덱"):
             .set_image(url=imageURL)
         
         await ctx.send(embed=portalEmbed)
+"""
