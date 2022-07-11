@@ -127,6 +127,21 @@ class _DeckList:
             rst &= self._searchDeck(kw)
         return [id for tp in rst for id in tp]
 
+    def hasDeck(self, name: str):
+        """Check if database has deck with provided name
+
+        Parameters
+        ----------
+        * name: :class:`str`
+            - target name of finding deck
+        
+        Return value
+        ------------
+        This method returns whether database has deck with that name. Type: :class:`bool`
+
+        ."""
+        return len(self._runSQL("SELECT * FROM DECKLIST WHERE name=?", name)) > 0
+
     def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
         """Add deck in database
 

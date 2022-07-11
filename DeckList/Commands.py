@@ -18,58 +18,113 @@ class CogDeckList(MyCog, name="덱"):
         if message.channel.category_id != 891697283702345798:
             # This auto-add logic only deal with `Lab` category
             return
+        
         if len(message.attachments) == 0:
             # This auto-add logic triggered when the message has at least one attachment
             return
+        
         if message.channel.id in [984745573406085160, 984746283430469652, 984746309573550080]:
-            return # This auto-add Logic is not triggered in above channels
+            # This auto-add Logic is not triggered in above channels
+            return
+        
         await message.add_reaction("<:Tldlr:805678671527936010>")
-    
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         if not isinstance(payload.emoji, discord.Emoji) or payload.emoji.id != 805678671527936010:
-            return # This auto-add Logic triggered with this emoji
+            # This auto-add Logic triggered with this emoji
+            return
         
         channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
-        msgOrg = await channel.fetch_message(payload.message_id)
+        orgMsg = await channel.fetch_message(payload.message_id)
         
         if msgOrg.author != payload.member:
             # This auto-add Logic triggered when author add reaction
             return
         
-        while True:
-            try:
-                def check(msg: discord.Message):
-                    return msgOrg.author == msg.author
-
-                await message.reply("덱의 이름을 입력해주세요 (시간 제한: 1분)")
-                msgName: discord.Message = await self.bot.wait_for(
-                    'message', check=check, timeout=60.0
-                )
-            except asyncio.TimeoutError:
-                await channel.send("시간 초과, 덱 등록을 취소합니다.")
-                return
-            
-            name = msgName.content
-            # TODO: Add name duplicate check
-            self._addDeck(name)
-        
-    async def _addDeck(self, name: str):
         try:
-            await message.reply("덱의 설명을 입력해주세요 (시간 제한: 15분)")
-            msgDesc: discord.Message = await self.bot.wait_for(
-                'message', check=check, timeout=60.0 * 15
-            )
+            while True:
+                name = await self.getDeckName(orgMsg)
+
+                if DeckList.hasDeck(name):
+                    if await self.getIfUpdate(orgMsg):
+                        await self._updateDeck(orgMsg, name)
+                        return
+                    else:
+                        continue
+                else:
+                    await self._addDeck(orgMsg, name)
+                    return
         except asyncio.TimeoutError:
             await channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
+    
+    async def getDeckName(self, orgMsg: discord.Message):
+        def check(message: discord.Message):
+            return orgMsg.author == message.author
+        
+        await orgMsg.reply(embed=discord.Embed(
+            title=":ledger: 덱의 이름을 입력해주세요!",
+            description="시간 제한: 1분"
+        ), mention_author=False)
+        
+        msgName: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0)
+        return msgName.content
+    
+    async def getIfUpdate(self, orgMsg: discord.Message):
+        def check(message: discord.Message):
+            return orgMsg.author == message.author and message.content in ["재입력", "업데이트"]
+        
+        await orgMsg.reply(embed=discord.Embed(
+            title=":pause_button: 이미 있는 덱 이름입니다!",
+            description="이름을 바꾸려면 `재입력`을, 덱을 업데이트하려면 `업데이트`를 입력해주세요.\n시간 제한: 1분"
+        ), mention_author=False)
+        
+        msgCheck: discord.Message = await self.bot.wait_for('message', check=checkCorrectInput, timeout=60.0)
+        return msgCheck.content == "업데이트"
+    
+    async def getDeckDesc(self, orgMsg: discord.Message):
+        def check(message: discord.Message):
+            return orgMsg.author == message.author
+        
+        await orgMsg.reply(embed=discord.Embed(
+            title=":ledger: 덱의 설명을 입력해주세요!",
+            description="시간 제한: 1분\n덱 설명을 생략하려면 `생략`을 입력해주세요."
+        ), mention_author=False)
+
+        msgDesc: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0 * 15)
+
+        desc = msgDesc.content
+        if desc.strip() == "생략": desc = ""
+        return desc
+
+    async def _addDeck(self, orgMsg: discord.Message, name: str):
+        try:
+            desc = await self.getDeckDesc(orgMsg)
+        except asyncio.TimeoutError:
+            await orgMsg.channel.send("시간 초과, 덱 등록을 취소합니다.")
+            return
 
         clazz = channel.name
-        desc = msgDesc.content
         imageURL = msgOrg.attachments[0].url
         author = msgOrg.author.id
 
         DeckList.addDeck(name, clazz, desc, imageURL, author)
+    
+    async def _updateDeck(self, orgMsg: discord.Message, name: str):
+        try:
+            desc = await self.getDeckDesc(orgMsg)
+        except:
+            await orgMsg.channel.send("시간 초과, 덱 등록을 취소합니다.")
+            return
+        
+        if len(msgOrg.attachments) > 0:
+            imageURL = orgMsg.attachments[0].url
+        else:
+            imageURL = ''
+        
+        DeckList.updateDeck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
+
 """
     def makeTitle(self, deck: Deck, KE: Lang = 'KR') -> str:
         name = deck['name']
