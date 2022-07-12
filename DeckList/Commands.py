@@ -4,8 +4,7 @@ import requests
 from .Helper import *
 
 class CogDeckList(MyCog, name="덱"):
-    """
-    덱리를 저장하고 구경하는 카테고리입니다.
+    """덱리를 저장하고 구경하는 카테고리입니다.
     Command category for storing/viewing Decklist
     """
     
@@ -15,6 +14,11 @@ class CogDeckList(MyCog, name="덱"):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        """ Detect all message
+
+        If message is in `Lab` category and has attached image
+            add a reaction (which is not in WMTD Server, but Bot server)
+        """
         if message.channel.category_id != 891697283702345798:
             # This auto-add logic only deal with `Lab` category
             return
@@ -31,6 +35,11 @@ class CogDeckList(MyCog, name="덱"):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        """ Detect all reaction even if origin message is not in cache
+        
+        If reaction is pre-defined emoji
+            proceed deck add logic
+        """
         if not isinstance(payload.emoji, discord.Emoji) or payload.emoji.id != 805678671527936010:
             # This auto-add Logic triggered with this emoji
             return
@@ -59,7 +68,79 @@ class CogDeckList(MyCog, name="덱"):
             await channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
     
+    async def _addDeck(self, orgMsg: discord.Message, name: str):
+        """|coro|
+        front-end method for adding deck in database
+
+        Parameters
+        ----------
+        * orgMsg: :class:`discord.Message`
+            - origin message to reply
+        * name: :class:`str`
+            - name of deck which will be added
+            - WARNING: deck with same name should not be in database
+
+        ."""
+        try:
+            desc = await self.getDeckDesc(orgMsg)
+        except asyncio.TimeoutError:
+            await orgMsg.channel.send("시간 초과, 덱 등록을 취소합니다.")
+            return
+
+        clazz = channel.name
+        imageURL = msgOrg.attachments[0].url
+        author = msgOrg.author.id
+
+        DeckList.addDeck(name, clazz, desc, imageURL, author)
+        await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!")
+    
+    async def _updateDeck(self, orgMsg: discord.Message, name: str):
+        """|coro|
+        front-end method for updating deck in database
+
+        Parameters
+        ----------
+        * orgMsg: :class:`discord.Message`
+            - origin message to reply
+        * name: :class:`str`
+            - name of deck which will be updated
+            - WARNING: deck with same name should be in database
+
+        ."""
+        try:
+            desc = await self.getDeckDesc(orgMsg)
+        except:
+            await orgMsg.channel.send("시간 초과, 덱 업데이트를 취소합니다.")
+            return
+        
+        if len(msgOrg.attachments) > 0:
+            imageURL = orgMsg.attachments[0].url
+        else:
+            imageURL = ''
+        
+        try:
+            DeckList.updateDeck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
+            await orgMsg.reply("덱 업데이트를 성공적으로 마쳤습니다!")
+        except ValueError as v:
+            await orgMsg.reply(str(v))
+
     async def getDeckName(self, orgMsg: discord.Message):
+        """ get deck name with origin message
+
+        Parameters
+        ----------
+        * orgMsg: :class:`discord.Message`
+            - origin message to reply
+        
+        Return value
+        ------------
+        return got deck name
+
+        Raises
+        ------
+        `asyncio.TimeoutError` when timeout(1min)
+
+        ."""
         def check(message: discord.Message):
             return orgMsg.author == message.author
         
@@ -72,6 +153,22 @@ class CogDeckList(MyCog, name="덱"):
         return msgName.content
     
     async def getIfUpdate(self, orgMsg: discord.Message):
+        """ get boolean data whether update deck or re-input name
+
+        Parameters
+        ----------
+        * orgMsg: :class:`discord.Message`
+            - origin message to reply
+        
+        Return value
+        ------------
+        return if author selected update
+
+        Raises
+        ------
+        `asyncio.TimeoutError` when timeout(1min)
+
+        ."""
         def check(message: discord.Message):
             return orgMsg.author == message.author and message.content in ["재입력", "업데이트"]
         
@@ -84,46 +181,35 @@ class CogDeckList(MyCog, name="덱"):
         return msgCheck.content == "업데이트"
     
     async def getDeckDesc(self, orgMsg: discord.Message):
+        """ get description of deck
+
+        Parameters
+        ----------
+        * orgMsg: :class:`discord.Message`
+            - origin message to reply
+        
+        Return value
+        ------------
+        return got description
+
+        Raises
+        ------
+        `asyncio.TimeoutError` when timeout(15min)
+
+        ."""
         def check(message: discord.Message):
             return orgMsg.author == message.author
         
         await orgMsg.reply(embed=discord.Embed(
             title=":ledger: 덱의 설명을 입력해주세요!",
-            description="시간 제한: 1분\n덱 설명을 생략하려면 `생략`을 입력해주세요."
+            description="시간 제한: 15분\n덱 설명을 생략하려면 `생략`을 입력해주세요."
         ), mention_author=False)
 
         msgDesc: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0 * 15)
 
-        desc = msgDesc.content
-        if desc.strip() == "생략": desc = ""
+        desc = msgDesc.content.strip()
+        if desc == "생략": desc = ""
         return desc
-
-    async def _addDeck(self, orgMsg: discord.Message, name: str):
-        try:
-            desc = await self.getDeckDesc(orgMsg)
-        except asyncio.TimeoutError:
-            await orgMsg.channel.send("시간 초과, 덱 등록을 취소합니다.")
-            return
-
-        clazz = channel.name
-        imageURL = msgOrg.attachments[0].url
-        author = msgOrg.author.id
-
-        DeckList.addDeck(name, clazz, desc, imageURL, author)
-    
-    async def _updateDeck(self, orgMsg: discord.Message, name: str):
-        try:
-            desc = await self.getDeckDesc(orgMsg)
-        except:
-            await orgMsg.channel.send("시간 초과, 덱 등록을 취소합니다.")
-            return
-        
-        if len(msgOrg.attachments) > 0:
-            imageURL = orgMsg.attachments[0].url
-        else:
-            imageURL = ''
-        
-        DeckList.updateDeck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
 
 """
     def makeTitle(self, deck: Deck, KE: Lang = 'KR') -> str:
@@ -157,60 +243,7 @@ class CogDeckList(MyCog, name="덱"):
         
         return embed
     
-    # ----- __init__ -----
-    
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.T = Translator('DeckList')
-    
-    @commands.Cog.listener()
-    async def on_ready(self):
-        DeckList.load(self.bot)
-    
     # ----- Command Helper -----
-    
-    async def Add(self, ctx: commands.Context, Name: str, Class: str, lang: Lang):
-        chID: int = ctx.channel.id
-        att: List[discord.Attachment] = ctx.message.attachments
-        atr: discord.User = ctx.author
-        
-        if chID not in [758479879418937374, 758480189503832124]:
-            await ctx.send(self.T.translate('Add.WrongChannel', lang))
-            return
-        
-        if len(att) != 1:
-            await ctx.send(self.T.translate('Add.NoImage', lang))
-            return
-        
-        if not Name:
-            await ctx.send(self.T.translate('Add.Usage', lang))
-            return
-        
-        if Name in [deck['name'] for deck in DeckList.List]:
-            await ctx.send(self.T.translate('Add.UsedName', lang))
-            return
-        
-        Class = strToClass(Class)
-        
-        if Class not in OrgCls:
-            ls = [_cls for _cls in classes.keys() if _cls in Name] # Check if name implies class
-            if len(ls) == 1:
-                Class = ls[0]
-            else:
-                await ctx.send(self.T.translate('Add.WrongClass', lang))
-                return
-        
-        deck: Deck = {
-            'author': str(atr.id),
-            'name'  : Name.upper(),
-            'class' : Class,
-            'imgURL': att[0].url,
-            'rtul'  : chToRTUL(chID),
-            'date'  : now().strftime('%Y/%m/%d')
-        }
-        
-        DeckList.append(deck)
-        await ctx.send(self.T.translate('Add.Success', lang).format(Name))
     
     async def Find(self, ctx: commands.Context, scThings: List[str], lang: Lang):
         if not scThings:
@@ -299,48 +332,7 @@ class CogDeckList(MyCog, name="덱"):
         else: # cannot find Deck
             await self.Similar(ctx, Name, lang)
     
-    async def Update(self, ctx: commands.Context, Name: str, lang: Lang):
-        att: List[discord.Attachment] = ctx.message.attachments
-        
-        upDeck = [deck for deck in DeckList.List if deck['name'] == Name]
-        
-        if upDeck: # Deck found
-            if not DeckList.hisCh:
-                DeckList.hisCh = self.bot.get_channel(804614670178320394)
-            
-            if len(att) != 1:
-                raise ValueError
-            else:
-                await DeckList.hisCh.send(embed=self.makeEmbed(
-                    DeckList.update(Name, att[0].url, ctx.author.id), lang
-                ))
-                
-                await ctx.send(self.T.translate('Update.Success', lang).format(Name))
-        
-        else: # cannot find deck
-            await self.Similar(ctx, Name, lang)
-    
     # ----- Command -----
-    
-    # Deck Adder
-    
-    @commands.command(
-        name='덱추가', aliases=['덱등록'],
-        brief='서버에 덱을 추가합니다.',
-        description='서버에 덱을 추가합니다.',
-        usage='!덱추가 (덱 이름) (클래스) `+ 덱 사진 첨부`'
-    )
-    async def RG_Add_KR(self, ctx: commands.Context, Name: str = '', Class: str = ''):
-        await self.Add(ctx, Name, Class, 'KR')
-    
-    @commands.command(
-        name='add',
-        brief='Add Deck in server',
-        description='Add Deck in server',
-        usage='!add (deck Name) (Class) `+ attach deck image`')
-    async def RG_Add_EN(self, ctx: commands.Context, Name: str = '', Class: str = ''):
-        await self.Add(ctx, Name, Class, 'EN')
-    
     # Deck Finder
     
     @commands.command(
@@ -380,26 +372,6 @@ class CogDeckList(MyCog, name="덱"):
     )
     async def RG_Delete_EN(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
         await self.Delete(ctx, Name, SendHistory, 'EN')
-    
-    # Deck Updater
-    
-    @commands.command(
-        name='덱업뎃',
-        brief='덱을 업데이트합니다.',
-        description='덱을 업데이트합니다.',
-        usage='!덱업뎃 (덱 이름)'
-    )
-    async def RG_Update_KR(self, ctx: commands.Context, Name: str = ''):
-        await self.Update(ctx, Name, 'KR')
-    
-    @commands.command(
-        name='update', aliases=['up'],
-        brief='Update Deck',
-        description='Update Deck\'s description/image.',
-        usage='!update (Deck name)'
-    )
-    async def RG_Update_EN(self, ctx: commands.Context, Name: str = ''):
-        await self.Update(ctx, Name, 'EN')
     
     # Deck Analyzer
     
