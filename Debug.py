@@ -19,7 +19,7 @@ class CogDebug(MyCog, name='디버그'):
     async def on_ready(self):
         self.guild = self.bot.get_guild(823359663973072957) #758478112979288094
         self.bugReportChannel: discord.TextChannel = self.bot.get_channel(884356850248724490)
-        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(854716123458043935) #864518975253119007
+        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(765759817662857256) #864518975253119007
         
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
@@ -65,6 +65,7 @@ class CogDebug(MyCog, name='디버그'):
                 for ignoreRole in self.IgnoreRole:
                     userList = [user for user in userList if ignoreRole not in user.roles]
                 
+                upUserList: List[discord.Member] = []
                 downUserList: List[discord.Member] = []
                 otherUserList: List[discord.Member] = []
                 
@@ -73,6 +74,8 @@ class CogDebug(MyCog, name='디버그'):
                     async for user in react.users():
                         if user in userList:
                             user = userList.pop(userList.index(user))
+                            if react.emoji == '👍':
+                                upUserList.append(user)
                             if react.emoji == '👎':
                                 downUserList.append(user)
                             else:
@@ -80,6 +83,10 @@ class CogDebug(MyCog, name='디버그'):
                 
                 embed = discord.Embed(title="인원점검")
                 
+                embed.add_field(
+                    name='👍 반응',
+                    value=", ".join([user.mention for user in upUserList]) or "없음"
+                )
                 embed.add_field(
                     name="👎 반응",
                     value=", ".join([user.mention for user in downUserList]) or "없음"
