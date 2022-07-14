@@ -3,7 +3,7 @@ import requests
 
 from .Helper import *
 
-class CogDeckList(commands.Cog, name="덱"):
+class CogDeckList(MyCog, name="덱"):
     """덱리를 저장하고 구경하는 카테고리입니다.
     Command category for storing/viewing Decklist
     """

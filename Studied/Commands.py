@@ -1,6 +1,6 @@
 from .Helper import *
 
-class CogStudied(commands.Cog, name='전체감지'):
+class CogStudied(MyCog, name='전체감지'):
     """
     메시지의 전체를 감지하게 하는 명령어 카테고리입니다.
     """

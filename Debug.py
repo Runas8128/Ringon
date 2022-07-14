@@ -1,6 +1,6 @@
 from Common import *
 
-class CogDebug(commands.Cog, name='디버그'):
+class CogDebug(MyCog, name='디버그'):
     """
     디버그용 커맨드 그룹입니다.
     개발자 전용 커맨드 그룹이며, 굳이 써봐야 볼 내용도 많이 없습니다.
