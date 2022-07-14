@@ -17,9 +17,9 @@ class CogDebug(MyCog, name='디버그'):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = self.bot.get_guild(823359663973072957) #758478112979288094
+        self.guild = self.bot.get_guild(758478112979288094)
         self.bugReportChannel: discord.TextChannel = self.bot.get_channel(884356850248724490)
-        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(765759817662857256) #864518975253119007
+        self.ServerNotice: discord.TextChannel = self.bot.get_channel(765759817662857256)
         
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
@@ -55,9 +55,9 @@ class CogDebug(MyCog, name='디버그'):
 
         elif sted == '끝' and tarMsgID != 0:
             try:
-                tarMsg: discord.Message = await self.MainNoticeChannel.fetch_message(tarMsgID)
+                tarMsg: discord.Message = await self.ServerNotice.fetch_message(tarMsgID)
             except discord.NotFound:
-                await ctx.send("잘못된 메시지 아이디 입니다.")
+                await ctx.send(f"잘못된 메시지 아이디 입니다. {self.ServerNotice.mention} 채널의 글인지 확인해주세요!")
             else:
                 notMsg = await ctx.send("인원점검중...")
                 userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
