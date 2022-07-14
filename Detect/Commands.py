@@ -1,6 +1,6 @@
 from .Helper import *
 
-class CogDetect(MyCog, name='일부감지'):
+class CogDetect(commands.Cog, name='일부감지'):
     """
     메시지의 일부를 감지하게 하는 명령어 카테고리입니다.
     """

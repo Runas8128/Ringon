@@ -3,7 +3,7 @@ from asyncio import TimeoutError
 
 from Common import *
 
-class CogOther(MyCog, name='기타'):
+class CogOther(commands.Cog, name='기타'):
     """
     기타 링곤이의 명령어를 보여줍니다.
     관리자용 명령어가 다른 카테고리보다 많이 있으며,
