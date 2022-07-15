@@ -1,23 +1,40 @@
-from typing import Dict
+from typing import Dict, List
+import random
 
-from Common import *
+import discord
 
-class Detect:
+from baseDB import DB
+
+class Detect(DB):
     def __init__(self):
-        self.detects: Dict[str, str] = {
-            "멈춰": "멈춰!",
-            "무야호": "<:myuyaho:837932121653903371>",
-            "어림": "어림도 없지 ㄹㅇㅋㅋ"
-        }
+        super().__init__('DB/detect.db')
     
-    def MakeEmbed(self) -> discord.Embed:
-        embed = discord.Embed(
-            title="제가 감지할 친구들을 전부 알려드릴게요!",
-            color=RGColHex
-        )
-        for src in self.detects.keys():
-            embed.add_field(name=src, value=self.detects[src], inline=False)
-        
+    def getFullDetect(self):
+        """get all full-detect keyword-result map with Embed-form"""
+        full = {tar: rst for tar, rst in self._runSQL("SELECT tar, rst FROM FULL_DETECT")}
+        # make embed manager
         return embed
+    
+    def getPartDetect(self):
+        """get all full-detect keyword-result map with Embed-form"""
+        full = {tar: rst for tar, rst in self._runSQL("SELECT tar, rst FROM PART_DETECT")}
+        # make embed manager
+        return embed
+    
+    def tryGet(self, tar: str) -> str:
+        """try to get matching result from database"""
+        FullMatch = self._runSQL("SELECT rst FROM FULL_DETECT WHERE tar=?", tar)
+        if len(FullMatch) > 1:
+            return FullMatch[0][0]
+        
+        PartMatch = self._runSQL("SELECT rst FROM PART_DETECT WHERE ? LIKE %tar%", tar)
+        if len(PartMatch) > 1:
+            return PartMatch[0][0]
+        
+        ProbMatch = self._runSQL("SELECT rst, ratio FROM PROB_DETECT WHERE tar=?", tar)
+        if len(ProbMatch) > 1:
+            rsts, ratios = zip(*ProbMatch)
+            rst = random.choices(rsts, weights=ratios, k=1)
+            return rst[0]
 
 detect = Detect()
