@@ -3,9 +3,9 @@ from typing import Tuple, Dict
 import discord
 
 class EmbedWrapper:
-    def __init__(self, embed: discord.Embed, *fields: Tuple[str, str]):
+    def __init__(self, title: str, description: str, *fields: Tuple[str, str]):
         self.baseMsg: discord.Message = None
-        self.baseEmbed = embed
+        self.baseEmbed = discord.Embed(title=title, description=description, color=0x72e4f3)
         self.fields = fields
         self.count = len(fields)
         self.topIndex = 0

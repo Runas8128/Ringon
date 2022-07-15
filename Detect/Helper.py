@@ -4,6 +4,7 @@ import random
 import discord
 
 from baseDB import DB
+from embedManager import EmbedWrapper, embedManager
 
 class Detect(DB):
     def __init__(self):
@@ -11,15 +12,42 @@ class Detect(DB):
     
     def getFullDetect(self):
         """get all full-detect keyword-result map with Embed-form"""
-        full = {tar: rst for tar, rst in self._runSQL("SELECT tar, rst FROM FULL_DETECT")}
-        # make embed manager
-        return embed
+
+        fields = self._runSQL("SELECT tar, rst FROM FULL_DETECT")
+
+        return EmbedWrapper(
+            "전체 감지 키워드 목록입니다!",
+            "이 목록에 있는 키워드가 메시지의 내용과 일치하면, 해당 메시지를 보내줍니다.",
+            *(fields or [("현재 감지 목록이 비어있는 것 같아요...", "...는 아마 버그일텐데...?")])
+        )
     
     def getPartDetect(self):
-        """get all full-detect keyword-result map with Embed-form"""
-        full = {tar: rst for tar, rst in self._runSQL("SELECT tar, rst FROM PART_DETECT")}
-        # make embed manager
-        return embed
+        """get all partial detect keyword-result map with Embed-form"""
+
+        fields = self._runSQL("SELECT tar, rst FROM PART_DETECT")
+
+        return EmbedWrapper(
+            "일부 감지 키워드 목록입니다!",
+            "이 목록에 있는 키워드가 메시지에 포함되어 있으면, 해당 메시지를 보내줍니다.",
+            *(fields or [("현재 감지 목록이 비어있는 것 같아요...", "...는 아마 버그일텐데...?")])
+        )
+    
+    def getProbDetect(self):
+        """get all probability-based detect keyword-result map with Embed-form"""
+
+        _fields = {}
+        for tar, rst, ratio in self._runSQL("SELECT tar, rst, ratio FROM PROB_DETECT"):
+            if tar in fields.keys():
+                _fields[tar] += f", {rst}(가중치: {ratio})"
+            else:
+                _fields[tar] = f"{rst}(가중치: {ratio})"
+        fields = [(tar, _fields[tar]) for tar in _fields.keys()]
+        
+        return EmbedWrapper(
+            "확률젹 감지 키워드 목록입니다!",
+            "이 목록에 있는 키워드가 메시지의 내용과 일치하면, 확률적으로 여러 메시지중 하나를 보내줍니다.",
+            *(fields or [("현재 감지 목록이 비어있는 것 같아요...", "...는 아마 버그일텐데...?")])
+        )
     
     def tryGet(self, tar: str) -> str:
         """try to get matching result from database"""
@@ -36,5 +64,7 @@ class Detect(DB):
             rsts, ratios = zip(*ProbMatch)
             rst = random.choices(rsts, weights=ratios, k=1)
             return rst[0]
+        
+        return None
 
 detect = Detect()
