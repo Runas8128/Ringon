@@ -6,36 +6,11 @@ from datetime import datetime, timedelta, timezone
 import discord
 from discord.ext import commands
 
-class _DeckList:
+from baseDB import DB
+
+class _DeckList(DB):
     def __init__(self):
-        self.dbCon = sqlite3.connect('db/decklist.db')
-        self.dbCon.row_factory = sqlite3.Row
-    
-    def _runSQL(self, query: str, *parameters):
-        """Run SQL query with parameters
-
-        Query will be run in `decklist.db` based on sqlite3 syntax
-
-        This method is private use only.
-        
-        Parameters
-        ----------
-        * query: :class:`str`
-            - Query you want to run.
-        * parameters: Union[:class:`dict`, :class:`list`, :class:`tuple`]
-            - Parameters for your query. It can be `dict` for named parameter.
-        
-        Return value
-        ------------
-        Result for your query. Type: List[:class:`Tuple`]
-
-        ."""
-        if len(parameters) > 0 and isinstance(parameters[0], (dict, list, tuple)):
-            parameters = parameters[0]
-        cur = self.dbCon.cursor()
-        cur.execute(query, parameters)
-        self.dbCon.commit()
-        return cur.fetchall()
+        super().__init__("db/decklist.db")
     
     def loadHistCh(self, bot: commands.Bot):
         """Load `역사관` channel when bot is ready
