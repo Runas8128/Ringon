@@ -15,11 +15,24 @@ class Detect(DB):
 
         fields = self._runSQL("SELECT tar, rst FROM FULL_DETECT")
 
+        _fields = {}
+        for tar, rst, ratio in self._runSQL("SELECT tar, rst, ratio FROM PROB_DETECT"):
+            if tar in fields.keys():
+                _fields[tar] += f", {rst}(가중치: {ratio})"
+            else:
+                _fields[tar] = f"{rst}(가중치: {ratio})"
+        fields.extend([(tar+" (확률적)", _fields[tar]) for tar in _fields.keys()])
+
         return EmbedWrapper(
             "전체 감지 키워드 목록입니다!",
             "이 목록에 있는 키워드가 메시지의 내용과 일치하면, 해당 메시지를 보내줍니다.",
             *(fields or [("현재 감지 목록이 비어있는 것 같아요...", "...는 아마 버그일텐데...?")])
         )
+    
+    def getFullCount(self):
+        """get full-detect map length + probability-based detect map length(only count keywords)"""
+        return self._runSQL("SELECT COUNT(*) FROM FULL_DETECT")[0][0] + \
+            self._runSQL("SELECT COUNT(tar) FROM FULL_DETECT")[0][0]
     
     def getPartDetect(self):
         """get all partial detect keyword-result map with Embed-form"""
@@ -32,22 +45,9 @@ class Detect(DB):
             *(fields or [("현재 감지 목록이 비어있는 것 같아요...", "...는 아마 버그일텐데...?")])
         )
     
-    def getProbDetect(self):
-        """get all probability-based detect keyword-result map with Embed-form"""
-
-        _fields = {}
-        for tar, rst, ratio in self._runSQL("SELECT tar, rst, ratio FROM PROB_DETECT"):
-            if tar in fields.keys():
-                _fields[tar] += f", {rst}(가중치: {ratio})"
-            else:
-                _fields[tar] = f"{rst}(가중치: {ratio})"
-        fields = [(tar, _fields[tar]) for tar in _fields.keys()]
-        
-        return EmbedWrapper(
-            "확률젹 감지 키워드 목록입니다!",
-            "이 목록에 있는 키워드가 메시지의 내용과 일치하면, 확률적으로 여러 메시지중 하나를 보내줍니다.",
-            *(fields or [("현재 감지 목록이 비어있는 것 같아요...", "...는 아마 버그일텐데...?")])
-        )
+    def getPartCount(self):
+        """get partial detect map length"""
+        return self._runSQL("SELECT COUNT(*) FROM PART_DETECT")[0][0]
     
     def tryGet(self, tar: str) -> str:
         """try to get matching result from database"""
