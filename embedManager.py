@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Dict
 
 import discord
 
@@ -16,6 +16,14 @@ class EmbedWrapper:
             embed.add_field(name=self.fields[i][0], value=self.fields[i][1])
         
         self.baseMsg = await channel.send(embed=embed)
+
+        if self.count > 10:
+            await self.baseMsg.add_reaction('🔼')
+            await self.baseMsg.add_reaction('🔽')
+        
+        if self.count > 20:
+            await self.baseMsg.add_reaction('⏫')
+            await self.baseMsg.add_reaction('⏬')
     
     async def update(self):
         embed = self.baseEmbed.copy()
@@ -43,3 +51,22 @@ class EmbedWrapper:
     async def bottom(self):
         self.topIndex = self.count - 10
         await self.update()
+
+class EmbedManager:
+    def __init__(self):
+        self.embeds: Dict[int, EmbedWrapper] = []
+    
+    async def make(self, embed: EmbedWrapper, channel: discord.TextChannel):
+        await embed.send(channel)
+        self.embeds[embed.baseMsg.id] = embed
+    
+    async def proceedReaction(self, msgID: int, react: str):
+        if msgID not in self.embeds.keys(): return
+
+        embed = self.embeds[msgID]
+        if   react == '⏫': await embed.top()
+        elif react == '🔼': await embed.up()
+        elif react == '🔽': await embed.down()
+        elif react == '⏬': await embed.bottom()
+
+embedManager = EmbedManager()
