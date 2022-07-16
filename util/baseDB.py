@@ -31,5 +31,3 @@ class DB:
         cur.execute(query, parameters)
         self.dbCon.commit()
         return cur.fetchall()
-
-DeckList = _DeckList()
