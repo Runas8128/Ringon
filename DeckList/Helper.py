@@ -8,7 +8,7 @@ from discord.ext import commands
 
 from util.baseDB import DB
 
-class _DeckList(DB):
+class DeckList(DB):
     def __init__(self):
         super().__init__("db/decklist.db")
     
@@ -277,7 +277,7 @@ class _DeckList(DB):
 
         embed = discord.Embed(
             title=f'총 {total}개 덱 분석 결과',
-            color=RGColHex
+            color=0x72e4f3
         )
         for clazz in data.keys():
             embed.add_field(
@@ -286,4 +286,4 @@ class _DeckList(DB):
             )
         return embed
 
-DeckList = _DeckList()
+deckList = DeckList()

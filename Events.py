@@ -1,6 +1,5 @@
 import io
-
-from Common import *
+from datetime import datetime, timedelta, timezone
 
 class CogEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -63,22 +62,15 @@ class CogEvent(commands.Cog):
         elif isinstance(error, commands.errors.UserNotFound):
             await ctx.send("유저는 멘션이나 ID복사로 전달해주세요!")
         
-        elif isinstance(error, discord.errors.HTTPException):
-            if error.code != 429:   # Too Many Requests
-                embed = discord.Embed(title="Bug report", timestamp=now())
-                embed.add_field(name="error string", value=str(error), inline=False)
-                embed.add_field(name="error invoked with", value=ctx.invoked_with, inline=False)
-                embed.add_field(name="full context", value=ctx.message.content, inline=False)
-                await self.ErrLogCh.send(embed=embed)
-                await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
+        elif isinstance(error, discord.errors.HTTPException) and error.code == 429:
+            return
         
-        else:
-            embed = discord.Embed(title="Bug report", timestamp=now())
-            embed.add_field(name="error string", value=str(error), inline=False)
-            embed.add_field(name="error invoked with", value=ctx.invoked_with, inline=False)
-            embed.add_field(name="full context", value=ctx.message.content, inline=False)
-            await self.ErrLogCh.send(embed=embed)
-            await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
+        embed = discord.Embed(title="Bug report", timestamp=datetime.now(timezone(timedelta(hours=9))))
+        embed.add_field(name="error string", value=str(error), inline=False)
+        embed.add_field(name="error invoked with", value=ctx.invoked_with, inline=False)
+        embed.add_field(name="full context", value=ctx.message.content, inline=False)
+        await self.ErrLogCh.send(embed=embed)
+        await ctx.send("잠시 오류가 나서, 개발자에게 버그 리포트를 작성해줬어요! 곧 고칠 예정이니 잠시만 기다려주세요 :)")
 
 def setup(bot):
     bot.add_cog(CogEvent(bot))

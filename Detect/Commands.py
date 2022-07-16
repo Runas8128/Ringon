@@ -1,7 +1,10 @@
-from .Helper import *
-from embedManager import embedManager
+import discord
+from discord.ext import commands
 
-class CogDetect(MyCog, name='일부감지'):
+from .Helper import detect
+from util.embedManager import embedManager
+
+class CogDetect(commands.Cog, name='일부감지'):
     """
     메시지의 일부를 감지하게 하는 명령어 카테고리입니다.
     """
@@ -44,7 +47,7 @@ class CogDetect(MyCog, name='일부감지'):
         usage='!배운거'
     )
     async def RG_Studied(self, ctx: commands.Context):
-        embedManager.make(detect.getFullDetect(), ctx.channel)
+        await embedManager.make(detect.getFullDetect(), ctx.channel)
     
     @commands.command(
         name='센서민감도',
@@ -62,4 +65,4 @@ class CogDetect(MyCog, name='일부감지'):
         usage='!센서기록'
     )
     async def RG_Sensor(self, ctx: commands.Context):
-        embedManager.make(detect.getPartCount(), ctx.channel)
+        await embedManager.make(detect.getPartCount(), ctx.channel)
