@@ -13,10 +13,21 @@ try:
             bot.load_extension('util.CogManager')
             bot.load_extension('util.Debug')
             
-            import keep_alive
-            
-            from os import environ
-            TOKEN = environ['TOKEN']
+            # code to make this bot keep alive
+            # TODO: Un-comment below code
+            #import keep_alive
+
+            # code to get TOKEN value from environment values
+            # TODO: Un-comment below codes
+            #from os import environ
+            #TOKEN = environ['TOKEN']
+
+            # code to get TOKEN value from TOKEN.json file
+            # TODO: Remove below codes before deploying
+            import json
+            with open('TOKEN.json', 'r', encoding="UTF-8") as f:
+                TOKEN = json.load(f)["TOKEN"]
+
             bot.run(TOKEN)
 
 except discord.errors.HTTPException as E:
