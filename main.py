@@ -11,7 +11,7 @@ try:
             from Common import *
         else:
             bot.load_extension('util.CogManager')
-            bot.load_extension('Debug')
+            bot.load_extension('util.Debug')
             
             import keep_alive
             
