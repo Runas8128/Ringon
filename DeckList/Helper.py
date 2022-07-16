@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 import discord
 from discord.ext import commands
 
-from baseDB import DB
+from util.baseDB import DB
 
 class _DeckList(DB):
     def __init__(self):

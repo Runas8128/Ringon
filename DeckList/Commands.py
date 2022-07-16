@@ -2,6 +2,7 @@ import asyncio
 import requests
 
 from .Helper import *
+from util import Translator
 
 class CogDeckList(MyCog, name="덱"):
     """덱리를 저장하고 구경하는 카테고리입니다.

@@ -10,7 +10,7 @@ try:
         if addingDB:
             from Common import *
         else:
-            bot.load_extension('CogManager')
+            bot.load_extension('util.CogManager')
             bot.load_extension('Debug')
             
             import keep_alive
