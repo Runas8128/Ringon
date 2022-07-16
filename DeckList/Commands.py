@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from .Helper import deckList
-from util import Translator
+from util.Translator import Translator
 
 class CogDeckList(commands.Cog, name="덱"):
     """덱리를 저장하고 구경하는 카테고리입니다.
