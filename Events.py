@@ -1,6 +1,9 @@
 import io
 from datetime import datetime, timedelta, timezone
 
+import discord
+from discord.ext import commands
+
 class CogEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot

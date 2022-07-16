@@ -3,6 +3,9 @@ from time    import time
 from asyncio import TimeoutError
 from random  import random
 
+import discord
+from discord.ext import commands
+
 class CogOther(commands.Cog, name='기타'):
     """
     기타 링곤이의 명령어를 보여줍니다.
