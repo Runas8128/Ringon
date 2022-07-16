@@ -4,7 +4,7 @@ from discord.ext import commands
 class CogManager(commands.Cog, name='매니저'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.all_cog = ['Events', 'Help', 'DeckList', 'Studied', 'Detect', 'Other']
+        self.all_cog = ['Events', 'DeckList', 'Detect', 'Other']
         
         for cogName in self.all_cog:
             self.bot.load_extension(cogName)
