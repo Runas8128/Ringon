@@ -23,7 +23,7 @@ class CogDeckList(commands.Cog, name="덱"):
         If message is in `Lab` category and has attached image
             add a reaction (which is not in WMTD Server, but Bot server)
         """
-        if message.channel.category_id != 891697283702345798:
+        if message.channel.category.name != "LAB":
             # This auto-add logic only deal with `Lab` category
             return
         
@@ -31,7 +31,7 @@ class CogDeckList(commands.Cog, name="덱"):
             # This auto-add logic triggered when the message has at least one attachment
             return
         
-        if message.channel.id in [984745573406085160, 984746283430469652, 984746309573550080]:
+        if message.channel.name in ["덱리커스텀_상성확인실", "unlimited", "2pick"]:
             # This auto-add Logic is not triggered in above channels
             return
         
@@ -44,7 +44,10 @@ class CogDeckList(commands.Cog, name="덱"):
         If reaction is pre-defined emoji
             proceed deck add logic
         """
-        if not isinstance(payload.emoji, discord.Emoji) or payload.emoji.id != 805678671527936010:
+        if not (
+            isinstance(payload.emoji, discord.Emoji) and \
+            payload.emoji.id != 805678671527936010
+        ):
             # This auto-add Logic triggered with this emoji
             return
         
@@ -146,7 +149,7 @@ class CogDeckList(commands.Cog, name="덱"):
 
         ."""
         def check(message: discord.Message):
-            return orgMsg.author == message.author
+            return orgMsg.author == message.author and orgMsg.channel == message.channel
         
         await orgMsg.reply(embed=discord.Embed(
             title=":ledger: 덱의 이름을 입력해주세요!",
@@ -174,7 +177,9 @@ class CogDeckList(commands.Cog, name="덱"):
 
         ."""
         def check(message: discord.Message):
-            return orgMsg.author == message.author and message.content in ["재입력", "업데이트"]
+            return orgMsg.author == message.author and \
+                orgMsg.channel == message.channel and \
+                message.content in ["재입력", "업데이트"]
         
         await orgMsg.reply(embed=discord.Embed(
             title=":pause_button: 이미 있는 덱 이름입니다!",
@@ -202,7 +207,7 @@ class CogDeckList(commands.Cog, name="덱"):
 
         ."""
         def check(message: discord.Message):
-            return orgMsg.author == message.author
+            return orgMsg.author == message.author and orgMsg.channel == message.channel
         
         await orgMsg.reply(embed=discord.Embed(
             title=":ledger: 덱의 설명을 입력해주세요!",
