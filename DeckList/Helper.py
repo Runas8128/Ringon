@@ -1,11 +1,11 @@
 from typing import Union, Callable, Dict, List
 import sqlite3
 import shutil
-from datetime import datetime, timedelta, timezone
 
 import discord
 from discord.ext import commands
 
+from util import utils
 from util.baseDB import DB
 
 class DeckList(DB):
@@ -242,7 +242,7 @@ class DeckList(DB):
 
         WARNING: This method will delete all deck.
         Although this method make backup automatically, you should double check before calling this method."""
-        today = datetime.now(timezone(timedelta(hours=9))).strftime("%Y%m%d")
+        today = utils.now().strftime("%Y%m%d")
         shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{today}.db")
         self._runSQL("DELETE FROM DECKLIST")
         self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")

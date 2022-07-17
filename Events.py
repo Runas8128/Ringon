@@ -1,8 +1,9 @@
 import io
-from datetime import datetime, timedelta, timezone
 
 import discord
 from discord.ext import commands
+
+from util import utils
 
 class CogEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -68,7 +69,7 @@ class CogEvent(commands.Cog):
         elif isinstance(error, discord.errors.HTTPException) and error.code == 429:
             return
         
-        embed = discord.Embed(title="Bug report", timestamp=datetime.now(timezone(timedelta(hours=9))))
+        embed = discord.Embed(title="Bug report", timestamp=utils.now())
         embed.add_field(name="error string", value=str(error), inline=False)
         embed.add_field(name="error invoked with", value=ctx.invoked_with, inline=False)
         embed.add_field(name="full context", value=ctx.message.content, inline=False)
