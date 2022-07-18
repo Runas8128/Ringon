@@ -27,7 +27,7 @@ class birthdayDB(DB):
 
 db = birthdayDB()
 
-class Birthday(commands.Cog, DB, name="생일"):
+class Birthday(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.guild: discord.Guild = None

@@ -7,11 +7,7 @@ from discord.ext import commands
 from .Helper import deckList
 from util.Translator import Translator
 
-class CogDeckList(commands.Cog, name="덱"):
-    """덱리를 저장하고 구경하는 카테고리입니다.
-    Command category for storing/viewing Decklist
-    """
-    
+class CogDeckList(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.T = Translator('DeckList')
@@ -252,8 +248,6 @@ class CogDeckList(commands.Cog, name="덱"):
         
         return embed
     
-    # ----- Command Helper -----
-    
     async def Find(self, ctx: commands.Context, scThings: List[str], lang: Lang):
         if not scThings:
             await ctx.send(self.T.translate('Find.NoWord', lang))
@@ -341,73 +335,31 @@ class CogDeckList(commands.Cog, name="덱"):
         else: # cannot find Deck
             await self.Similar(ctx, Name, lang)
     
-    # ----- Command -----
-    # Deck Finder
-    
-    @commands.command(
-        name='덱검색',
-        brief='덱을 검색합니다',
-        description='서버에서 덱을 검색합니다. 여러개의 검색어를 공백으로 구분해 전달할 수 있습니다.',
-        usage='!덱검색 (검색어)'
-    )
+    @commands.command(name='덱검색')
     async def RG_Find_KR(self, ctx: commands.Context, *scThings: str):
         await self.Find(ctx, scThings, 'KR')
     
-    @commands.command(
-        name='search', aliases=['sc'],
-        brief='Search Deck',
-        description='Search Deck in server. You can search two or more words separated by spaces',
-        usage='!search (search words)'
-    )
+    @commands.command(name='search', aliases=['sc'])
     async def RG_Find_EN(self, ctx: commands.Context, *scThings: str):
         await self.Find(ctx, scThings, 'EN')
     
-    # Deck Deleter
-    
-    @commands.command(
-        name='덱삭제',
-        brief='덱을 삭제합니다',
-        description='덱을 삭제합니다. 해당 덱을 업로드하신 분만 삭제하실 수 있습니다. 처음 등록한 이름을 정확히 적어주셔야 합니다.',
-        usage='!덱삭제 (덱 이름)'
-    )
+    @commands.command(name='덱삭제')
     async def RG_Delete_KR(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
         await self.Delete(ctx, Name, SendHistory, 'KR')
     
-    @commands.command(
-        name='delete', aliases=['remove', 'del', 'rem'],
-        brief='Delete Deck',
-        description='Delete Deck in Server. The deck can only be deleted by it\'s uploader. You must write exact name',
-        usage='!delete (Deck name)'
-    )
+    @commands.command(name='delete', aliases=['remove', 'del', 'rem'])
     async def RG_Delete_EN(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
         await self.Delete(ctx, Name, SendHistory, 'EN')
     
-    # Deck Analyzer
-    
-    @commands.command(
-        name='덱분석',
-        brief='현재 저장된 덱을 분석합니다.',
-        description='현재 저장된 덱을 로테/언리, 클래스 별로 분석합니다.',
-        usage='!덱분석'
-    )
+    @commands.command(name='덱분석')
     async def RG_Analyze_KR(self, ctx: commands.Context):
         await ctx.send(embed=deckList.analyze('KR'))
     
-    @commands.command(
-        name='analyze',
-        brief='analyze stored decks',
-        description='analyze stored decks by Rotation/Unlimited, Class',
-        usage='!analyze'
-    )
+    @commands.command(name='analyze')
     async def RG_Analyze_EN(self, ctx: commands.Context):
         await ctx.send(embed=deckList.analyze('EN'))
     
-    @commands.command(
-        name='팩이름',
-        brief='이번 로테이션 팩의 이름을 설정합니다. 관리자용 명령어입니다.',
-        description='이번 로테이션 팩의 이름을 설정합니다. 팩 이름을 바꿀 때마다 로테이션 덱이 모두 삭제되며 역사관에 보관됩니다. 관리자용 명령어입니다.',
-        usage='!팩이름 (새 팩 이름)'
-    )
+    @commands.command(name='팩이름')
     @commands.has_permissions(administrator=True)
     async def RG_Pack(self, ctx: commands.Context, newPack: str=''):
         if newPack == '':

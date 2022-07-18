@@ -3,12 +3,7 @@ from typing import List
 import discord
 from discord.ext import commands
 
-class CogDebug(commands.Cog, name='디버그'):
-    """
-    디버그용 커맨드 그룹입니다.
-    개발자 전용 커맨드 그룹이며, 굳이 써봐야 볼 내용도 많이 없습니다.
-    """
-    
+class CogDebug(commands.Cog):    
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         
@@ -30,12 +25,7 @@ class CogDebug(commands.Cog, name='디버그'):
             self.guild.get_role(805451727859613707)  # 고3
         ]
     
-    @commands.command(
-        name='인원점검',
-        brief='인원점검 공지를 올립니다. 관리자 권한입니다.',
-        description='인원점검 공지를 올립니다. 관리자 권한입니다.',
-        usage='!인원점검'
-    )
+    @commands.command(name='인원점검')
     @commands.has_permissions(administrator=True)
     async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '끝', tarMsgID: int = 0):
         if sted == '시작':

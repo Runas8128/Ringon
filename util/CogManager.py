@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-class CogManager(commands.Cog, name='매니저'):
+class CogManager(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.all_cog = ['Events', 'DeckList', 'Detect', 'Other']
