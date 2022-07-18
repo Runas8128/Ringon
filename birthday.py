@@ -11,10 +11,18 @@ class birthdayDB(DB):
         super().__init__("DB/birthday.db")
     
     def getToday(self, now) -> List[int]:
+        """get IDs for members whom birthday is today
+
+        Parameters
+        ----------
+        * now: :class:`datetime.datetime`
+            - datetime object that refers to now
+
+        ."""
         date = now.strftime("%m/%d")
         return [
             val["ID"] for val in
-            self._runSQL("SELECT mention FROM BIRTHDAY WHERE date=?", date)
+            self._runSQL("SELECT ID FROM BIRTHDAY WHERE date=?", date)
         ]
 
 db = birthdayDB()

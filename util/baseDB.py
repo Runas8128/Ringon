@@ -1,8 +1,21 @@
 import sqlite3
 
 class DB:
+    """Base class for SQLite3 DB
+
+    This class offers simple SQL query executor
+
+    Parameters
+    ----------
+    * dbPath: :class:`str`
+        - specifies db file to connect
+
+    ."""
     def __init__(self, dbPath: str):
         self.dbCon = sqlite3.connect(dbPath)
+
+        # This enables to access query result with row name
+        # ex) res["row"]
         self.dbCon.row_factory = sqlite3.Row
     
     def _runSQL(self, query: str, *parameters):
