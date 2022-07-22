@@ -50,8 +50,8 @@ class CogDebug(commands.Cog):
             try:
                 _, _, _, _, guildID, channelID, messageID = tarMsgLink.split('/')
                 guild: discord.Guild = self.bot.get_guild(int(guildID))
-                channel: discord.TextChannel = guild.get_channel(channelID)
-                tarMsg = discord.Message = await channel.fetch_message(messageID)
+                channel: discord.TextChannel = guild.get_channel(int(channelID))
+                tarMsg = discord.Message = await channel.fetch_message(int(messageID))
             except discord.NotFound:
                 await ctx.send(f"잘못된 메시지 링크입니다. `메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!")
             except ValueError:
