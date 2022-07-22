@@ -1,11 +1,9 @@
-from Common import *
+from typing import List
 
-class CogDebug(MyCog, name='디버그'):
-    """
-    디버그용 커맨드 그룹입니다.
-    개발자 전용 커맨드 그룹이며, 굳이 써봐야 볼 내용도 많이 없습니다.
-    """
-    
+import discord
+from discord.ext import commands
+
+class CogDebug(commands.Cog):    
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         
@@ -17,9 +15,9 @@ class CogDebug(MyCog, name='디버그'):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = self.bot.get_guild(823359663973072957) #758478112979288094
+        self.guild = self.bot.get_guild(758478112979288094)
         self.bugReportChannel: discord.TextChannel = self.bot.get_channel(884356850248724490)
-        self.MainNoticeChannel: discord.TextChannel = self.bot.get_channel(854716123458043935) #864518975253119007
+        self.ServerNotice: discord.TextChannel = self.bot.get_channel(765759817662857256)
         
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
@@ -27,14 +25,9 @@ class CogDebug(MyCog, name='디버그'):
             self.guild.get_role(805451727859613707)  # 고3
         ]
     
-    @commands.command(
-        name='인원점검',
-        brief='인원점검 공지를 올립니다. 관리자 권한입니다.',
-        description='인원점검 공지를 올립니다. 관리자 권한입니다.',
-        usage='!인원점검'
-    )
+    @commands.command(name='인원점검')
     @commands.has_permissions(administrator=True)
-    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '끝', tarMsgID: int = 0):
+    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '끝', tarMsgLink: str="empty"):
         if sted == '시작':
             """try:
                 def check(msg: discord.Message):
@@ -53,11 +46,16 @@ class CogDebug(MyCog, name='디버그'):
                 await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')"""
             await ctx.send("아직 추가되지 않았습니다.")
 
-        elif sted == '끝' and tarMsgID != 0:
+        elif sted == '끝' and tarMsgLink != "empty":
             try:
-                tarMsg: discord.Message = await self.MainNoticeChannel.fetch_message(tarMsgID)
+                _, _, _, _, guildID, channelID, messageID = tarMsgLink.split('/')
+                guild: discord.Guild = self.bot.get_guild(int(guildID))
+                channel: discord.TextChannel = guild.get_channel(channelID)
+                tarMsg = discord.Message = await channel.fetch_message(messageID)
             except discord.NotFound:
-                await ctx.send("잘못된 메시지 아이디 입니다.")
+                await ctx.send(f"잘못된 메시지 링크입니다. `메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!")
+            except ValueError:
+                await ctx.send("잘못된 메시지 링크 형식입니다. `메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!")
             else:
                 notMsg = await ctx.send("인원점검중...")
                 userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
@@ -65,6 +63,7 @@ class CogDebug(MyCog, name='디버그'):
                 for ignoreRole in self.IgnoreRole:
                     userList = [user for user in userList if ignoreRole not in user.roles]
                 
+                upUserList: List[discord.Member] = []
                 downUserList: List[discord.Member] = []
                 otherUserList: List[discord.Member] = []
                 
@@ -73,6 +72,8 @@ class CogDebug(MyCog, name='디버그'):
                     async for user in react.users():
                         if user in userList:
                             user = userList.pop(userList.index(user))
+                            if react.emoji == '👍':
+                                upUserList.append(user)
                             if react.emoji == '👎':
                                 downUserList.append(user)
                             else:
@@ -80,6 +81,10 @@ class CogDebug(MyCog, name='디버그'):
                 
                 embed = discord.Embed(title="인원점검")
                 
+                embed.add_field(
+                    name='👍 반응',
+                    value=", ".join([user.mention for user in upUserList]) or "없음"
+                )
                 embed.add_field(
                     name="👎 반응",
                     value=", ".join([user.mention for user in downUserList]) or "없음"
