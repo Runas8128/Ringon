@@ -156,7 +156,7 @@ class CogDebug(commands.Cog):
                     continue
                 
                 message: discord.Message
-                async for _ in channel.history(after=now-timedelta(days=14), limit=50).find(predicate):
+                async for _ in channel.history(after=utils.now()-timedelta(days=14), limit=50).find(predicate):
                     count += 1
                     if count >= 50:
                         await noticeMessage.edit(content=f"{member.mention}님의 채팅량: 50개 이상, 검사를 중단합니다.")
