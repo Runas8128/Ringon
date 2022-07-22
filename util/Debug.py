@@ -27,7 +27,7 @@ class CogDebug(commands.Cog):
     
     @commands.command(name='인원점검')
     @commands.has_permissions(administrator=True)
-    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '끝', tarMsgID: int = 0):
+    async def cmd_CheckMembers(self, ctx: commands.Context, sted: str = '끝', tarMsgLink: str="empty"):
         if sted == '시작':
             """try:
                 def check(msg: discord.Message):
@@ -46,11 +46,16 @@ class CogDebug(commands.Cog):
                 await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')"""
             await ctx.send("아직 추가되지 않았습니다.")
 
-        elif sted == '끝' and tarMsgID != 0:
+        elif sted == '끝' and tarMsgLink != "empty":
             try:
-                tarMsg: discord.Message = await self.ServerNotice.fetch_message(tarMsgID)
+                _, _, _, _, guildID, channelID, messageID = tarMsgLink.split('/')
+                guild: discord.Guild = self.bot.get_guild(int(guildID))
+                channel: discord.TextChannel = guild.get_channel(int(channelID))
+                tarMsg = discord.Message = await channel.fetch_message(int(messageID))
             except discord.NotFound:
-                await ctx.send(f"잘못된 메시지 아이디 입니다. {self.ServerNotice.mention} 채널의 글인지 확인해주세요!")
+                await ctx.send(f"잘못된 메시지 링크입니다. `메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!")
+            except ValueError:
+                await ctx.send("잘못된 메시지 링크 형식입니다. `메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!")
             else:
                 notMsg = await ctx.send("인원점검중...")
                 userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
