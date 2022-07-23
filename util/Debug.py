@@ -55,7 +55,6 @@ class CogDebug(commands.Cog):
                 tarMsg = await ctx.send("에블핑 뺀 인원점검 메시지")
                 await ctx.send(f'이번 인원점검 메시지 아이디는 {tarMsg.id}입니다.')"""
             await ctx.send("아직 추가되지 않았습니다.")
-
         elif sted == '끝' and tarMsgLink != "empty":
             try:
                 _, _, _, _, guildID, channelID, messageID = tarMsgLink.split('/')
@@ -144,7 +143,9 @@ class CogDebug(commands.Cog):
             if role in member.roles:
                 await noticeMessage.edit(content=f"{member.mention}({role.name})님의 채팅량 검사를 건너뜁니다.")
                 return
-            
+        
+        await noticeMessage.edit(content=f"{member.mention}님의 채팅량을 세는 중...")
+        
         def predicate(message: discord.Message):
             return message.author.id == member.id
 
