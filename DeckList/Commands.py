@@ -40,10 +40,7 @@ class CogDeckList(commands.Cog):
         If reaction is pre-defined emoji
             proceed deck add logic
         """
-        if not (
-            isinstance(payload.emoji, discord.Emoji) and \
-            payload.emoji.id != 805678671527936010
-        ):
+        if not (isinstance(payload.emoji, discord.Emoji) and payload.emoji.id != 805678671527936010):
             # This auto-add Logic triggered with this emoji
             return
         
@@ -116,10 +113,7 @@ class CogDeckList(commands.Cog):
             await orgMsg.channel.send("시간 초과, 덱 업데이트를 취소합니다.")
             return
         
-        if len(msgOrg.attachments) > 0:
-            imageURL = orgMsg.attachments[0].url
-        else:
-            imageURL = ''
+        imageURL = '' if len(msgOrg.attachments) == 0 else orgMsg.attachments[0].url
         
         try:
             deckList.updateDeck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
@@ -173,9 +167,7 @@ class CogDeckList(commands.Cog):
 
         ."""
         def check(message: discord.Message):
-            return orgMsg.author == message.author and \
-                orgMsg.channel == message.channel and \
-                message.content in ["재입력", "업데이트"]
+            return orgMsg.author == message.author and orgMsg.channel == message.channel and message.content in ["재입력", "업데이트"]
         
         await orgMsg.reply(embed=discord.Embed(
             title=":pause_button: 이미 있는 덱 이름입니다!",

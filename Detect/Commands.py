@@ -10,18 +10,15 @@ class CogDetect(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        msg: str = message.content
-
-        rst = detect.tryGet(msg)
+        rst = detect.tryGet(message.content)
         if rst != None:
             await message.channel.trigger_typing()
             await message.channel.send(rst)
     
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
-        if user.bot: return
-
-        await embedManager.proceedReaction(reaction.message.id, reaction.emoji)
+        if not user.bot:
+            await embedManager.proceedReaction(reaction.message.id, reaction.emoji)
     
     @commands.command(name='잊어')
     async def RG_Forget(self, ctx: commands.Context):
