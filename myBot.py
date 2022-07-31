@@ -26,7 +26,7 @@ def getToken(is_testing: bool):
             print("[ERROR] TOKEN is not set in your environment variables.")
             exit(1)
 
-class Bot(commands.Bot):
+class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(
             command_prefix='!',
@@ -74,4 +74,4 @@ class Bot(commands.Bot):
             await self.load_extension('util.Debug')
         await self.tree.sync(guild=self.target_guild)
 
-bot = Bot()
+instance = MyBot()

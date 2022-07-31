@@ -1,11 +1,13 @@
 import discord
 from discord.ext import commands
 
+from myBot import MyBot, instance
+
 class CogManager(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: MyBot):
         self.bot = bot
         self.all_cog = ['Events', 'DeckList', 'Detect', 'Other']
-        
+    
     async def load_all(self):
         for cogName in self.all_cog:
             await self.bot.load_extension(cogName)
@@ -130,9 +132,7 @@ class CogManager(commands.Cog):
                     await ctx.send(f"Reloading Cog {cogName} Failed, skipping...")
             await ctx.send(f"Successfully reload All Cogs: {success}")
 
-async def setup(bot: commands.Bot):
-    from bot import bot as instance
-
+async def setup(bot: MyBot):
     manager = CogManager(bot)
     await manager.load_all()
 
