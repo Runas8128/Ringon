@@ -27,7 +27,7 @@ def getToken(is_testing: bool):
             exit(1)
 
 class MyBot(commands.Bot):
-    def __init__(self):
+    def __init__(self, is_testing: bool):
         super().__init__(
             command_prefix='!',
             help_command=None,
@@ -35,13 +35,8 @@ class MyBot(commands.Bot):
             case_insensitive=True
         )
 
-        self.is_testing = False
-        self.target_guild = 758478112979288094
-    
-    def enable_test(self):
-        """Enable `is_testing` flag. This function should be called before run bot"""
-        self.is_testing = True
-        self.target_guild = 823359663973072957
+        self.is_testing = is_testing
+        self.target_guild = 823359663973072957 if is_testing else 758478112979288094
     
     def run(self):
         """get token automatically and run bot.
@@ -73,5 +68,3 @@ class MyBot(commands.Bot):
         if self.is_testing:
             await self.load_extension('util.Debug')
         await self.tree.sync(guild=self.target_guild)
-
-bot = MyBot()
