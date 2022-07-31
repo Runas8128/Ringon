@@ -6,7 +6,7 @@ from myBot import MyBot
 class CogManager(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
-        self.all_cog = ['Events', 'DeckList', 'Detect', 'Other']
+        self.all_cog = ['Events', 'DeckList', 'Detect', 'birthday', 'Other']
     
     async def load_all(self):
         for cogName in self.all_cog:
