@@ -6,8 +6,9 @@ class CogManager(commands.Cog):
         self.bot = bot
         self.all_cog = ['Events', 'DeckList', 'Detect', 'Other']
         
+    async def load_all(self):
         for cogName in self.all_cog:
-            self.bot.load_extension(cogName)
+            await self.bot.load_extension(cogName)
     
     async def checkMe(self, ctx: commands.Context, me: discord.User):
         """|coro|
@@ -36,82 +37,106 @@ class CogManager(commands.Cog):
         
         return True
     
+    async def _load(self, name: str):
+        """|coro|
+
+        this coroutine loads extension, ignore `NotLoaded` exception.
+        """
+        try:
+            await self.bot.load_extension(name)
+        except commands.ExtensionNotLoaded:
+            pass
+    
+    async def _unload(self, name: str):
+        """|coro|
+
+        this coroutine unloads extension, ignore `AlreadyLoaded` exception.
+        """
+        try:
+            await self.bot.unload_extension(name)
+        except commands.ExtensionAlreadyLoaded:
+            pass
+
     @commands.command()
     @commands.is_owner()
     async def debug(self, ctx: commands.Context, me: discord.User=None, onoff: bool=True):
-        if await self.checkMe(ctx, me):
-            if onoff:
-                try:
-                    self.bot.load_extension('Debug')
-                except commands.ExtensionAlreadyLoaded:
-                    pass
-            else:
-                try:
-                    self.bot.unload_extension('Debug')
-                except commands.ExtensionNotLoaded:
-                    pass
-            await ctx.message.add_reaction('👍')
+        if not await self.checkMe(ctx, me):
+            return
+        
+        if onoff:
+            await self._load('util.Debug')
+        else:
+            await self._unload('util.Debug')
+        await ctx.message.add_reaction('👍')
     
     @commands.command()
     @commands.is_owner()
     async def load(self, ctx: commands.Context, me: discord.User=None, CogName: str = ''):
-        if await self.checkMe(ctx, me):
-            if CogName == 'CogManager':
-                await ctx.send("[Error] Cog Manager can only be loaded in code")
-                return
-            
-            try:
-                self.bot.load_extension(CogName)
-                await ctx.send(f"Successfully loaded Cog {CogName}")
-            except commands.ExtensionAlreadyLoaded:
-                pass
-            except commands.ExtensionNotFound:
-                await ctx.send(f"Cannot find that Cog. You can load: {self.all_cog}")
+        if not await self.checkMe(ctx, me):
+            return
+        
+        if CogName == 'CogManager':
+            await ctx.send("[Error] Cog Manager can only be loaded in code")
+            return
+        
+        try:
+            await self._load(CogName)
+            await ctx.send(f"Successfully loaded Cog {CogName}")
+        except commands.ExtensionNotFound:
+            await ctx.send(f"Cannot find that Cog. You can load: {self.all_cog}")
     
     @commands.command()
     @commands.is_owner()
     async def unload(self, ctx: commands.Context, me: discord.User=None, CogName: str = ''):
-        if await self.checkMe(ctx, me):
-            if CogName == 'CogManager':
-                await ctx.send("[Error] Cog Manager cannot be unloaded")
-                return
-            
-            try:
-                self.bot.unload_extension(CogName)
-                await ctx.send(f"Successfully unloaded Cog {CogName}")
-            except commands.ExtensionNotLoaded:
-                pass
+        if not await self.checkMe(ctx, me):
+            return
+        
+        if CogName == 'CogManager':
+            await ctx.send("[Error] Cog Manager cannot be unloaded")
+            return
+        
+        try:
+            await self._unload(CogName)
+            await ctx.send(f"Successfully unloaded Cog {CogName}")
+        except commands.ExtensionNotFound:
+            await ctx.send(f"Cannot find that Cog. You can unload: {self.all_cog}")
     
     @commands.command()
     @commands.is_owner()
     async def reload(self, ctx: commands.Context, me: discord.User=None, CogName: str = ''):
-        if await self.checkMe(ctx, me):
-            if CogName == 'CogManager':
-                await ctx.send("[Error] Cog Manager cannot be reloaded")
-                return
-            
-            if CogName:
-                try:
-                    self.bot.unload_extension(CogName)
-                except commands.ExtensionNotLoaded:
-                    pass
-                try:
-                    self.bot.load_extension(CogName)
-                except commands.ExtensionAlreadyLoaded:
-                    pass
-                
+        if not await self.checkMe(ctx, me):
+            return
+        
+        if CogName == 'CogManager':
+            await ctx.send("[Error] Cog Manager cannot be reloaded")
+            return
+        
+        if CogName:
+            try:
+                await self._unload(CogName)
+                await self._load(CogName)
                 await ctx.send(f"Successfully reloaded Cog {CogName}")
-            
-            else:
-                success = self.all_cog[:]
-                for cogName in success:
-                    try:
-                        self.bot.unload_extension(cogName)
-                        self.bot.load_extension(cogName)
-                    except:
-                        success.remove(cogName)
-                        await ctx.send(f"Reloading Cog {cogName} Failed, skipping...")
-                await ctx.send(f"Successfully reload All Cogs: {success}")
+            except commands.ExtensionNotFound:
+                await ctx.send(f"Cannot find that Cog. You can load: {self.all_cog}")
+        
+        else:
+            success = self.all_cog[:]
+            for cogName in success:
+                try:
+                    await self._unload(CogName)
+                    await self._load(CogName)
+                except:
+                    success.remove(cogName)
+                    await ctx.send(f"Reloading Cog {cogName} Failed, skipping...")
+            await ctx.send(f"Successfully reload All Cogs: {success}")
 
-def setup(bot):
-    bot.add_cog(CogManager(bot))
+async def setup(bot: commands.Bot):
+    from bot import bot as instance
+
+    manager = CogManager(bot)
+    await manager.load_all()
+
+    await bot.add_cog(
+        manager,
+        guild=instance.target_guild
+    )
