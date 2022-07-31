@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands
 
+from myBot import MyBot
 from .Helper import detect
 from util.embedManager import embedManager
 
 class CogDetect(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: MyBot):
         self.bot = bot
     
     @commands.Cog.listener()

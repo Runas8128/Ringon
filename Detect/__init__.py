@@ -1,4 +1,4 @@
-from .Commands import CogDetect
+from .Commands import CogDetect, MyBot
 
-def setup(bot):
-    bot.add_cog(CogDetect(bot))
+async def setup(bot: MyBot):
+    await bot.add_cog(CogDetect(bot), guild=bot.target_guild)

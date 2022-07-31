@@ -4,11 +4,12 @@ import requests
 import discord
 from discord.ext import commands
 
+from myBot import MyBot
 from .Helper import deckList
 from util.Translator import Translator
 
 class CogDeckList(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: MyBot):
         self.bot = bot
         self.T = Translator('DeckList')
 

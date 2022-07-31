@@ -1,4 +1,4 @@
-from .Commands import CogDeckList
+from .Commands import CogDeckList, MyBot
 
-def setup(bot):
-    bot.add_cog(CogDeckList(bot))
+async def setup(bot: MyBot):
+    await bot.add_cog(CogDeckList(bot), bot.target_guild)

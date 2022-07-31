@@ -9,7 +9,7 @@ from discord.ext import commands
 from myBot import MyBot
 from util import utils
 
-class CogDebug(MyBot):    
+class CogDebug(commands.Cog):    
     def __init__(self, bot: MyBot):
         self.bot = bot
     
