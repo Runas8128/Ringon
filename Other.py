@@ -6,8 +6,10 @@ from random  import random
 import discord
 from discord.ext import commands
 
+from myBot import MyBot
+
 class CogOther(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: MyBot):
         self.bot = bot
     
     @commands.command(
@@ -37,5 +39,5 @@ class CogOther(commands.Cog):
         tE = time()
         await msg.edit(content=f'Now delay is {round((tE - tB) * 1000, 2)}ms!')
 
-def setup(bot):
-    bot.add_cog(CogOther(bot))
+async def setup(bot: MyBot):
+    bot.add_cog(CogOther(bot), bot.target_guild)

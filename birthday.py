@@ -3,6 +3,7 @@ from typing import List
 import discord
 from discord.ext import commands, tasks
 
+from myBot import MyBot
 from util import utils
 from util.baseDB import DB
 
@@ -28,7 +29,7 @@ class birthdayDB(DB):
 db = birthdayDB()
 
 class Birthday(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: MyBot):
         self.bot = bot
         self.guild: discord.Guild = None
         self.noticeCh: discord.TextChannel = None
@@ -53,5 +54,5 @@ class Birthday(commands.Cog):
         content += f"Today is {', '.join(members)}'s birthday! :partying_face:"
         await self.noticeCh.send(content)
 
-def setup(bot):
-    bot.add_cog(Birthday(bot))
+async def setup(bot: MyBot):
+    await bot.add_cog(Birthday(bot), guild=bot.target_guild)
