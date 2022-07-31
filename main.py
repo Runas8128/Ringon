@@ -1,5 +1,5 @@
-from myBot import instance
+from myBot import bot
 
 if __name__ == '__main__':
-    instance.enable_test()
-    instance.run()
+    bot.enable_test()
+    bot.run()

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from myBot import MyBot, instance
+from myBot import MyBot
 
 class CogManager(commands.Cog):
     def __init__(self, bot: MyBot):
@@ -136,7 +136,4 @@ async def setup(bot: MyBot):
     manager = CogManager(bot)
     await manager.load_all()
 
-    await bot.add_cog(
-        manager,
-        guild=instance.target_guild
-    )
+    await bot.add_cog(manager, guild=bot.target_guild)

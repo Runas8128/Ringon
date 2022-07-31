@@ -74,4 +74,4 @@ class MyBot(commands.Bot):
             await self.load_extension('util.Debug')
         await self.tree.sync(guild=self.target_guild)
 
-instance = MyBot()
+bot = MyBot()
