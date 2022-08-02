@@ -1,7 +1,4 @@
-from typing import Dict, List
 import random
-
-import discord
 
 from .baseDB import DB
 from .embedManager import EmbedWrapper, embedManager

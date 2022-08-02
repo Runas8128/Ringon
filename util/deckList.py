@@ -1,5 +1,4 @@
-from typing import Union, Callable, Dict, List
-import sqlite3
+from typing import List
 import shutil
 
 import discord

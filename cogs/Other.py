@@ -1,7 +1,4 @@
-from typing  import List, Union, Tuple
 from time    import time
-from asyncio import TimeoutError
-from random  import random
 
 import discord
 from discord.ext import commands

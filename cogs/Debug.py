@@ -1,8 +1,3 @@
-from typing import List
-import asyncio
-from datetime import timedelta
-from time import time
-
 import discord
 from discord.ext import commands
 
