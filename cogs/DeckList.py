@@ -10,6 +10,10 @@ from util.myBot import MyBot
 class CogDeckList(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        deckList.loadHistCh(self.bot)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
