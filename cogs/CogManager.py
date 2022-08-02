@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from myBot import MyBot
+from util.myBot import MyBot
 
 class CogManager(commands.Cog):
     def __init__(self, bot: MyBot):

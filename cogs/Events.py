@@ -3,8 +3,8 @@ import io
 import discord
 from discord.ext import commands
 
-from myBot import MyBot
 from util import utils
+from util.myBot import MyBot
 
 class CogEvent(commands.Cog):
     def __init__(self, bot: MyBot):

@@ -6,7 +6,7 @@ from random  import random
 import discord
 from discord.ext import commands
 
-from myBot import MyBot
+from util.myBot import MyBot
 
 class CogOther(commands.Cog):
     def __init__(self, bot: MyBot):

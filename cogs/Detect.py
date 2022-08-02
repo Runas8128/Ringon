@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 
-from myBot import MyBot
 from util.detect import detect
 from util.embedManager import embedManager
+from util.myBot import MyBot
 
 class CogDetect(commands.Cog):
     def __init__(self, bot: MyBot):

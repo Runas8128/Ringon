@@ -4,8 +4,8 @@ import requests
 import discord
 from discord.ext import commands
 
-from myBot import MyBot
 from util.deckList import deckList
+from util.myBot import MyBot
 
 class CogDeckList(commands.Cog):
     def __init__(self, bot: MyBot):

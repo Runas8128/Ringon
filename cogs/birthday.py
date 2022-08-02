@@ -3,9 +3,9 @@ from typing import List
 import discord
 from discord.ext import commands, tasks
 
-from myBot import MyBot
 from util import utils
 from util.baseDB import DB
+from util.myBot import MyBot
 
 class birthdayDB(DB):
     def __init__(self):
