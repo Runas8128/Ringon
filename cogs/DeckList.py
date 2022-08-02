@@ -208,7 +208,7 @@ class CogDeckList(commands.Cog):
         return desc
 
 async def setup(bot: MyBot):
-    await bot.add_cog(CogDeckList(bot), bot.target_guild)
+    await bot.add_cog(CogDeckList(bot), guild=bot.target_guild)
 
 """
     def makeTitle(self, deck: Deck, KE: Lang = 'KR') -> str:

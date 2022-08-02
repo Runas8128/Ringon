@@ -40,4 +40,4 @@ class CogOther(commands.Cog):
         await msg.edit(content=f'Now delay is {round((tE - tB) * 1000, 2)}ms!')
 
 async def setup(bot: MyBot):
-    bot.add_cog(CogOther(bot), bot.target_guild)
+    await bot.add_cog(CogOther(bot), guild=bot.target_guild)
