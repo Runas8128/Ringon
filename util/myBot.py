@@ -36,7 +36,9 @@ class MyBot(commands.Bot):
         )
 
         self.is_testing = is_testing
-        self.target_guild = 823359663973072957 if is_testing else 758478112979288094
+        self.target_guild = discord.Object(
+            823359663973072957 if is_testing else 758478112979288094
+        )
     
     def run(self):
         """get token automatically and run bot.
