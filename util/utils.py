@@ -2,9 +2,6 @@ from datetime import datetime, timedelta, timezone
 
 from .baseDB import DB
 
-def now() -> datetime:
-    return datetime.now(tz=timezone(offset=timedelta(hours=9)))
-
 class Util(DB):
     def __init__(self):
         super().__init__('db/util.db')
