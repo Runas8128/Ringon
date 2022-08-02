@@ -10,7 +10,7 @@ class CogManager(commands.Cog):
     
     async def load_all(self):
         for cogName in self.all_cog:
-            await self.bot.load_extension(cogName)
+            await self._load(cogName)
     
     async def checkMe(self, ctx: commands.Context, me: discord.User):
         """|coro|
@@ -45,7 +45,7 @@ class CogManager(commands.Cog):
         this coroutine loads extension, ignore `NotLoaded` exception.
         """
         try:
-            await self.bot.load_extension(name)
+            await self.bot.load_extension('cogs.' + name)
         except commands.ExtensionNotLoaded:
             pass
     
@@ -55,7 +55,7 @@ class CogManager(commands.Cog):
         this coroutine unloads extension, ignore `AlreadyLoaded` exception.
         """
         try:
-            await self.bot.unload_extension(name)
+            await self.bot.unload_extension('cogs.' + name)
         except commands.ExtensionAlreadyLoaded:
             pass
 

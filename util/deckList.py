@@ -5,8 +5,8 @@ import shutil
 import discord
 from discord.ext import commands
 
-from util import utils
-from util.baseDB import DB
+from . import utils
+from .baseDB import DB
 
 class DeckList(DB):
     def __init__(self):

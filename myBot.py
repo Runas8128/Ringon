@@ -63,8 +63,8 @@ class MyBot(commands.Bot):
             print(f"Retry-After: {h}h {m}m {s}s")
     
     async def setup_hook(self):
-        await self.load_extension('util.CogManager')
+        await self.load_extension('cogs.CogManager')
 
         if self.is_testing:
-            await self.load_extension('util.Debug')
+            await self.load_extension('cogs.Debug')
         await self.tree.sync(guild=self.target_guild)

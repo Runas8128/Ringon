@@ -3,8 +3,8 @@ import random
 
 import discord
 
-from util.baseDB import DB
-from util.embedManager import EmbedWrapper, embedManager
+from .baseDB import DB
+from .embedManager import EmbedWrapper, embedManager
 
 class Detect(DB):
     def __init__(self):

@@ -5,13 +5,11 @@ import discord
 from discord.ext import commands
 
 from myBot import MyBot
-from .Helper import deckList
-from util.Translator import Translator
+from util.deckList import deckList
 
 class CogDeckList(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
-        self.T = Translator('DeckList')
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -208,6 +206,9 @@ class CogDeckList(commands.Cog):
         desc = msgDesc.content.strip()
         if desc == "생략": desc = ""
         return desc
+
+async def setup(bot: MyBot):
+    await bot.add_cog(CogDeckList(bot), bot.target_guild)
 
 """
     def makeTitle(self, deck: Deck, KE: Lang = 'KR') -> str:

@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 from myBot import MyBot
-from .Helper import detect
+from util.detect import detect
 from util.embedManager import embedManager
 
 class CogDetect(commands.Cog):
@@ -40,3 +40,6 @@ class CogDetect(commands.Cog):
     @commands.command(name='센서기록')
     async def RG_Sensor(self, ctx: commands.Context):
         await embedManager.make(detect.getPartCount(), ctx.channel)
+
+async def setup(bot: MyBot):
+    await bot.add_cog(CogDetect(bot), guild=bot.target_guild)
