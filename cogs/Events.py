@@ -3,7 +3,7 @@ import io
 import discord
 from discord.ext import commands
 
-from util import utils
+from util.utils import util
 from util.myBot import MyBot
 
 class CogEvent(commands.Cog):
@@ -57,7 +57,7 @@ class CogEvent(commands.Cog):
         elif isinstance(error, discord.errors.HTTPException) and error.code == 429:
             return
         
-        embed = discord.Embed(title="Bug report", timestamp=utils.now())
+        embed = discord.Embed(title="Bug report", timestamp=util.now())
         embed.add_field(name="error string", value=str(error), inline=False)
         embed.add_field(name="error invoked with", value=ctx.invoked_with, inline=False)
         embed.add_field(name="full context", value=ctx.message.content, inline=False)
