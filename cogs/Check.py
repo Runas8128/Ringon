@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Union
 import asyncio
 from datetime import timedelta
 from time import time
@@ -9,14 +9,15 @@ from discord.ext import commands
 from util import utils
 from util.myBot import MyBot
 
+T_Emoji = Union[discord.Emoji, discord.PartialEmoji, str]
+
 class CogCheck(commands.Cog):    
     def __init__(self, bot: MyBot):
         self.bot = bot
+        self.guild: discord.Guild = self.bot.target_guild
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild: discord.Guild = self.bot.get_guild(self.bot.target_guild)
-        
         self.IgnoreRole: List[discord.Role] = [
             self.guild.get_role(924315254098387024), # Guest of Honor
             self.guild.get_role(861883220722319391), # 군머
@@ -51,46 +52,15 @@ class CogCheck(commands.Cog):
         
         else:
             notMsg = await ctx.send("인원점검중...")
-            userList: List[discord.Member] = [user for user in ctx.guild.members if not user.bot]
-            
-            for ignoreRole in self.IgnoreRole:
-                userList = [user for user in userList if ignoreRole not in user.roles]
-            
-            upUserList: List[discord.Member] = []
-            downUserList: List[discord.Member] = []
-            otherUserList: List[discord.Member] = []
-            
-            react: discord.Reaction
-            for react in tarMsg.reactions:
-                async for user in react.users():
-                    if user in userList:
-                        user = userList.pop(userList.index(user))
-                        if react.emoji == '👍':
-                            upUserList.append(user)
-                        elif react.emoji == '👎':
-                            downUserList.append(user)
-                        else:
-                            otherUserList.append(user)
+            userMap = await self.getMemberMap(tarMsg.reactions, ['👍', '👎'])
             
             embed = discord.Embed(title="인원점검")
-            
-            embed.add_field(
-                name='👍 반응',
-                value=", ".join([user.mention for user in upUserList]) or "없음"
-            )
-            embed.add_field(
-                name="👎 반응",
-                value=", ".join([user.mention for user in downUserList]) or "없음"
-            )
-            embed.add_field(
-                name="그 외",
-                value=", ".join([user.mention for user in otherUserList]) or "없음"
-            )
-            embed.add_field(
-                name="반응 안함",
-                value=", ".join([user.mention for user in userList]) or "없음"
-            )
-            
+            for emoji in userMap.keys():
+                embed.add_field(
+                    name=emoji,
+                    value=", ".join([user.mention for user in userMap[emoji]]) or "없음",
+                    inline=False
+                )
             await notMsg.edit(content="", embed=embed)
     
     @commands.command(name="채팅량검사")
@@ -112,6 +82,51 @@ class CogCheck(commands.Cog):
             title="전체 멤버의 채팅량을 불러왔습니다!",
             description=f"각 멤버의 채팅량은 {self.NotNotifyRoom.mention}을 참고해주세요!\n걸린 시간: {round(e - b, 2):.2f}초"
         ))
+
+    async def getMemberMap(self, allReact: List[discord.Reaction], indiEmoji: List[T_Emoji]) -> Dict[T_Emoji, List[discord.Member]]:
+        """|coro|
+
+        This function makes emoji-member map.
+        if member reacted with two or more emoji, then check first emoji only.
+
+        Parameters
+        ----------
+        * allReact: :class:`List[discord.Reaction]`
+            - all reaction of target message.
+        * indiEmoji: :class:`List[discord.Emoji|discord.PartialEmoji|str]`
+            - emoji which will be counted individually.
+        
+        Return value
+        ------------
+        * emoji - member list map, :class:`Dict[discord.Emoji|discord.PartialEmoji|str, List[discord.Member]]`
+            - all member who reacted with emoji not in `indiEmoji` are stored in "그 외" key
+            - all member who didn't reacted are stored in "반응 안함" key
+
+        ."""
+
+        userList: List[discord.Member] = [user for user in self.guild.members if not user.bot]
+
+        userMap: Dict[T_Emoji, discord.Member] = { emoji : [] for emoji in indiEmoji }
+        userMap['그 외'] = []
+        userMap['반응 안함'] = []
+        
+        react: discord.Reaction
+        for react in allReact:
+            async for user in react.users():
+                if user in userList:
+                    user = userList.pop(userList.index(user))
+                
+                if react.emoji in indiEmoji:
+                    userMap[react.emoji].append(user)
+                else:
+                    userMap['Other'].append(user)
+
+        for ignoreRole in self.IgnoreRole:
+            userList = [user for user in userList if ignoreRole not in user.roles]
+        
+        userMap['반응 안함'] = userList
+        
+        return userMap
 
     async def getUserChatAmount(self, member: discord.Member):
         """Count chat amount in `Lab` and `Rating` category and send count stack info to not-notifing-admin room.
