@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from util.detect import detect
-from util.embedManager import EmbedView
+from util.view import EmbedView
 from util.myBot import MyBot
 
 class CogDetect(commands.Cog):

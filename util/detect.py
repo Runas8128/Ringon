@@ -1,7 +1,6 @@
 import random
 
 from .baseDB import DB
-from .embedManager import EmbedView
 
 class Detect(DB):
     def __init__(self):
