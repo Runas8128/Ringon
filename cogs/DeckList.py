@@ -1,5 +1,6 @@
 import asyncio
 import requests
+import io
 
 import discord
 from discord import app_commands
@@ -120,17 +121,19 @@ class CogDeckList(commands.Cog):
             params={'format': 'json', 'deck_code': deck_code}
         )
         d = response.json()['data']
+        
         if len(d['errors']) > 0:
             await interaction.response.send_message("덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.")
         else:
-            clan, hash = d['clan'], d['hash']
-            deckURL, imageURL = f'https://shadowverse-portal.com/deck/{hash}?lang=ko', f'https://shadowverse-portal.com/image/{hash}'
-
-            portalEmbed = discord.Embed(title="포탈 연결 성공!").set_image(url=imageURL)
-            linkButton = discord.ui.Button(label="포탈 링크", style=discord.ButtonStyle.blurple, url=deckURL)
-            linkView = discord.ui.View(); linkView.add_item(linkButton)
-            
-            await interaction.response.send_message(embed=portalEmbed, view=linkView)
+            await interaction.response.send_message(
+                view=discord.ui.View().add_item(
+                    discord.ui.Button(
+                        label="포탈 링크",
+                        style=discord.ButtonStyle.blurple,
+                        url=f"https://shadowverse-portal.com/deck/{d['hash']}?lang=ko"
+                    )
+                )
+            )
 
     async def _addDeck(self, orgMsg: discord.Message, name: str):
         """|coro|
