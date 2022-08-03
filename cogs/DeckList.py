@@ -102,6 +102,31 @@ class CogDeckList(commands.Cog):
         await interaction.response.send_message(
             view=DeckListView(interaction, deckList.searchDeck(query or [], clazz, author))
         )
+    
+    @app_commands.command(
+        name="포탈링크",
+        description="덱 코드를 입력하면, 그 포탈로 가는 버튼을 만들어줍니다."
+    )
+    @app_commands.describe(
+        DeckCode="포탈 링크를 만들 덱 코드입니다."
+    )
+    async def RG_LinkPortal(self, interaction: discord.Interaction, DeckCode: str):
+        response = requests.get(
+            'https://shadowverse-portal.com/api/v1/deck/import',
+            params={'format': 'json', 'deck_code': DeckCode}
+        )
+        d = response.json()['data']
+        if len(d['errors']) > 0:
+            await interaction.response.send_message("덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.")
+        else:
+            clan, hash = d['clan'], d['hash']
+            deckURL, imageURL = f'https://shadowverse-portal.com/deck/{hash}', f'https://shadowverse-portal.com/image/{hash}'
+
+            portalEmbed = discord.Embed(title="포탈 연결 성공!").set_image(url=imageURL)
+            linkButton = discord.ui.Button(label="포탈 링크", style=discord.ButtonStyle.blurple, url=deckURL)
+            linkView = discord.ui.View(); linkView.add_item(linkButton)
+            
+            await interaction.response.send_message(embed=portalEmbed, view=linkView)
 
     async def _addDeck(self, orgMsg: discord.Message, name: str):
         """|coro|
@@ -246,93 +271,7 @@ class CogDeckList(commands.Cog):
 async def setup(bot: MyBot):
     await bot.add_cog(CogDeckList(bot), guild=bot.target_guild)
 
-"""
-    def makeTitle(self, deck: Deck, KE: Lang = 'KR') -> str:
-        name = deck['name']
-        ver  = '' if not deck.get('ver') else f" ver. {deck['ver']}"
-        rtul = eval(deck['rtul'])
-        pack = '' if deck['rtul'] == 'UL' else f", {db['pack']} {'팩' if KE == 'KR' else 'Pack'}"
-        return f"{name}{ver}({rtul}{pack})"
-    
-    def makeEmbed(self, deck: Deck, KE: Lang = 'KR') -> discord.Embed:
-        uploader: str
-        
-        if deck['author'].startswith('<@!') or deck['author'].startswith('<@'):
-            uploader = deck['author']
-        else:
-            uploader = self.bot.get_user(int(deck['author'])).mention
-        
-        embed = discord.Embed(
-            title=self.makeTitle(deck, KE),
-            color=0x2b5468
-        )
-        embed.add_field(name="업로더" if KE == 'KR' else "Uploader", value=uploader, inline=False)
-        embed.add_field(name="클래스" if KE == 'KR' else "Class", value=deck['class'], inline=False)
-        
-        if deck.get('date'):
-            embed.add_field(name='올린 날짜' if KE == 'KR' else 'Date', value=deck['date'])
-        if deck.get('cont'):
-            embed.add_field(name='기여자' if KE == 'KR' else 'Contributor', value=', '.join(deck['cont']))
-        
-        embed.set_image(url=deck['imgURL'])
-        
-        return embed
-    
-    async def Find(self, ctx: commands.Context, scThings: List[str], lang: Lang):
-        if not scThings:
-            await ctx.send(self.T.translate('Find.NoWord', lang))
-            return
-        
-        foundDeck = deckList.find(lambda deck: deck['name'] == scThings[0].upper())
-        
-        if not foundDeck:
-            scFuncS = "lambda deck: True"
-            
-            for scThing in scThings:
-                Class = strToClass(scThing)
-                
-                if   scThing.lower() in ['로테이션',   '로테', 'rotation', 'rt']:
-                    scFuncS += " and deck['rtul'] == 'RT'"
-                elif scThing.lower() in ['언리미티드', '언리', 'unlimited', 'ul']:
-                    scFuncS += " and deck['rtul'] == 'UL'"
-                
-                elif scThing.startswith('<@'):
-                    scFuncS += f''' and deck['author'] == "{scThing[2:-1].replace('!', '')}"'''
-                
-                elif Class in OrgCls:
-                    scFuncS += f" and '{Class}' == deck['class']"
-                
-                else:
-                    scFuncS += f" and '{scThing.upper()}' in deck['name']"
-            
-            foundDeck = deckList.find(eval(scFuncS))
-        
-        if len(foundDeck) == 0:
-            await ctx.send(self.T.translate('Find.NoMatchDeck', lang))
-        else:
-            if len(foundDeck) > 25:
-                await ctx.send(self.T.translate('Find.TooManyDeck', lang))
-            
-            elif len(foundDeck) > 3:
-                embed = discord.Embed(
-                    title=self.T.translate('Find.SomeDeck', lang),
-                    description=self.T.translate('Find.SomeNotice', lang),
-                    color=0x2b5468
-                )
-                
-                for deck in foundDeck:
-                    embed.add_field(
-                        name=self.makeTitle(deck, lang),
-                        value=f"{'클래스' if lang == 'KR' else 'Class'}: {deck['class']}"
-                    )
-                
-                await ctx.send(embed=embed)
-            
-            else:
-                await ctx.send(self.T.translate('Find.SpecificDeck', lang))
-                for deck in foundDeck:
-                    await ctx.send(embed=self.makeEmbed(deck, lang))
-    
+""" 
     async def Similar(self, ctx: commands.Context, Name: str, lang: Lang):
         await ctx.send(self.T.translate('Similar.FindFail', lang).format(Name))
         
@@ -364,14 +303,6 @@ async def setup(bot: MyBot):
         
         else: # cannot find Deck
             await self.Similar(ctx, Name, lang)
-    
-    @commands.command(name='덱검색')
-    async def RG_Find_KR(self, ctx: commands.Context, *scThings: str):
-        await self.Find(ctx, scThings, 'KR')
-    
-    @commands.command(name='search', aliases=['sc'])
-    async def RG_Find_EN(self, ctx: commands.Context, *scThings: str):
-        await self.Find(ctx, scThings, 'EN')
     
     @commands.command(name='덱삭제')
     async def RG_Delete_KR(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
@@ -426,25 +357,4 @@ async def setup(bot: MyBot):
             s += f'{author} - {sum(write)} / {sum(cont)}\n'
         
         await ctx.send(s)
-
-    @commands.command(name="po")
-    async def RG_LinkPortal(self, ctx: commands.Context, DeckCode: str):
-        response = requests.get(
-            'https://shadowverse-portal.com/api/v1/deck/import',
-            params={'format': 'json', 'deck_code': DeckCode}
-        )
-        d = response.json()['data']
-        if len(d['errors']) > 0:
-            await ctx.send("덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.")
-            return
-        
-        clan, hash = d['clan'], d['hash']
-        deckURL, imageURL = f'https://shadowverse-portal.com/deck/{hash}', f'https://shadowverse-portal.com/image/{hash}'
-
-        portalEmbed = discord.Embed(title="포탈로 연결!")\
-            .add_field(name='덱 코드', value=DeckCode)\
-            .add_field(name='포탈 링크', value=f'[여기를 클릭해주세요!]({deckURL})')\
-            .set_image(url=imageURL)
-        
-        await ctx.send(embed=portalEmbed)
 """
