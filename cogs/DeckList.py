@@ -25,7 +25,10 @@ class CogDeckList(commands.Cog):
         If message is in `Lab` category and has attached image
             add a reaction (which is not in WMTD Server, but Bot server)
         """
-        if message.channel.category.name != "LAB":
+        if message.author.bot:
+            return
+
+        if message.channel.category.name != "Lab":
             # This auto-add logic only deal with `Lab` category
             return
         

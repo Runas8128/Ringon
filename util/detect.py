@@ -51,7 +51,7 @@ class Detect(DB):
         if len(FullMatch) > 1:
             return FullMatch[0][0]
         
-        PartMatch = self._runSQL("SELECT rst FROM PART_DETECT WHERE ? LIKE %tar%", tar)
+        PartMatch = self._runSQL("SELECT rst FROM PART_DETECT WHERE ? LIKE '%tar%'", tar)
         if len(PartMatch) > 1:
             return PartMatch[0][0]
         

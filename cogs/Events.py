@@ -29,7 +29,7 @@ class CogEvent(commands.Cog):
         if message.author.bot:
             return
         
-        if isinstance(ch, discord.channel.DMChannel):
+        if isinstance(message.channel, discord.channel.DMChannel):
             files = None
             if len(att) > 0:
                 files = [discord.File(io.BytesIO(await file.read()), file.filename) for file in message.attachments]
@@ -37,7 +37,7 @@ class CogEvent(commands.Cog):
             await self.AdminCh.send(f"{message.author.mention}님의 DM입니다!\n" + message.content, files=files)
             return
         
-        for block in db['WordBlock']:
+        for block in util.getBlockWord():
             if block in message.content:
                 await message.channel.send(f'금칙어 {block[0]}읍읍이 포함되었습니다', delete_after=5)
                 await message.delete()
