@@ -109,9 +109,12 @@ class CogDeckList(commands.Cog):
         description="덱 코드를 입력하면, 그 포탈로 가는 버튼을 만들어줍니다."
     )
     @app_commands.describe(
-        DeckCode="포탈 링크를 만들 덱 코드입니다."
+        deck_code="포탈 링크를 만들 덱 코드입니다."
     )
-    async def RG_LinkPortal(self, interaction: discord.Interaction, DeckCode: str):
+    async def cmdPortalLink(
+        self, interaction: discord.Interaction,
+        deck_code: str
+    ):
         response = requests.get(
             'https://shadowverse-portal.com/api/v1/deck/import',
             params={'format': 'json', 'deck_code': DeckCode}
