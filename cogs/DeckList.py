@@ -117,14 +117,14 @@ class CogDeckList(commands.Cog):
     ):
         response = requests.get(
             'https://shadowverse-portal.com/api/v1/deck/import',
-            params={'format': 'json', 'deck_code': DeckCode}
+            params={'format': 'json', 'deck_code': deck_code}
         )
         d = response.json()['data']
         if len(d['errors']) > 0:
             await interaction.response.send_message("덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.")
         else:
             clan, hash = d['clan'], d['hash']
-            deckURL, imageURL = f'https://shadowverse-portal.com/deck/{hash}', f'https://shadowverse-portal.com/image/{hash}'
+            deckURL, imageURL = f'https://shadowverse-portal.com/deck/{hash}?lang=ko', f'https://shadowverse-portal.com/image/{hash}'
 
             portalEmbed = discord.Embed(title="포탈 연결 성공!").set_image(url=imageURL)
             linkButton = discord.ui.Button(label="포탈 링크", style=discord.ButtonStyle.blurple, url=deckURL)
