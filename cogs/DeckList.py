@@ -49,19 +49,16 @@ class CogDeckList(commands.Cog):
         If reaction is pre-defined emoji
             proceed deck add logic
         """
-        print("in on raw reaction add")
 
-        if not (isinstance(payload.emoji, discord.Emoji) and payload.emoji.id == 805678671527936010):
+        if not (isinstance(payload.emoji, (discord.Emoji, discord.PartialEmoji)) and payload.emoji.id == 805678671527936010):
             # This auto-add Logic triggered with this emoji
-            print("Not correct emoji")
             return
         
         channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
         orgMsg = await channel.fetch_message(payload.message_id)
         
-        if msgOrg.author != payload.member:
+        if orgMsg.author != payload.member:
             # This auto-add Logic triggered when author add reaction
-            print("Different author")
             return
         
         try:
@@ -160,9 +157,9 @@ class CogDeckList(commands.Cog):
             await orgMsg.channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
 
-        clazz = channel.name
-        imageURL = msgOrg.attachments[0].url
-        author = msgOrg.author.id
+        clazz = orgMsg.channel.name
+        imageURL = orgMsg.attachments[0].url
+        author = orgMsg.author.id
 
         deckList.addDeck(name, clazz, desc, imageURL, author)
         await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!")
@@ -186,7 +183,7 @@ class CogDeckList(commands.Cog):
             await orgMsg.channel.send("시간 초과, 덱 업데이트를 취소합니다.")
             return
         
-        imageURL = '' if len(msgOrg.attachments) == 0 else orgMsg.attachments[0].url
+        imageURL = '' if len(orgMsg.attachments) == 0 else orgMsg.attachments[0].url
         
         try:
             deckList.updateDeck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
