@@ -13,7 +13,7 @@ class Detect(DB):
 
         _fields = {}
         for tar, rst, ratio in self._runSQL("SELECT tar, rst, ratio FROM PROB_DETECT"):
-            if tar in fields.keys():
+            if tar in _fields.keys():
                 _fields[tar] += f", {rst}(가중치: {ratio})"
             else:
                 _fields[tar] = f"{rst}(가중치: {ratio})"

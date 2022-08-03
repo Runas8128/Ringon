@@ -45,7 +45,7 @@ class DeckList(DB):
         deckInfo = dict(self._runSQL("""SELECT * FROM DECKLIST WHERE ID=?""", id)[0])
         deckInfo["contrib"] = [
             contribID
-            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTERS WHERE DeckID=?", id)
+            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTORS WHERE DeckID=?", id)
             for contribID in tp
         ]
         return deckInfo
@@ -199,8 +199,8 @@ class DeckList(DB):
         self._runSQL(query, *param)
 
         deckID, author = self._runSQL("SELECT ID, author FROM DECKLIST WHERE name=?", name)[0]
-        if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTERS WHERE DeckID=? and ContribID=?", deckID, contrib) == []:
-            self._runSQL("INSERT INTO CONTRIBUTERS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
+        if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTORS WHERE DeckID=? and ContribID=?", deckID, contrib) == []:
+            self._runSQL("INSERT INTO CONTRIBUTORS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
         self._runSQL("UPDATE DECKLIST SET version = version + 1 WHERE ID=?", deckID)
 
     def deleteDeck(self, name: str, reqID: int):
@@ -238,7 +238,7 @@ class DeckList(DB):
         deckInfo = dict(self._runSQL("SELECT * FROM DECKLIST WHERE name=?", name)[0])
         deckInfo["contrib"] = [
             contribID
-            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTERS WHERE DeckID=?", id)
+            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTORS WHERE DeckID=?", id)
             for contribID in tp
         ]
         self._runSQL("DELETE FROM DECKLIST WHERE name=?", name)

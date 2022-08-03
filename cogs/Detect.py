@@ -17,11 +17,6 @@ class CogDetect(commands.Cog):
             await message.channel.trigger_typing()
             await message.channel.send(rst)
     
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
-        if not user.bot:
-            await embedManager.proceedReaction(reaction.message.id, reaction.emoji)
-    
     @app_commands.command(
         name="능지",
         description="링곤이가 배운 단어들이 몇 개인지 알려줍니다. 전체 단어 목록은 `배운거` 명령어로 알 수 있습니다."
@@ -36,9 +31,8 @@ class CogDetect(commands.Cog):
         description="링곤이의 단어장을 보여줍니다. 추가/삭제는 개발자에게 직접 요청해주시기 바랍니다."
     )
     async def cmdGetFullWordMap(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            view=EmbedView(interaction, *detect.getFullDetect())
-        )
+        view = EmbedView(interaction, *detect.getFullDetect())
+        await interaction.response.send_message(embed=view.makeEmbed(), view=view)
     
     @app_commands.command(
         name="센서민감도",
@@ -54,9 +48,8 @@ class CogDetect(commands.Cog):
         description="링곤이가 일부감지할 친구들을 보여줍니다. 추가/삭제는 개발자에게 직접 요청해주시기 바랍니다."
     )
     async def cmdGetPartWordMap(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            view=EmbedView(interaction, *detect.getPartDetect())
-        )
+        view = EmbedView(interaction, *detect.getPartDetect())
+        await interaction.response.send_message(embed=view.makeEmbed(), view=view)
 
 async def setup(bot: MyBot):
     await bot.add_cog(CogDetect(bot), guild=bot.target_guild)

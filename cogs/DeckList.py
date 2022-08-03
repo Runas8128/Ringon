@@ -101,9 +101,8 @@ class CogDeckList(commands.Cog):
         clazz: str = None,
         author: discord.Member = None
     ):
-        await interaction.response.send_message(
-            view=DeckListView(interaction, deckList.searchDeck(query or [], clazz, author))
-        )
+        view = DeckListView(interaction, deckList.searchDeck(query or [], clazz, author))
+        await interaction.response.send_message(embed=view.makeEmbed(), view=view)
     
     @app_commands.command(
         name="포탈링크",
@@ -121,7 +120,7 @@ class CogDeckList(commands.Cog):
             params={'format': 'json', 'deck_code': deck_code}
         )
         d = response.json()['data']
-        
+
         if len(d['errors']) > 0:
             await interaction.response.send_message("덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.")
         else:
@@ -323,10 +322,6 @@ async def setup(bot: MyBot):
     async def RG_Analyze_KR(self, ctx: commands.Context):
         await ctx.send(embed=deckList.analyze('KR'))
     
-    @commands.command(name='analyze')
-    async def RG_Analyze_EN(self, ctx: commands.Context):
-        await ctx.send(embed=deckList.analyze('EN'))
-    
     @commands.command(name='팩이름')
     @commands.has_permissions(administrator=True)
     async def RG_Pack(self, ctx: commands.Context, newPack: str=''):
@@ -342,9 +337,6 @@ async def setup(bot: MyBot):
         
         for deck in deckList.deleteRT():
             await deckList.hisCh.send(embed=self.makeEmbed(deck, 'KR'))
-    
-    @commands.command(name="세부분석")
-    async def RG_DeepAnalyze(self, ctx: commands.Context):
         deckList: List[Deck] = deckList.List
         rt = [deck for deck in deckList if deck['rtul'] == 'RT']
         ul = [deck for deck in deckList if deck['rtul'] == 'UL']
