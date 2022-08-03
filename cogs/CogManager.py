@@ -11,6 +11,7 @@ class CogManager(commands.Cog):
     async def load_all(self):
         for cogName in self.all_cog:
             await self._load(cogName)
+            print(f"loaded {cogName}")
     
     async def checkMe(self, ctx: commands.Context, me: discord.User):
         """|coro|
