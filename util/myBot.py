@@ -49,6 +49,9 @@ class MyBot(commands.Bot):
         then clear console and notice how long we should wait.
         """
         try:
+            if not self.is_testing:
+                # deploy to replit web
+                import keep_alive
             token = getToken(self.is_testing)
             super().run(token)
         except discord.errors.HTTPException as E:
