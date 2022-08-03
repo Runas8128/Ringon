@@ -18,5 +18,8 @@ class Util(DB):
     def getPackInfo(self):
         result = self._runSQL("SELECT value FROM UTIL WHERE prop='pack'")
         return result[0]['value']
+    
+    def setPackName(self, name: str):
+        self._runSQL("UPDATE UTIL SET value=? WHERE prop='pack'", name)
 
 util = Util()

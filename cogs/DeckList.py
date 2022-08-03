@@ -2,9 +2,10 @@ import asyncio
 import requests
 
 import discord
-from discord.ext import commands
+from discord import app_commands
 
 from util.deckList import deckList
+from util.view import DeckListView
 from util.myBot import MyBot
 
 class CogDeckList(commands.Cog):
@@ -71,6 +72,37 @@ class CogDeckList(commands.Cog):
             await channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
     
+    @app_commands.command(
+        name="덱검색",
+        description="DB에 저장된 덱을 검색합니다."
+    )
+    @app_commands.describe(
+        query="검색할 키워드를 입력합니다. 공백을 기준으로 분리해 덱 이름이나 덱 설명에서만 검색합니다.",
+        clazz="검색할 클래스를 지정합니다.",
+        author="검색할 덱의 작성자/기여자를 선택합니다."
+    )
+    @app_commands.choices(
+        clazz=[
+            app_commands.Choice(name="엘프",        value="엘프"),
+            app_commands.Choice(name="로얄",        value="로얄"),
+            app_commands.Choice(name="위치",        value="위치"),
+            app_commands.Choice(name="드래곤",      value="드래곤"),
+            app_commands.Choice(name="네크로맨서",  value="네크로맨서"),
+            app_commands.Choice(name="뱀파이어",    value="뱀파이어"),
+            app_commands.Choice(name="비숍",        value="비숍"),
+            app_commands.Choice(name="네메시스",    value="네메시스")
+        ]
+    )
+    async def cmdSearchDeck(
+        self, interaction: discord.Interaction,
+        query: str = None,
+        clazz: str = None,
+        author: discord.Member = None
+    ):
+        await interaction.response.send_message(
+            view=DeckListView(interaction, deckList.searchDeck(query or [], clazz, author))
+        )
+
     async def _addDeck(self, orgMsg: discord.Message, name: str):
         """|coro|
         front-end method for adding deck in database

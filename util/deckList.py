@@ -4,7 +4,7 @@ import shutil
 import discord
 from discord.ext import commands
 
-from . import utils
+from .utils import util
 from .baseDB import DB
 
 class DeckList(DB):
@@ -51,37 +51,32 @@ class DeckList(DB):
         return deckInfo
     
     def _searchDeck(self, kw: str):
-        """Search decks with one keyword
-        
-        This method is private use only.
+        """Search decks with one keyword. (Private use only)"""
+        return set(self._runSQL("SELECT ID FROM DECKLIST WHERE name LIKE ?", f"%{kw}%"))
 
-        Parameters
-        ----------
-        * kw: :class:`str`
-            - keyword which will be used to search
-        
-        Return value
-        ------------
-        Deck IDs. Type: Set[:class:`int`]
-
-        ."""
+    def _searchClass(self, clazz: str):
+        """Search Only for provided class (Private use only)"""
+        return set(self._runSQL("SELECT ID FROM DECKLIST WHERE class=?", clazz))
+    
+    def _searchAuthor(self, author: int):
+        """Search only for author id (Private use only)"""
         return set(self._runSQL("""
-            SELECT ID FROM DECKLIST WHERE author=:key OR class=:key
+            SELECT ID FROM DECKLIST WHERE author=?
             UNION
-            SELECT ID FROM DECKLIST WHERE name LIKE :keyLike
-            UNION
-            SELECT DeckID FROM CONTRIBUTORS WHERE ContribID=:key
-            UNION
-            SELECT DeckID FROM HASHTAG WHERE tag LIKE :keyLike
-        """, {"key": kw, "keyLike": f"%{kw}%"}))
+            SELECT DeckID FROM CONTRIBUTORS WHERE ContribID=?
+        """, author))
 
-    def searchDeck(self, searchKeywords: List[str]):
+    def searchDeck(self, query: List[str], clazz: str, author: int):
         """Search decks with one or more keywords
         
         Parameters
         ----------
-        * searchKeywords: List[:class:`str`]
+        * query: List[:class:`str`]
             - keywords which will be used to search
+        * clazz: :class:`str`
+            - your class to search, None to All class
+        * author: :class:`int`
+            - ID of deck author, None to All member
         
         Return value
         ------------
@@ -90,15 +85,29 @@ class DeckList(DB):
         Exceptions
         ----------
         :class:`ValueError`
-            raised when keyword list is empty
+            raised when query is empty
         
         ."""
-        if len(searchKeywords) == 0:
+        if len(query) == 0 and clazz == None and author == None:
             raise ValueError("검색할 단어를 입력해주세요")
         
-        rst = self._searchDeck(searchKeywords.pop())
-        for kw in searchKeywords:
-            rst &= self._searchDeck(kw)
+        rst = set()
+
+        if len(query) > 0:
+            rst = self._searchDeck(query.pop())
+            for kw in query:
+                rst &= self._searchDeck(kw)
+        
+        if clazz != None:
+            tmp = self._searchClass(clazz)
+            if rst: rst &= tmp
+            else: rst = tmp
+        
+        if author != None:
+            tmp = self._searchAuthor(author)
+            if rst: rst &= tmp
+            else: rst = tmp
+        
         return [id for tp in rst for id in tp]
 
     def hasDeck(self, name: str):
@@ -236,15 +245,15 @@ class DeckList(DB):
         
         return deckInfo
 
-    def deleteAll(self):
-        """Delete all deck in database
+    def changePack(self, newPack: str):
+        """Delete all deck in database, and change pack name
 
         WARNING: This method will delete all deck.
         Although this method make backup automatically, you should double check before calling this method."""
-        today = utils.now().strftime("%Y%m%d")
-        shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{today}.db")
+        shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{util.getPackInfo()}.db")
         self._runSQL("DELETE FROM DECKLIST")
         self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
+        util.setPackName(newPack)
     
     def similar(self, name: str):
         """Get decks with similar names
