@@ -49,8 +49,11 @@ class CogDeckList(commands.Cog):
         If reaction is pre-defined emoji
             proceed deck add logic
         """
-        if not (isinstance(payload.emoji, discord.Emoji) and payload.emoji.id != 805678671527936010):
+        print("in on raw reaction add")
+
+        if not (isinstance(payload.emoji, discord.Emoji) and payload.emoji.id == 805678671527936010):
             # This auto-add Logic triggered with this emoji
+            print("Not correct emoji")
             return
         
         channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
@@ -58,6 +61,7 @@ class CogDeckList(commands.Cog):
         
         if msgOrg.author != payload.member:
             # This auto-add Logic triggered when author add reaction
+            print("Different author")
             return
         
         try:
