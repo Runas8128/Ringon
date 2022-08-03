@@ -53,18 +53,31 @@ class EmbedView(discord.ui.View):
 
 class DeckListView(discord.ui.View):
     """EmbedView for Deck Search results"""
-    def __init__(self, initInter: discord.Interaction, *deckIDs: List):
+    def __init__(self, initInter: discord.Interaction, deckIDs: List[int]):
         super().__init__()
 
         self.guild = initInter.guild
         self.deckIDs = deckIDs
         self.index = 0
+
+        self.empty = len(self.deckIDs) == 0
+        if self.empty:
+            for child in self.children:
+                if isinstance(child, discord.ui.Button):
+                    child.disabled = True
     
     def __getMention(self, id: int):
         member = self.guild.get_member(id)
         return "(정보 없음)" if member == None else member.mention
 
     def makeEmbed(self):
+        if self.empty:
+            return discord.Embed(
+                title="검색 결과가 없습니다!",
+                description="더 일반적인 / 다른 / 더 적은 키워드를 사용해보시는건 어떤가요?",
+                color=0x2b5468
+            )
+        
         deck = deckList.searchDeckByID(self.deckIDs[self.index])
         embed = discord.Embed(title=deck['name'], description=f"작성자: {self.__getMention(deck['author'])}", color=0x2b5468)
 
