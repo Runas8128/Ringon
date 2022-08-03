@@ -105,7 +105,7 @@ class CogDeckList(commands.Cog):
         clazz: str = None,
         author: discord.Member = None
     ):
-        view = DeckListView(interaction, deckList.searchDeck(query or [], clazz, author))
+        view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author))
         await interaction.response.send_message(embed=view.makeEmbed(), view=view)
     
     @app_commands.command(
@@ -244,7 +244,7 @@ class CogDeckList(commands.Cog):
             description="이름을 바꾸려면 `재입력`을, 덱을 업데이트하려면 `업데이트`를 입력해주세요.\n시간 제한: 1분"
         ), mention_author=False)
         
-        msgCheck: discord.Message = await self.bot.wait_for('message', check=checkCorrectInput, timeout=60.0)
+        msgCheck: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0)
         return msgCheck.content == "업데이트"
     
     async def getDeckDesc(self, orgMsg: discord.Message):
@@ -317,10 +317,6 @@ async def setup(bot: MyBot):
     @commands.command(name='덱삭제')
     async def RG_Delete_KR(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
         await self.Delete(ctx, Name, SendHistory, 'KR')
-    
-    @commands.command(name='delete', aliases=['remove', 'del', 'rem'])
-    async def RG_Delete_EN(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
-        await self.Delete(ctx, Name, SendHistory, 'EN')
     
     @commands.command(name='덱분석')
     async def RG_Analyze_KR(self, ctx: commands.Context):

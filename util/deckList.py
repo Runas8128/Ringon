@@ -51,8 +51,9 @@ class DeckList(DB):
         return deckInfo
     
     def _searchDeck(self, kw: str):
-        """Search decks with one keyword. (Private use only)"""
-        return set(self._runSQL("SELECT ID FROM DECKLIST WHERE name LIKE ?", f"%{kw}%"))
+        """Search decks with one keyword. Check for name/hashtag (Private use only)"""
+        return set(self._runSQL("SELECT ID FROM DECKLIST WHERE name LIKE ?", f"%{kw}%"))\
+            | set(self._runSQL("SELECT ID FROM DECKLIST WHERE description LIKE ?", f"%#{kw}%"))
 
     def _searchClass(self, clazz: str):
         """Search Only for provided class (Private use only)"""
@@ -66,13 +67,14 @@ class DeckList(DB):
             SELECT DeckID FROM CONTRIBUTORS WHERE ContribID=?
         """, author))
 
-    def searchDeck(self, query: List[str], clazz: str, author: int):
+    def searchDeck(self, query: str, clazz: str, author: int):
         """Search decks with one or more keywords
         
         Parameters
         ----------
-        * query: List[:class:`str`]
-            - keywords which will be used to search
+        * query: :class:`str`
+            - keywords which will be used to search.
+            - this function will split it by space automatically.
         * clazz: :class:`str`
             - your class to search, None to All class
         * author: :class:`int`
@@ -88,6 +90,8 @@ class DeckList(DB):
             raised when query is empty
         
         ."""
+
+        query = query.split()
         if len(query) == 0 and clazz == None and author == None:
             raise ValueError("검색할 단어를 입력해주세요")
         
@@ -96,7 +100,7 @@ class DeckList(DB):
         if len(query) > 0:
             rst = self._searchDeck(query.pop())
             for kw in query:
-                rst &= self._searchDeck(kw)
+                rst |= self._searchDeck(kw)
         
         if clazz != None:
             tmp = self._searchClass(clazz)
