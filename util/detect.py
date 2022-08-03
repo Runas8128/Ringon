@@ -27,8 +27,8 @@ class Detect(DB):
     
     def getFullCount(self):
         """get full-detect map length + probability-based detect map length(only count keywords)"""
-        return self._runSQL("SELECT COUNT(*) FROM FULL_DETECT")[0][0] + \
-            self._runSQL("SELECT COUNT(tar) FROM FULL_DETECT")[0][0]
+        return self._runSQL("SELECT COUNT(tar) FROM FULL_DETECT")[0][0] + \
+            self._runSQL("SELECT COUNT(DISTINCT tar) FROM PROB_DETECT")[0][0]
     
     def getPartDetect(self):
         """get all partial detect keyword-result map with Embed-form"""
@@ -43,7 +43,7 @@ class Detect(DB):
     
     def getPartCount(self):
         """get partial detect map length"""
-        return self._runSQL("SELECT COUNT(*) FROM PART_DETECT")[0][0]
+        return self._runSQL("SELECT COUNT(tar) FROM PART_DETECT")[0][0]
     
     def tryGet(self, tar: str) -> str:
         """try to get matching result from database"""
