@@ -35,7 +35,7 @@ class CogDetect(commands.Cog):
         name="배운거",
         description="링곤이의 단어장을 보여줍니다. 추가/삭제는 개발자에게 직접 요청해주시기 바랍니다."
     )
-    async def cmdGetWordMap(self, interaction: discord.Interaction):
+    async def cmdGetFullWordMap(self, interaction: discord.Interaction):
         await interaction.response.send_message(
             view=EmbedView(interaction, *detect.getFullDetect())
         )
@@ -53,7 +53,7 @@ class CogDetect(commands.Cog):
         name="센서기록",
         description="링곤이가 일부감지할 친구들을 보여줍니다. 추가/삭제는 개발자에게 직접 요청해주시기 바랍니다."
     )
-    async def cmdGetWordMap(self, interaction: discord.Interaction):
+    async def cmdGetPartWordMap(self, interaction: discord.Interaction):
         await interaction.response.send_message(
             view=EmbedView(interaction, *detect.getPartDetect())
         )
