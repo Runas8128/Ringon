@@ -138,6 +138,30 @@ class CogDeckList(commands.Cog):
                 )
             )
 
+    @commands.command(name="팩이름")
+    @commands.has_permissions(administrator=True)
+    async def cmdChangePackName(self, ctx: commands.Context, newName: str=None):
+        if newName == None:
+            return await ctx.send("사용법: `!팩이름 (신팩 이름: 띄어쓰기 X)")
+        
+        notify: discord.Message = await ctx.send(
+            embed=discord.Embed(
+                title="⚠️ 이 명령어는 현재 등록된 덱리를 모두 삭제할 수 있습니다.",
+                description="사용하시려면 `확인`을 입력해주세요! 1분 후 자동으로 취소됩니다.",
+                color=0x2b5468
+            )
+        )
+
+        try:
+            def check(msg: discord.Message):
+                return msg.author == ctx.author and msg.channel == ctx.channel and msg.content == "확인"
+            
+            await self.bot.wait_for('message', check=check, timeout=60.0)
+            deckList.changePack(newName)
+            await ctx.send("팩 이름을 {newName}로 고쳤습니다!")
+        except asyncio.TimeoutError:
+            await notify.edit(embed=discord.Embed(title="⚠️ 시간 초과, 명령어 사용을 취소합니다.", color=0x2b5468))
+
     async def _addDeck(self, orgMsg: discord.Message, name: str):
         """|coro|
         front-end method for adding deck in database
@@ -321,39 +345,4 @@ async def setup(bot: MyBot):
     @commands.command(name='덱분석')
     async def RG_Analyze_KR(self, ctx: commands.Context):
         await ctx.send(embed=deckList.analyze('KR'))
-    
-    @commands.command(name='팩이름')
-    @commands.has_permissions(administrator=True)
-    async def RG_Pack(self, ctx: commands.Context, newPack: str=''):
-        if newPack == '':
-            await ctx.send('사용법: !팩이름 (새 팩 이름)\n**주의 - 모든 로테이션 덱이 삭제됩니다**')
-            return
-        
-        db['pack'] = newPack
-        await ctx.send(f'팩 이름을 {newPack}으로 바꿨어요!')
-        
-        if not deckList.hisCh:
-            deckList.hisCh = self.bot.get_channel(804614670178320394)
-        
-        for deck in deckList.deleteRT():
-            await deckList.hisCh.send(embed=self.makeEmbed(deck, 'KR'))
-        deckList: List[Deck] = deckList.List
-        rt = [deck for deck in deckList if deck['rtul'] == 'RT']
-        ul = [deck for deck in deckList if deck['rtul'] == 'UL']
-        
-        s = '**제작자 ID/멘션** - (추가 / 기여)\n'
-        
-        s += '**로테이션**\n'
-        for author in set([deck['author'] for deck in rt]):
-            write = [1 if deck['author'] == author else 0 for deck in rt]
-            cont = [1 if ('cont' in deck and author in deck['cont']) else 0 for deck in rt]
-            s += f'{author} - {sum(write)} / {sum(cont)}\n'
-        
-        s += '**언리미티드**\n'
-        for author in set([deck['author'] for deck in ul]):
-            write = [1 if deck['author'] == author else 0 for deck in ul]
-            cont = [1 if ('cont' in deck and author in deck['cont']) else 0 for deck in ul]
-            s += f'{author} - {sum(write)} / {sum(cont)}\n'
-        
-        await ctx.send(s)
 """
