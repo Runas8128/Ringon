@@ -330,9 +330,3 @@ class CogDeckList(commands.Cog):
 
 async def setup(bot: MyBot):
     await bot.add_cog(CogDeckList(bot), guild=bot.target_guild)
-
-""" 
-    @commands.command(name='덱분석')
-    async def RG_Analyze_KR(self, ctx: commands.Context):
-        await ctx.send(embed=deckList.analyze('KR'))
-"""
