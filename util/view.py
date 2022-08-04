@@ -88,6 +88,9 @@ class DeckListView(baseView):
         if len(self.decks) <= 1:
             self.btnGoto.disabled = True
             self.btnNext.disabled = True
+            if len(self.decks) == 0:
+                self.btnGoto.label = "-"
+                self.btnDelete.disabled = True
     
     def __getMention(self, id: int):
         member = self.guild.get_member(id)
@@ -127,9 +130,15 @@ class DeckListView(baseView):
 
     async def update(self, interaction: discord.Interaction):
         try:
-            self.btnPrev.disabled = self.index == 0
-            self.btnGoto.label = f"☰ {self.index + 1} / {len(self.decks)}"
-            self.btnNext.disabled = self.index == len(self.decks) - 1
+            if len(self.decks) == 0:
+                self.btnPrev.disabled   = True
+                self.btnGoto.label      = "-"
+                self.btnNext.disabled   = True
+                self.btnDelete.disabled = True
+            else:
+                self.btnPrev.disabled   = self.index == 0
+                self.btnGoto.label      = f"☰ {self.index + 1} / {len(self.decks)}"
+                self.btnNext.disabled   = self.index == (len(self.decks) - 1)
             
             await interaction.response.edit_message(embed=self.makeEmbed(), view=self)
         except KeyError:
