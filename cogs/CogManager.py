@@ -88,17 +88,20 @@ class CogManager(commands.Cog):
     )
     async def reload(self, interaction: discord.Interaction):
         if interaction.user.id == self.bot.owner_id:
-            await interaction.response.defer()
+            await interaction.response.defer(ephemeral=True)
 
             success = self.all_cog[:]
             await interaction.followup.send(f"Reloading cogs... target = {self.all_cog}", ephemeral=True)
             for cogName in success:
                 try:
-                    await self._unload(CogName)
-                    await self._load(CogName)
-                except:
+                    await self._unload(cogName)
+                    await self._load(cogName)
+                except Exception as E:
                     success.remove(cogName)
-                    await interaction.followup.send(f"Reloading Cog {cogName} Failed, skipping...", ephemeral=True)
+                    await interaction.followup.send(
+                        f"Reloading Cog {cogName} Failed.\nException message: {E.args}\nskipping...",
+                        ephemeral=True
+                    )
             await self.sync()
             await interaction.followup.send(f"Successfully reload All Cogs: {success}", ephemeral=True)
         else:
