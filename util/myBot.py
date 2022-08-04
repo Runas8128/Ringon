@@ -71,6 +71,9 @@ class MyBot(commands.Bot):
             print(f"Retry-After: {h}h {m}m {s}s")
     
     async def setup_hook(self):
+        appInfo = await self.application_info()
+        self.owner_id = appInfo.owner.id
+        
         await self.load_extension('cogs.CogManager')
 
         if self.is_testing:

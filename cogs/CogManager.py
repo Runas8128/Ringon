@@ -60,7 +60,7 @@ class CogManager(commands.Cog):
         ]
     )
     async def manage(self, interaction: discord.Interaction, name: str, option: str):
-        if interaction.user.id == self.bot.owner_id or interaction.user.id in self.bot.owner_ids:
+        if interaction.user.id == self.bot.owner_id:
             if option == "load":
                 await self._load(name)
             elif option == "unload":
@@ -71,14 +71,14 @@ class CogManager(commands.Cog):
             await interaction.response.send_message("Success", ephemeral=True)
         else:
             await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)
-            print(interaction.user.id, self.bot.owner_id, self.bot.owner_ids)
+            print(interaction.user.id, self.bot.owner_id)
     
     @app_commands.command(
         name="ㅎ_reload",
         description="[개발자 전용] 현재 테스트중인 / 구동중인 모든 커맨드 그룹을 다시 로드합니다."
     )
     async def reload(self, interaction: discord.Interaction):
-        if interaction.user.id == self.bot.owner_id or interaction.user.id in self.bot.owner_ids:
+        if interaction.user.id == self.bot.owner_id:
             await interaction.response.defer()
 
             success = self.all_cog[:]
@@ -93,7 +93,7 @@ class CogManager(commands.Cog):
             await interaction.followup.send(f"Successfully reload All Cogs: {success}", ephemeral=True)
         else:
             await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)
-            print(interaction.user.id, self.bot.owner_id, self.bot.owner_ids)
+            print(interaction.user.id, self.bot.owner_id)
 
 async def setup(bot: MyBot):
     manager = CogManager(bot)
