@@ -263,23 +263,6 @@ class DeckList(DB):
         self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
         util.setPackName(newPack)
     
-    def similar(self, name: str):
-        """Get decks with similar names
-
-        ... but just all deck names which has provided string :)
-
-        Parameters
-        ----------
-        * name: :class:`str`
-            - substring which is in deck name
-        
-        Return value
-        ------------
-        Deck names similar with provided string. Type: List[:class:`str`]
-
-        ."""
-        return [value for tp in self._runSQL("SELECT name FROM DECKLIST WHERE name LIKE ?", f"%{name}%") for value in tp]
-    
     def analyze(self):
         """Get deck analyze report by embed object
 
