@@ -30,7 +30,7 @@ class EmbedView(baseView):
         self.count = len(fields)
         self.topIndex = 0
 
-        if len(fields) == 0:
+        if len(fields) <= 10:
             self.btnBottom.disabled = True
             self.btnDown.disabled = True
     
