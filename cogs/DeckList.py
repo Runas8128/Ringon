@@ -119,8 +119,11 @@ class CogDeckList(commands.Cog):
         clazz: str = None,
         author: discord.Member = None
     ):
-        view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author), self.emojiMap)
-        await interaction.response.send_message(embed=view.makeEmbed(), view=view)
+        try:
+            view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author), self.emojiMap)
+            await interaction.response.send_message(embed=view.makeEmbed(), view=view)
+        except ValueError as E:
+            await interaction.response.send_message(E.args[0])
     
     @app_commands.command(
         name="포탈링크",
@@ -320,42 +323,6 @@ async def setup(bot: MyBot):
     await bot.add_cog(CogDeckList(bot), guild=bot.target_guild)
 
 """ 
-    async def Similar(self, ctx: commands.Context, Name: str, lang: Lang):
-        await ctx.send(self.T.translate('Similar.FindFail', lang).format(Name))
-        
-        similar = deckList.similar(Name)
-        if similar:
-            embed = discord.Embed(
-                title='이런 덱을 찾으셨나요?' if lang == 'KR' else 'Did you find...',
-                color=0x2b5468
-            )
-            for deck in similar:
-                embed.add_field(
-                    name=self.makeTitle(deck),
-                    value=f"{'클래스' if lang == 'KR' else 'Class'}: {deck['class']}"
-                )
-            await ctx.send(embed=embed)
-    
-    async def Delete(self, ctx: commands.Context, Name: str, SendHistory:bool, lang: Lang):
-        delDeck = [deck for deck in deckList.List if deck['name'] == Name]
-        
-        if delDeck: # Deck found
-            if not deckList.hisCh: # history channel is not made yet
-                deckList.hisCh = self.bot.get_channel(804614670178320394)
-            
-            embed = self.makeEmbed(deckList.delete(Name), lang)
-            
-            if SendHistory:
-                await deckList.hisCh.send(embed=embed)
-            await ctx.send(self.T.translate('Delete.Success', lang).format(Name))
-        
-        else: # cannot find Deck
-            await self.Similar(ctx, Name, lang)
-    
-    @commands.command(name='덱삭제')
-    async def RG_Delete_KR(self, ctx: commands.Context, Name: str='', SendHistory:bool=True):
-        await self.Delete(ctx, Name, SendHistory, 'KR')
-    
     @commands.command(name='덱분석')
     async def RG_Analyze_KR(self, ctx: commands.Context):
         await ctx.send(embed=deckList.analyze('KR'))

@@ -4,6 +4,7 @@ import shutil
 import discord
 from discord.ext import commands
 
+from .myBot import MyBot
 from .utils import util
 from .baseDB import DB
 
@@ -11,7 +12,7 @@ class DeckList(DB):
     def __init__(self):
         super().__init__("db/decklist.db")
     
-    def loadHistCh(self, bot: commands.Bot):
+    def loadHistCh(self, bot: MyBot):
         """Load `역사관` channel when bot is ready
         
         Parameters
@@ -20,7 +21,10 @@ class DeckList(DB):
             - Ringon bot instance
         
         ."""
-        self.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
+        if bot.is_testing:
+            self.hisCh: discord.TextChannel = bot.get_channel(1004611688802287626)
+        else:
+            self.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
     
     def searchDeckByID(self, id: int):
         """Search decks by ID
@@ -207,7 +211,7 @@ class DeckList(DB):
             self._runSQL("INSERT INTO CONTRIBUTORS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
         self._runSQL("UPDATE DECKLIST SET version = version + 1 WHERE ID=?", deckID)
 
-    def deleteDeck(self, name: str, reqID: int):
+    def deleteDeck(self, deckID: int, reqID: int):
         """Delete deck from database
 
         Only uploader must be able to delete the deck.
@@ -234,18 +238,18 @@ class DeckList(DB):
             - raised when requester is not deck author
 
         ."""
-        author = self._runSQL("SELECT author FROM DECKLIST WHERE name=?", name)[0][0]
+        author = self._runSQL("SELECT author FROM DECKLIST WHERE ID=?", deckID)[0][0]
         
         if author != reqID:
             raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
         
-        deckInfo = dict(self._runSQL("SELECT * FROM DECKLIST WHERE name=?", name)[0])
+        deckInfo = dict(self._runSQL("SELECT * FROM DECKLIST WHERE ID=?", deckID)[0])
         deckInfo["contrib"] = [
             contribID
-            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTORS WHERE DeckID=?", id)
+            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTORS WHERE DeckID=?", deckID)
             for contribID in tp
         ]
-        self._runSQL("DELETE FROM DECKLIST WHERE name=?", name)
+        self._runSQL("DELETE FROM DECKLIST WHERE ID=?", deckID)
         
         return deckInfo
 

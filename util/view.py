@@ -82,12 +82,10 @@ class DeckListView(baseView):
         self.guild = initInter.guild
         self.decks = sorted(decks, key=lambda deck: deck['ID'])
         self.emojiMap = emojiMap
-
-        self.count = len(decks)
         self.index = 0
         
-        self.btnGoto.label = f"☰ 1 / {self.count}"
-        if len(self.decks) == 0:
+        self.btnGoto.label = f"☰ 1 / {len(self.decks)}"
+        if len(self.decks) <= 1:
             self.btnGoto.disabled = True
             self.btnNext.disabled = True
     
@@ -130,8 +128,8 @@ class DeckListView(baseView):
     async def update(self, interaction: discord.Interaction):
         try:
             self.btnPrev.disabled = self.index == 0
-            self.btnGoto.label = f"☰ {self.index + 1} / {self.count}"
-            self.btnNext.disabled = self.index == self.count - 1
+            self.btnGoto.label = f"☰ {self.index + 1} / {len(self.decks)}"
+            self.btnNext.disabled = self.index == len(self.decks) - 1
             
             await interaction.response.edit_message(embed=self.makeEmbed(), view=self)
         except KeyError:
@@ -170,6 +168,13 @@ class DeckListView(baseView):
     
     @discord.ui.button(label="다음 덱 >", style=discord.ButtonStyle.blurple, custom_id="vDeckList_btnNext")
     async def btnNext_onClicked(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.index < self.count - 1:
+        if self.index < len(self.decks) - 1:
             self.index += 1
+        await self.update(interaction)
+    
+    @discord.ui.button(label="덱 삭제", style=discord.ButtonStyle.danger, custom_id="vDeckList_btnDelete")
+    async def btnDelete_onClicked(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await deckList.hisCh.send(embed=self.makeEmbed())
+        nowDeck = self.decks.pop(self.index)
+        deckList.deleteDeck(nowDeck['ID'], interaction.user.id)
         await self.update(interaction)
