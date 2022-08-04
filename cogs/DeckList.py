@@ -310,10 +310,10 @@ class CogDeckList(commands.Cog):
         
         await orgMsg.reply(embed=discord.Embed(
             title=":ledger: 덱의 설명을 입력해주세요!",
-            description="시간 제한: 15분\n덱 설명을 생략하려면 `생략`을 입력해주세요."
+            description="시간 제한 X\n덱 설명을 생략하려면 `생략`을 입력해주세요."
         ), mention_author=False)
 
-        msgDesc: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0 * 15)
+        msgDesc: discord.Message = await self.bot.wait_for('message', check=check)
 
         desc = msgDesc.content.strip()
         if desc == "생략": desc = ""
