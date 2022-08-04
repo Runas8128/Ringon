@@ -10,27 +10,27 @@ from util.myBot import MyBot
 class Birthday(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
-        self.guild: discord.Guild = None
-        self.noticeCh: discord.TextChannel = None
-    
-    @commands.Cog.listener()
-    async def on_ready(self):
-        self.guild = self.bot.get_guild(758478112979288094)
-        self.noticeCh = self.guild.get_channel(864518975253119007)
+
+        self.noticeCh: discord.TextChannel = self.guild.get_channel(
+            823359663973072960 if self.is_testing else 864518975253119007
+        )
+        self.birthdayRole: discord.Role = self.bot.target_guild.get_role(
+            854505668785602561 if self.is_testing else 952236601331810437
+        )
     
     @tasks.loop(hours = 1)
     async def birthdayCheckLoop(self):
         now = utils.now()
         if (now - now.replace(hour=0, minute=0, second=0, microsecond=0)).seconds >= 1*60*60: return
         
-        members: List[discord.Member] = [self.guild.get_member(id) for id in birthdayDB.getToday(now)]
+        members: List[discord.Member] = [self.bot.target_guild.get_member(id) for id in birthdayDB.getToday(now)]
         if len(members) == 0: return
 
-        for member in members:
-            member.add_roles(self.guild.get_role(952236601331810437))
+        mentions = [member.mention for member in members]
+        for member in members: member.add_roles(self.birthdayRole)
         
-        content  = f"오늘은 {'님, '.join(members)}님의 생일입니다! 모두 축하해주세요 :tada:"
-        content += f"Today is {', '.join(members)}'s birthday! :partying_face:"
+        content  = f"오늘은 {'님, '.join(mentions)}님의 생일입니다! 모두 축하해주세요 :tada:"
+        content += f"Today is {', '.join(mentions)}'s birthday! :partying_face:"
         await self.noticeCh.send(content)
 
 async def setup(bot: MyBot):
