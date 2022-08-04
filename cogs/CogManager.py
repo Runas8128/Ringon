@@ -12,6 +12,14 @@ class CogManager(commands.Cog):
     async def load_all(self):
         for cogName in self.all_cog:
             await self._load(cogName)
+        
+        if self.bot.is_testing:
+            await self._load('Debug')
+        
+        await self.sync()
+    
+    async def sync(self):
+        await self.bot.tree.sync(guild=self.bot.target_guild)
     
     async def _load(self, name: str):
         """|coro|
@@ -68,6 +76,7 @@ class CogManager(commands.Cog):
             elif option == "reload":
                 await self._unload(name)
                 await self._load(name)
+            await self.sync()
             await interaction.response.send_message("Success", ephemeral=True)
         else:
             await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)
@@ -90,6 +99,7 @@ class CogManager(commands.Cog):
                 except:
                     success.remove(cogName)
                     await interaction.followup.send(f"Reloading Cog {cogName} Failed, skipping...", ephemeral=True)
+            await self.sync()
             await interaction.followup.send(f"Successfully reload All Cogs: {success}", ephemeral=True)
         else:
             await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)

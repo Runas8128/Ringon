@@ -73,9 +73,6 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
         appInfo = await self.application_info()
         self.owner_id = appInfo.owner.id
-        
-        await self.load_extension('cogs.CogManager')
 
-        if self.is_testing:
-            await self.load_extension('cogs.Debug')
+        await self.load_extension('cogs.CogManager')
         await self.tree.sync(guild=self.target_guild)
