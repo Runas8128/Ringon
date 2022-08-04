@@ -132,7 +132,7 @@ class CogDeckList(commands.Cog):
     async def cmdAnalyze(
         self, interaction: discord.Interaction
     ):
-        interaction.response.send_message(embed=deckList.analyze())
+        await interaction.response.send_message(embed=deckList.analyze())
 
     @app_commands.command(
         name="포탈링크",

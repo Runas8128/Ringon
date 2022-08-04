@@ -272,7 +272,8 @@ class DeckList(DB):
 
         ."""
         data = {k: v for k, v in self._runSQL("SELECT class, COUNT(*) FROM DECKLIST GROUP BY class")}
-        total = sum(deck.values())
+        total = sum(data.values())
+        print(data)
 
         embed = discord.Embed(
             title=f'총 {total}개 덱 분석 결과',
@@ -281,7 +282,7 @@ class DeckList(DB):
         for clazz in data.keys():
             embed.add_field(
                 name=clazz,
-                value=f"{count:2}개 (점유율: {round(data[clazz]/total*100):5.2f}%)"
+                value=f"{data[clazz]:2}개 (점유율: {round(data[clazz]/total*100):5.2f}%)"
             )
         return embed
 
