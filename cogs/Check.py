@@ -14,14 +14,15 @@ T_Emoji = Union[discord.Emoji, discord.PartialEmoji, str]
 class CogCheck(commands.Cog):    
     def __init__(self, bot: MyBot):
         self.bot = bot
-        self.guild: discord.Guild = self.bot.target_guild
     
     @commands.Cog.listener()
     async def on_ready(self):
+        guild = self.bot.get_guild(self.bot.target_guild.id)
+
         self.IgnoreRole: List[discord.Role] = [
-            self.guild.get_role(924315254098387024), # Guest of Honor
-            self.guild.get_role(861883220722319391), # 군머
-            self.guild.get_role(805451727859613707)  # 고3
+            guild.get_role(924315254098387024), # Guest of Honor
+            guild.get_role(861883220722319391), # 군머
+            guild.get_role(805451727859613707)  # 고3
         ] if not self.bot.is_testing else []
 
         self.Category: List[discord.CategoryChannel] = [
@@ -52,7 +53,7 @@ class CogCheck(commands.Cog):
         
         else:
             notMsg = await ctx.send("인원점검중...")
-            userMap = await self.getMemberMap(tarMsg.reactions, ['👍', '👎'])
+            userMap = await self.getMemberMap(ctx.guild, tarMsg.reactions, ['👍', '👎'])
             
             embed = discord.Embed(title="인원점검")
             for emoji in userMap.keys():
@@ -75,7 +76,7 @@ class CogCheck(commands.Cog):
         ))
         b = time()
         await asyncio.gather([
-            self.getUserChatAmount(member) for member in self.guild.members
+            self.getUserChatAmount(member) for member in ctx.guild.members
         ])
         e = time()
         await tmp.edit(embed=discord.Embed(
@@ -83,7 +84,7 @@ class CogCheck(commands.Cog):
             description=f"각 멤버의 채팅량은 {self.NotNotifyRoom.mention}을 참고해주세요!\n걸린 시간: {round(e - b, 2):.2f}초"
         ))
 
-    async def getMemberMap(self, allReact: List[discord.Reaction], indiEmoji: List[T_Emoji]) -> Dict[T_Emoji, List[discord.Member]]:
+    async def getMemberMap(self, guild: discord.Guild, allReact: List[discord.Reaction], indiEmoji: List[T_Emoji]) -> Dict[T_Emoji, List[discord.Member]]:
         """|coro|
 
         This function makes emoji-member map.
@@ -91,6 +92,8 @@ class CogCheck(commands.Cog):
 
         Parameters
         ----------
+        * guild: :class:`discord.Guild`
+            - guild object for this context
         * allReact: :class:`List[discord.Reaction]`
             - all reaction of target message.
         * indiEmoji: :class:`List[discord.Emoji|discord.PartialEmoji|str]`
@@ -104,7 +107,7 @@ class CogCheck(commands.Cog):
 
         ."""
 
-        userList: List[discord.Member] = [user for user in self.guild.members if not user.bot]
+        userList: List[discord.Member] = [user for user in guild.members if not user.bot]
 
         userMap: Dict[T_Emoji, discord.Member] = { emoji : [] for emoji in indiEmoji }
         userMap['그 외'] = []
