@@ -152,13 +152,15 @@ class CogDeckList(commands.Cog):
         d = response.json()['data']
 
         if len(d['errors']) > 0:
-            await interaction.response.send_message("덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.")
+            await interaction.response.send_message(
+                "덱 코드가 무효하거나, 잘못 입력되었습니다. 다시 입력해 주시기 바랍니다.",
+                ephemeral=True
+            )
         else:
             await interaction.response.send_message(
                 view=discord.ui.View().add_item(
                     discord.ui.Button(
                         label="포탈 링크",
-                        style=discord.ButtonStyle.blurple,
                         url=f"https://shadowverse-portal.com/deck/{d['hash']}?lang=ko"
                     )
                 )

@@ -9,8 +9,6 @@ from util.myBot import MyBot
 class CogEvent(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
-        self.ErrLogCh: discord.TextChannel = None
-        self.AdminCh: discord.TextChannel = None
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -19,8 +17,11 @@ class CogEvent(commands.Cog):
             activity=discord.Game("덱, 프로필, 전적을 관리")
         )
         
-        self.ErrLogCh = self.bot.get_channel(863719856061939723) # 783539105374928986
-        self.AdminCh = self.bot.get_channel(783539105374928986)
+        self.ErrLogCh = self.bot.get_channel(863719856061939723)
+        if self.bot.is_testing:
+            self.AdminCh = self.bot.get_channel(823359663973072960)
+        else:
+            self.AdminCh = self.bot.get_channel(783539105374928986)
         
         print("Ringonbot ON")
     

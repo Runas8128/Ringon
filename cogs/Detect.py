@@ -22,9 +22,7 @@ class CogDetect(commands.Cog):
         description="링곤이가 배운 단어들이 몇 개인지 알려줍니다. 전체 단어 목록은 `배운거` 명령어로 알 수 있습니다."
     )
     async def cmdGetIQ(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            f"링곤사전을 보니, 저의 아이큐는 {detect.getFullCount()}이라고 하네요!"
-        )
+        await interaction.response.send_message(f"링곤사전을 보니, 저의 아이큐는 {detect.getFullCount()}이라고 하네요!")
     
     @app_commands.command(
         name="배운거",
@@ -39,9 +37,7 @@ class CogDetect(commands.Cog):
         description="링곤이가 감지할 단어들이 몇 개인지 알려줍니다. 전체 단어 목록은 `센서기록` 명령어로 알 수 있습니다."
     )
     async def cmdGetSensitivity(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            f"링곤사전을 보니, 저의 센서민감도는 {detect.getPartCount()}이라고 하네요!"
-        )
+        await interaction.response.send_message(f"링곤사전을 보니, 저의 센서민감도는 {detect.getPartCount()}이라고 하네요!")
     
     @app_commands.command(
         name="센서기록",
