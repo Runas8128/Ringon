@@ -34,7 +34,7 @@ class DeckList(DB):
         
         Return value
         ------------
-        Deck info for provided id. Type: :class:`dict`
+        Deck info for provided id. Type: :class:`Deck`(a.k.a. `sqlite3.Row`)
         * ID `int`, author `int`
         * name `str`, class `str`, description `str`
         * version `int`
@@ -82,7 +82,7 @@ class DeckList(DB):
         
         Return value
         ------------
-        Deck ids. Type: List[:class:`int`]
+        Searched deck info. Type: List[:class:`Deck`]
 
         Exceptions
         ----------
@@ -112,7 +112,7 @@ class DeckList(DB):
             if rst: rst &= tmp
             else: rst = tmp
         
-        return [id for tp in rst for id in tp]
+        return [self.searchDeckByID(row['id']) for row in rst]
 
     def hasDeck(self, name: str):
         """Check if database has deck with provided name

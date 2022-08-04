@@ -1,3 +1,5 @@
+from typing import Dict
+
 import asyncio
 import requests
 import io
@@ -13,10 +15,22 @@ from util.myBot import MyBot
 class CogDeckList(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
+        self.emojiMap: Dict[str, discord.Emoji] = {}
     
     @commands.Cog.listener()
     async def on_ready(self):
         deckList.loadHistCh(self.bot)
+
+        self.emojiMap = {
+            '엘프':         self.bot.get_emoji(1004600679433777182),
+            '로얄':         self.bot.get_emoji(1004600684517261422),
+            '위치':         self.bot.get_emoji(1004600687688163418),
+            '드래곤':       self.bot.get_emoji(1004600677751848961),
+            '네크로맨서':   self.bot.get_emoji(1004600681266675782),
+            '뱀파이어':     self.bot.get_emoji(1004600685985271859),
+            '비숍':         self.bot.get_emoji(1004600676053155860),
+            '네메시스':     self.bot.get_emoji(1004600682902462465),
+        }
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -105,7 +119,7 @@ class CogDeckList(commands.Cog):
         clazz: str = None,
         author: discord.Member = None
     ):
-        view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author))
+        view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author), self.emojiMap)
         await interaction.response.send_message(embed=view.makeEmbed(), view=view)
     
     @app_commands.command(
