@@ -126,6 +126,15 @@ class CogDeckList(commands.Cog):
             await interaction.response.send_message(E.args[0])
     
     @app_commands.command(
+        name="덱분석",
+        description="현재 등록된 덱들을 간단하게 분석해줍니다. 클래스별 덱 갯수 및 점유율을 표시합니다."
+    )
+    async def cmdAnalyze(
+        self, interaction: discord.Interaction
+    ):
+        interaction.response.send_message(embed=deckList.analyze())
+
+    @app_commands.command(
         name="포탈링크",
         description="덱 코드를 입력하면, 그 포탈로 가는 버튼을 만들어줍니다."
     )
