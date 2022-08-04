@@ -1,4 +1,5 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 from util.myBot import MyBot
@@ -11,34 +12,6 @@ class CogManager(commands.Cog):
     async def load_all(self):
         for cogName in self.all_cog:
             await self._load(cogName)
-            print(f"loaded {cogName}")
-    
-    async def checkMe(self, ctx: commands.Context, me: discord.User):
-        """|coro|
-        
-        Check if mentioned this bot when calling below commands
-
-        Parameters
-        ----------
-        * ctx: :class:`discord.ext.commands.Context`
-            - Context of calling command
-        * me: :class:`discord.User`
-            - Bot user, which must be equal to this running bot.
-
-        Return Value
-        ------------
-        True if the command may run, else False
-        
-        ."""
-
-        if not me:
-            await ctx.send("mention me when running command!")
-            return False
-        
-        if me != self.bot.user:
-            return False
-        
-        return True
     
     async def _load(self, name: str):
         """|coro|
@@ -47,8 +20,9 @@ class CogManager(commands.Cog):
         """
         try:
             await self.bot.load_extension('cogs.' + name)
-        except commands.ExtensionNotLoaded:
-            pass
+            print(f"Loaded {name}")
+        except commands.ExtensionAlreadyLoaded:
+            print(f"Skipping loading cog {name}: Already loaded")
     
     async def _unload(self, name: str):
         """|coro|
@@ -57,81 +31,69 @@ class CogManager(commands.Cog):
         """
         try:
             await self.bot.unload_extension('cogs.' + name)
-        except commands.ExtensionAlreadyLoaded:
-            pass
+            print(f"Unloaded {name}")
+        except commands.ExtensionNotLoaded:
+            print(f"Skipping unloading cog {name}: Not loaded")
 
-    @commands.command()
-    @commands.is_owner()
-    async def debug(self, ctx: commands.Context, me: discord.User=None, onoff: bool=True):
-        if not await self.checkMe(ctx, me):
-            return
-        
-        if onoff:
-            await self._load('util.Debug')
+    @app_commands.command(
+        name="ㅎ_manage",
+        description="[개발자 전용] 특정 커맨드 그룹을 로드하거나 언로드합니다."
+    )
+    @app_commands.describe(
+        name="대상 커맨드 그룹을 지정합니다.",
+        option="실행할 행동을 지정합니다."
+    )
+    @app_commands.choices(
+        name=[
+            app_commands.Choice(name='Events',      value='Events'),
+            app_commands.Choice(name='DeckList',    value='DeckList'),
+            app_commands.Choice(name='Detect',      value='Detect'),
+            app_commands.Choice(name='Birthday',    value='Birthday'),
+            app_commands.Choice(name='Check',       value='Check'),
+            app_commands.Choice(name='Other',       value='Other'),
+            app_commands.Choice(name='Debug',       value='Debug'),
+        ],
+        option=[
+            app_commands.Choice(name="Load",    value="load"),
+            app_commands.Choice(name="Unload",  value="unload"),
+            app_commands.Choice(name="Reload",  value="reload")
+        ]
+    )
+    async def manage(self, interaction: discord.Interaction, name: str, option: str):
+        if interaction.user.id == self.bot.owner_id or interaction.user.id in self.bot.owner_ids:
+            if option == "load":
+                await self._load(name)
+            elif option == "unload":
+                await self._unload(name)
+            elif option == "reload":
+                await self._unload(name)
+                await self._load(name)
+            await interaction.response.send_message("Success", ephemeral=True)
         else:
-            await self._unload('util.Debug')
-        await ctx.message.add_reaction('👍')
+            await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)
+            print(interaction.user.id, self.bot.owner_id, self.bot.owner_ids)
     
-    @commands.command()
-    @commands.is_owner()
-    async def load(self, ctx: commands.Context, me: discord.User=None, CogName: str = ''):
-        if not await self.checkMe(ctx, me):
-            return
-        
-        if CogName == 'CogManager':
-            await ctx.send("[Error] Cog Manager can only be loaded in code")
-            return
-        
-        try:
-            await self._load(CogName)
-            await ctx.send(f"Successfully loaded Cog {CogName}")
-        except commands.ExtensionNotFound:
-            await ctx.send(f"Cannot find that Cog. You can load: {self.all_cog}")
-    
-    @commands.command()
-    @commands.is_owner()
-    async def unload(self, ctx: commands.Context, me: discord.User=None, CogName: str = ''):
-        if not await self.checkMe(ctx, me):
-            return
-        
-        if CogName == 'CogManager':
-            await ctx.send("[Error] Cog Manager cannot be unloaded")
-            return
-        
-        try:
-            await self._unload(CogName)
-            await ctx.send(f"Successfully unloaded Cog {CogName}")
-        except commands.ExtensionNotFound:
-            await ctx.send(f"Cannot find that Cog. You can unload: {self.all_cog}")
-    
-    @commands.command()
-    @commands.is_owner()
-    async def reload(self, ctx: commands.Context, me: discord.User=None, CogName: str = ''):
-        if not await self.checkMe(ctx, me):
-            return
-        
-        if CogName == 'CogManager':
-            await ctx.send("[Error] Cog Manager cannot be reloaded")
-            return
-        
-        if CogName:
-            try:
-                await self._unload(CogName)
-                await self._load(CogName)
-                await ctx.send(f"Successfully reloaded Cog {CogName}")
-            except commands.ExtensionNotFound:
-                await ctx.send(f"Cannot find that Cog. You can load: {self.all_cog}")
-        
-        else:
+    @app_commands.command(
+        name="ㅎ_reload",
+        description="[개발자 전용] 현재 테스트중인 / 구동중인 모든 커맨드 그룹을 다시 로드합니다."
+    )
+    async def reload(self, interaction: discord.Interaction):
+        if interaction.user.id == self.bot.owner_id or interaction.user.id in self.bot.owner_ids:
+            await interaction.response.defer()
+
             success = self.all_cog[:]
+            await interaction.followup.send(f"Reloading cogs... target = {self.all_cog}", ephemeral=True)
             for cogName in success:
                 try:
                     await self._unload(CogName)
                     await self._load(CogName)
                 except:
                     success.remove(cogName)
-                    await ctx.send(f"Reloading Cog {cogName} Failed, skipping...")
-            await ctx.send(f"Successfully reload All Cogs: {success}")
+                    await interaction.followup.send(f"Reloading Cog {cogName} Failed, skipping...", ephemeral=True)
+            await interaction.followup.send(f"Successfully reload All Cogs: {success}", ephemeral=True)
+        else:
+            await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)
+            print(interaction.user.id, self.bot.owner_id, self.bot.owner_ids)
 
 async def setup(bot: MyBot):
     manager = CogManager(bot)
