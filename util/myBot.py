@@ -51,7 +51,18 @@ class MyBot(commands.Bot):
         try:
             if not self.is_testing:
                 # deploy to replit web
-                import keep_alive
+                
+                from flask import Flask
+                from threading import Thread
+
+                app = Flask('')
+
+                @app.route('/')
+                def home():
+                    return "Ringon is alive now!"
+
+                Thread(target = lambda: app.run(host='0.0.0.0')).start()
+            
             token = getToken(self.is_testing)
             super().run(token)
         except discord.errors.HTTPException as E:
