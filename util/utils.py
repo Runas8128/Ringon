@@ -4,7 +4,7 @@ from .baseDB import DB
 
 class Util(DB):
     def __init__(self):
-        super().__init__('db/util.db')
+        super().__init__('DB/util.db')
     
     def now(self):
         return datetime.now(tz=timezone(offset=timedelta(hours=9)))

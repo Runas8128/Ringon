@@ -10,7 +10,7 @@ from .baseDB import DB
 
 class DeckList(DB):
     def __init__(self):
-        super().__init__("db/decklist.db")
+        super().__init__("DB/decklist.db")
     
     def loadHistCh(self, bot: MyBot):
         """Load `역사관` channel when bot is ready
