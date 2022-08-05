@@ -32,7 +32,7 @@ class CogEvent(commands.Cog):
         
         if isinstance(message.channel, discord.channel.DMChannel):
             files = None
-            if len(att) > 0:
+            if len(message.attachments) > 0:
                 files = [discord.File(io.BytesIO(await file.read()), file.filename) for file in message.attachments]
             
             await self.AdminCh.send(f"{message.author.mention}님의 DM입니다!\n" + message.content, files=files)
