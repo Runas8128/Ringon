@@ -24,7 +24,7 @@ class CogEvent(commands.Cog):
         else:
             self.AdminCh = self.bot.get_channel(783539105374928986)
         
-        self.bot.get_channel(1005348204965015563).send(
+        await self.bot.get_channel(1005348204965015563).send(
             f"Ringon is alive since <t:{int(time())}>"
         )
     
