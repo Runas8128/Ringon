@@ -22,6 +22,13 @@ class CogOther(commands.Cog):
     )
     async def cmdGetLatency(self, interaction: discord.Interaction):
         await interaction.response.send_message(f"현재 레이턴시는 {round(self.bot.latency*1000, 2):.2f}ms 입니다.")
+    
+    @app_commands.command(
+        name='생존신고',
+        description='링곤이가 살아있는지 확인해줍니다.'
+    )
+    async def cmdCheckAlive(self, interaction: discord.Interaction):
+        await interaction.response.send_message("살아있어요!", ephemeral=True)
 
 async def setup(bot: MyBot):
     await bot.add_cog(CogOther(bot), guild=bot.target_guild)
