@@ -1,4 +1,5 @@
 import io
+from time import time
 
 import discord
 from discord.ext import commands
@@ -23,7 +24,9 @@ class CogEvent(commands.Cog):
         else:
             self.AdminCh = self.bot.get_channel(783539105374928986)
         
-        print("Ringonbot ON")
+        self.bot.get_channel(1005348204965015563).send(
+            f"Ringon is alive since <t:{int(time())}>"
+        )
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
