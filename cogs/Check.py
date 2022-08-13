@@ -63,26 +63,6 @@ class CogCheck(commands.Cog):
                     inline=False
                 )
             await notMsg.edit(content="", embed=embed)
-    
-    @commands.command(name="채팅량검사")
-    @commands.has_permissions(administrator=True)
-    async def RG_CheckChatAmount(self, ctx: commands.Context):
-        if self.bot.is_testing:
-            await ctx.reply("해당 명령어는 테스트 모드에서 사용 불가능한 명령어입니다.", mention_author=False)
-
-        tmp: discord.Message = await ctx.send(embed=discord.Embed(
-            title="각 멤버의 채팅량을 불러오는 중입니다.",
-            description=f"각 멤버에 대한 로그는 {self.NotNotifyRoom.mention}에서 봐주세요!"
-        ))
-        b = time()
-        await asyncio.gather([
-            self.getUserChatAmount(member) for member in ctx.guild.members
-        ])
-        e = time()
-        await tmp.edit(embed=discord.Embed(
-            title="전체 멤버의 채팅량을 불러왔습니다!",
-            description=f"각 멤버의 채팅량은 {self.NotNotifyRoom.mention}을 참고해주세요!\n걸린 시간: {round(e - b, 2):.2f}초"
-        ))
 
     async def getMemberMap(self, guild: discord.Guild, allReact: List[discord.Reaction], indiEmoji: List[T_Emoji]) -> Dict[T_Emoji, List[discord.Member]]:
         """|coro|
@@ -130,41 +110,6 @@ class CogCheck(commands.Cog):
         userMap['반응 안함'] = userList
         
         return userMap
-
-    async def getUserChatAmount(self, member: discord.Member):
-        """Count chat amount in `Lab` and `Rating` category and send count stack info to not-notifing-admin room.
-
-        Parameters
-        ----------
-        * member: :class:`discord.Member`
-            - Member object to get chat amount
-
-        ."""
-        noticeMessage: discord.Message = await self.NotNotifyRoom.send(f"{member.mention}님의 역할을 분석하는 중...")
-
-        for role in self.IgnoreRole:
-            if role in member.roles:
-                await noticeMessage.edit(content=f"{member.mention}({role.name})님의 채팅량 검사를 건너뜁니다.")
-                return
-        
-        await noticeMessage.edit(content=f"{member.mention}님의 채팅량을 세는 중...")
-        
-        def predicate(message: discord.Message):
-            return message.author.id == member.id
-
-        count = 0
-        channel: discord.TextChannel
-        for category in self.Category:
-            for channel in category.channels:
-                if not isinstance(channel, discord.TextChannel):
-                    continue
-                
-                message: discord.Message
-                async for _ in channel.history(after=utils.now()-timedelta(days=14), limit=50).find(predicate):
-                    count += 1
-                    if count >= 50:
-                        await noticeMessage.edit(content=f"{member.mention}님의 채팅량: 50개 이상, 검사를 중단합니다.")
-        await noticeMessage.edit(content=f"{member.mention}님의 채팅량은 {count}건입니다.")
 
 async def setup(bot: MyBot):
     await bot.add_cog(CogCheck(bot), guild=bot.target_guild)

@@ -3,7 +3,7 @@ from typing import List
 import discord
 from discord.ext import commands, tasks
 
-from util import utils
+from util.utils import util
 from util.birthday import birthdayDB
 from util.myBot import MyBot
 
@@ -24,7 +24,7 @@ class Birthday(commands.Cog):
     
     @tasks.loop(hours = 1)
     async def birthdayCheckLoop(self):
-        now = utils.now()
+        now = util.now()
         if (now - now.replace(hour=0, minute=0, second=0, microsecond=0)).seconds >= 1*60*60: return
         
         members: List[discord.Member] = [self.guild.get_member(id) for id in birthdayDB.getToday(now)]
