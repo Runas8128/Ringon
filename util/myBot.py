@@ -3,30 +3,7 @@ from typing import List
 import discord
 from discord.ext import commands
 
-def getToken(is_testing: bool):
-    """Load token with proper way(json loading vs environment variable)"""
-
-    if is_testing:
-        import json
-
-        try:
-            with open('TOKEN.json', 'r', encoding="UTF-8") as f:
-                return json.load(f)["discord"]
-        except FileNotFoundError:
-            print("[ERROR] `TOKEN.json` file is missing.")
-            exit(1)
-        except KeyError:
-            print("[ERROR] `discord` field in json file is missing.")
-            exit(1)
-    
-    else:
-        from os import environ
-
-        try:
-            return environ["discord"]
-        except KeyError:
-            print("[ERROR] `discord` is not set in your environment variables.")
-            exit(1)
+from .load_token import load_token
 
 class MyBot(commands.Bot):
     def __init__(self, is_testing: bool, testCogs: List[str] = []):
@@ -49,7 +26,7 @@ class MyBot(commands.Bot):
         then clear console and notice how long we should wait.
         """
         try:
-            token = getToken(self.is_testing)
+            token = load_token('discord', self.is_testing)
             super().run(token)
         except discord.errors.HTTPException as E:
             if E.code != 429: raise

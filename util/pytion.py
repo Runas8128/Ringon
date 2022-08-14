@@ -3,6 +3,8 @@ from enum import Enum
 
 import json, httpx
 
+from .load_token import load_token
+
 def get_text_from_richtext(richTextObj: dict):
     if 'title' in richTextObj:
         richTextObj = richTextObj['title']
@@ -16,33 +18,12 @@ class Version(Enum):
     v3 = "2022-02-22"
     v4 = "2022-06-28"
 
-def load_token(is_testing: bool):
-    if is_testing:
-        try:
-            with open('TOKEN.json', 'r', encoding='UTF-8') as f:
-                return json.load(f)['notion']
-        except FileNotFoundError:
-            print("[ERROR] `TOKEN.json` file is missing.")
-            exit(1)
-        except KeyError:
-            print("[ERROR] `notion` field in json file is missing.")
-            exit(1)
-    
-    else:
-        from os import environ
-
-        try:
-            return environ["notion"]
-        except KeyError:
-            print("[ERROR] `notion` is not set in your environment variables.")
-            exit(1)
-
 class Notion:
     def __init__(self, *, version: Version = Version.v3, is_testing: bool=False):
         self.client = httpx.Client(
             base_url="https://api.notion.com/v1",
             headers={
-                "Authorization":    "Bearer " + load_token(is_testing),
+                "Authorization":    "Bearer " + load_token('notion', is_testing),
                 "Content-Type":     "application/json",
                 "Notion-Version":   version.value
             }
