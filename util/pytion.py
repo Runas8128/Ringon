@@ -1,4 +1,4 @@
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 import json, httpx
 
 from .load_token import load_token
@@ -48,7 +48,7 @@ class Notion:
 
         return resp.is_success
     
-    def query_database(self, dbID: str, filter: dict, parser: Callable[[dict], dict]):
+    def query_database(self, dbID: str, filter: dict, parser: Callable[[dict], Any]):
         """
         Filter Example for Decklist - class search
         {
