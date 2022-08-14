@@ -11,21 +11,21 @@ def getToken(is_testing: bool):
 
         try:
             with open('TOKEN.json', 'r', encoding="UTF-8") as f:
-                return json.load(f)["TOKEN"]
+                return json.load(f)["discord"]
         except FileNotFoundError:
             print("[ERROR] `TOKEN.json` file is missing.")
             exit(1)
         except KeyError:
-            print("[ERROR] `TOKEN` field in json file is missing.")
+            print("[ERROR] `discord` field in json file is missing.")
             exit(1)
     
     else:
         from os import environ
 
         try:
-            return environ["TOKEN"]
+            return environ["discord"]
         except KeyError:
-            print("[ERROR] TOKEN is not set in your environment variables.")
+            print("[ERROR] `discord` is not set in your environment variables.")
             exit(1)
 
 class MyBot(commands.Bot):
