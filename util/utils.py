@@ -4,8 +4,8 @@ from datetime import datetime, timedelta, timezone
 from .pytion import Notion, ID
 
 class Util:
-    def __init__(self, is_testing: bool):
-        self.notion = Notion(is_testing=is_testing)
+    def __init__(self):
+        self.notion = Notion()
     
     def now(self):
         return datetime.now(tz=timezone(offset=timedelta(hours=9)))

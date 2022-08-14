@@ -1,7 +1,7 @@
 from typing import Optional, Callable, Any
 import json, httpx
 
-from .load_token import load_token
+from .load_token import provider
 
 def parse_richtext(richTextObj: dict):
     if 'title' in richTextObj:
@@ -17,11 +17,11 @@ class Version:
     v4 =            "2022-06-28"
 
 class Notion:
-    def __init__(self, *, version: Version = Version.default, is_testing: bool=False):
+    def __init__(self, *, version: Version = Version.default):
         self.client = httpx.Client(
             base_url="https://api.notion.com/v1",
             headers={
-                "Authorization":    "Bearer " + load_token('notion', is_testing),
+                "Authorization":    "Bearer " + provider.load_token('notion'),
                 "Content-Type":     "application/json",
                 "Notion-Version":   version.value
             }

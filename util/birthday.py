@@ -8,8 +8,8 @@ def birthdayParser(result: dict) -> int:
     return properties['id']['number']
 
 class BirthdayDB:
-    def __init__(self, is_testing: bool):
-        self.notion = Notion(is_testing=is_testing)
+    def __init__(self):
+        self.notion = Notion()
     
     def getToday(self, now: datetime) -> List[int]:
         """get IDs for members whom birthday is today
