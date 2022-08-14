@@ -6,7 +6,6 @@ chardet==4.0.0
 charset-normalizer==2.1.0
 click==8.1.3
 colorama==0.4.5
-discord==1.7.3
 discord.py @ git+https://github.com/Rapptz/discord.py.git@7d11e2a27c041cc0a60567c14ad21b3259817f3a
 Flask==2.1.3
 idna==3.3
