@@ -49,20 +49,6 @@ class MyBot(commands.Bot):
         then clear console and notice how long we should wait.
         """
         try:
-            if not self.is_testing:
-                # deploy to replit web
-                
-                from flask import Flask
-                from threading import Thread
-
-                app = Flask('')
-
-                @app.route('/')
-                def home():
-                    return "Ringon is alive now!"
-
-                Thread(target = lambda: app.run(host='0.0.0.0')).start()
-            
             token = getToken(self.is_testing)
             super().run(token)
         except discord.errors.HTTPException as E:
