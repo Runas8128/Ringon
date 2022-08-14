@@ -21,28 +21,9 @@ class MyBot(commands.Bot):
         self.testCogs = testCogs
     
     def run(self):
-        """get token automatically and run bot.
-        if `429 Too many request` error raises,
-        then clear console and notice how long we should wait.
-        """
-        try:
-            token = load_token('discord', self.is_testing)
-            super().run(token)
-        except discord.errors.HTTPException as E:
-            if E.code != 429: raise
-
-            from os import system, name
-            system('cls' if name == 'nt' else 'clear')
-            
-            sec = int(E.response.headers['Retry-After'])
-
-            h = sec // 3600
-            sec -= h * 3600
-            m = sec // 60
-            sec -= m * 60
-            s = sec
-            
-            print(f"Retry-After: {h}h {m}m {s}s")
+        """get token automatically and run bot."""
+        token = load_token('discord', self.is_testing)
+        super().run(token)
     
     async def setup_hook(self):
         appInfo = await self.application_info()
