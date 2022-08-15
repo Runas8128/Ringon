@@ -126,7 +126,6 @@ class ID:
         
         class detect:
             full    = "481b6de47c6a41debf83fe1b93700622"
-            part    = "371aa34963db4efa9b3d4b398aa3c46b"
             prob    = "5e22777f724b4f27a336cdce350bc1a2"
         
         birthday    = "a66f05422b91471da108737db205c7c7"
