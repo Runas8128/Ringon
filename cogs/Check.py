@@ -102,7 +102,7 @@ class CogCheck(commands.Cog):
                 if react.emoji in indiEmoji:
                     userMap[react.emoji].append(user)
                 else:
-                    userMap['Other'].append(user)
+                    userMap['그 외'].append(user)
 
         for ignoreRole in self.IgnoreRole:
             userList = [user for user in userList if ignoreRole not in user.roles]
