@@ -6,6 +6,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
+from util.myBot import MyBot
+
 class CogBackup(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
