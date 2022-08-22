@@ -3,17 +3,10 @@ import json
 
 class TokenProvider:
     def __init__(self):
-        self.is_testing = False
+        self.load_token = self._load_deploy
     
     def enable_test(self):
-        self.is_testing = True
-
-    def load_token(self, token_key: str):
-        if self.is_testing:
-            self._load_test(token_key)
-        
-        else:
-            self._load_deploy(token_key)
+        self.load_token = self._load_test
         
     def _load_test(self, token_key: str):
         try:
