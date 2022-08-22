@@ -3,6 +3,8 @@ import random
 from .pytion import Notion, ID, parse_richtext
 
 class Parser:
+    """NOTE: Replace to pytion.Parser(target=Type.Text, result=Type.Text, ratio=Type.Number)"""
+    
     def __init__(
         self, *,
         target: bool = False, result: bool = False, ratio: bool = False

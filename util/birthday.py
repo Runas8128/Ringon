@@ -4,6 +4,8 @@ from datetime import datetime
 from .pytion import Notion, ID
 
 def birthdayParser(result: dict) -> int:
+    """NOTE: Replace to pytion.Parser(id=Type.Number)"""
+
     properties = result['properties']
     return properties['id']['number']
 
