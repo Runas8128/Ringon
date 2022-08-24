@@ -1,28 +1,7 @@
 import random
 
-from .pytion import Notion, ID, parse_richtext
-
-class Parser:
-    """NOTE: Replace to pytion.Parser(target=Type.Text, result=Type.Text, ratio=Type.Number)"""
-    
-    def __init__(
-        self, *,
-        target: bool = False, result: bool = False, ratio: bool = False
-    ):
-        self.target = target
-        self.result = result
-        self.ratio = ratio
-    
-    def __call__(self, result):
-        properties = result['properties']
-        data = []
-
-        if self.target: data.append(parse_richtext(properties['target']))
-        if self.result: data.append(parse_richtext(properties['result']))
-        if self.ratio:  data.append(properties['ratio']['number'])
-        
-        if len(data) == 1: data = data[0]
-        return data
+from pytion import filter, prop, ID
+from pytion import Notion, Filter, Parser
 
 class Detect:
     def __init__(self):
@@ -34,13 +13,19 @@ class Detect:
         full = self.notion.query_database(
             dbID=ID.database.detect.full,
             filter=None,
-            parser=Parser(target=True, result=True)
+            parser=Parser(
+                only_values=True,
+                target=Parser.Type.Text, result=Parser.Type.Text
+            )
         )
 
         prob = self.notion.query_database(
             dbID=ID.database.detect.prob,
             filter=None,
-            parser=Parser(target=True, result=True, ratio=True)
+            parser=Parser(
+                only_values=True,
+                target=Parser.Type.Text, result=Parser.Type.Text, ratio=Parser.Type.Number
+            )
         )
 
         _fields = {}
@@ -65,12 +50,12 @@ class Detect:
         full = len(self.notion.query_database(
             dbID=ID.database.detect.full,
             filter=None,
-            parser=Parser(target=True)
+            parser=Parser(only_values=True, target=Parser.Type.Text)
         ))
         prob = len(set(self.notion.query_database(
             dbID=ID.database.detect.prob,
             filter=None,
-            parser=Parser(target=True)
+            parser=Parser(only_values=True, target=Parser.Type.Text)
         )))
         return full + prob
     
@@ -78,22 +63,16 @@ class Detect:
         """try to get matching result from database"""
         FullMatch = self.notion.query_database(
             dbID=ID.database.detect.full,
-            filter={
-                'property': 'target',
-                'rich_text': { 'equals': tar }
-            },
-            parser=Parser(result=True)
+            filter=Filter(target=filter.Text(equals=tar)),
+            parser=Parser(only_values=True, result=Parser.Type.Text)
         )
         if len(FullMatch) > 1:
             return FullMatch[0]
         
         ProbMatch = self.notion.query_database(
             dbID=ID.database.detect.prob,
-            filter={
-                'property': 'target',
-                'rich_text': { 'equals': tar }
-            },
-            parser=Parser(result=True, ratio=True)
+            filter=Filter(target=filter.Text(equals=tar)),
+            parser=Parser(only_values=True, result=Parser.Type.Text, ratio=Parser.Type.Number)
         )
         if len(ProbMatch) > 1:
             rsts, ratios = zip(*ProbMatch)
