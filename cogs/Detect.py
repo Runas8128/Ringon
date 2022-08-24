@@ -31,21 +31,6 @@ class CogDetect(commands.Cog):
     async def cmdGetFullWordMap(self, interaction: discord.Interaction):
         view = EmbedView(interaction, *detect.getFullDetect())
         await interaction.response.send_message(embed=view.makeEmbed(), view=view)
-    
-    @app_commands.command(
-        name="센서민감도",
-        description="링곤이가 감지할 단어들이 몇 개인지 알려줍니다. 전체 단어 목록은 `센서기록` 명령어로 알 수 있습니다."
-    )
-    async def cmdGetSensitivity(self, interaction: discord.Interaction):
-        await interaction.response.send_message(f"링곤사전을 보니, 저의 센서민감도는 {detect.getPartCount()}이라고 하네요!")
-    
-    @app_commands.command(
-        name="센서기록",
-        description="링곤이가 일부감지할 친구들을 보여줍니다. 추가/삭제는 개발자에게 직접 요청해주시기 바랍니다."
-    )
-    async def cmdGetPartWordMap(self, interaction: discord.Interaction):
-        view = EmbedView(interaction, *detect.getPartDetect())
-        await interaction.response.send_message(embed=view.makeEmbed(), view=view)
 
 async def setup(bot: MyBot):
     await bot.add_cog(CogDetect(bot), guild=bot.target_guild)

@@ -6,11 +6,14 @@ from discord.ext import commands
 
 from .myBot import MyBot
 from .utils import util
-from .baseDB import DB
 
-class DeckList(DB):
+from pytion import filter, prop, ID
+from pytion import Notion, Filter, Parser
+
+class DeckList:
     def __init__(self):
-        super().__init__("DB/decklist.db")
+        self.notion = Notion()
+        self.ID_extractor = Parser(ID=Type.Number, only_values=True)
     
     def loadHistCh(self, bot: MyBot):
         """Load `역사관` channel when bot is ready
@@ -38,7 +41,7 @@ class DeckList(DB):
         
         Return value
         ------------
-        Deck info for provided id. Type: :class:`Deck`(a.k.a. `sqlite3.Row`)
+        Deck info for provided id. Type: :class:`dict`
         * ID `int`, author `int`
         * name `str`, class `str`, description `str`
         * version `int`
@@ -46,30 +49,66 @@ class DeckList(DB):
         * contrib `List[int]`
         
         ."""
-        deckInfo = dict(self._runSQL("""SELECT * FROM DECKLIST WHERE ID=?""", id)[0])
-        deckInfo["contrib"] = [
-            contribID
-            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTORS WHERE DeckID=?", id)
-            for contribID in tp
-        ]
+
+        deckInfo = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(ID=filter.Number(equals=id)),
+            parser=Parser(
+                ID=Type.Number,
+                name=Type.Text, clazz=Type.Select, desc=Type.Text, author=Type.Number,
+                imageURL=Type.Text, timestamp=Type.Text, version=Type.Number
+            )
+        )[0]
+
+        deckInfo['contrib'] = self.notion.query_database(
+            dbID=ID.database.deck.contrib,
+            filter=Filter(DeckID=filter.Number(equals=id)),
+            parser=Parser(ContribID=Type.Number, only_values=True)
+        )
+
         return deckInfo
     
     def _searchDeck(self, kw: str):
         """Search decks with one keyword. Check for name/hashtag (Private use only)"""
-        return set(self._runSQL("SELECT ID FROM DECKLIST WHERE name LIKE ?", f"%{kw}%"))\
-            | set(self._runSQL("SELECT ID FROM DECKLIST WHERE description LIKE ?", f"%#{kw}%"))
+
+        name = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(name=filter.Text(contains=kw)),
+            parser=self.ID_extractor
+        )
+
+        hashtag = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(desc=filter.Text(contains='#'+kw)),
+            parser=self.ID_extractor
+        )
+
+        return set(name) | set(hashtag)
 
     def _searchClass(self, clazz: str):
         """Search Only for provided class (Private use only)"""
-        return set(self._runSQL("SELECT ID FROM DECKLIST WHERE class=?", clazz))
+        return set(self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(clazz=filter.Select(equals=clazz)),
+            parser=self.ID_extractor
+        ))
     
     def _searchAuthor(self, author: int):
         """Search only for author id (Private use only)"""
-        return set(self._runSQL("""
-            SELECT ID FROM DECKLIST WHERE author=?
-            UNION
-            SELECT DeckID FROM CONTRIBUTORS WHERE ContribID=?
-        """, author))
+        
+        author = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(author=filter.Number(equals=author)),
+            parser=self.ID_extractor
+        )
+
+        contrib = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(ContribID=filter.Number(equals=author)),
+            parser=Parser(DeckID=Type.Number, only_values=True)
+        )
+        
+        return set(author) | set(contrib)
 
     def searchDeck(self, query: str, clazz: str, author: int):
         """Search decks with one or more keywords
@@ -116,7 +155,7 @@ class DeckList(DB):
             if rst: rst &= tmp
             else: rst = tmp
         
-        return [self.searchDeckByID(row['id']) for row in rst]
+        return [self.searchDeckByID(id) for id in rst]
 
     def hasDeck(self, name: str):
         """Check if database has deck with provided name
@@ -131,7 +170,12 @@ class DeckList(DB):
         This method returns whether database has deck with that name. Type: :class:`bool`
 
         ."""
-        return len(self._runSQL("SELECT * FROM DECKLIST WHERE name=?", name)) > 0
+
+        return sum(self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(name=filter.Text(equals=name)),
+            parser=lambda result: 1
+        )) > 0
 
     def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
         """Add deck in database
@@ -155,13 +199,23 @@ class DeckList(DB):
             - ID of author of this deck
         
         ."""
-        self._runSQL("""
-            INSERT INTO DECKLIST (name, class, description, imageURL, author)
-            VALUES(?,?,?,?,?)
-        """, name, clazz, desc, imageURL, author)
+
+        self.notion.add_database(
+            dbID=ID.database.deck.data,
+
+            name=prop.Title(name),
+            desc=prop.Text(desc),
+            clazz=prop.Select(clazz),
+            author=prop.Number(author),
+            imageURL=prop.Text(imageURL),
+            timestamp=prop.Text(util.now().strftime("%Y/%m/%d")),
+            version=prop.Number(1)
+        )
 
     def updateDeck(self, name: str, contrib: int, imageURL: str = '', desc: str = ''):
-        """Update deck image or description
+        """DEPRECATED: I didnt added `update database` feature: will be updated soon
+        
+        Update deck image or description
 
         This method automatically add contributor information and increase version number
 
@@ -212,7 +266,9 @@ class DeckList(DB):
         self._runSQL("UPDATE DECKLIST SET version = version + 1 WHERE ID=?", deckID)
 
     def deleteDeck(self, deckID: int, reqID: int):
-        """Delete deck from database
+        """DEPRECATED: I didnt added `delete database` feature: will be updated soon
+
+        Delete deck from database
 
         Only uploader must be able to delete the deck.
 
@@ -254,7 +310,9 @@ class DeckList(DB):
         return deckInfo
 
     def changePack(self, newPack: str):
-        """Delete all deck in database, and change pack name
+        """DEPRECATED: I didnt added `delete database` feature: will be updated soon
+
+        Delete all deck in database, and change pack name
 
         WARNING: This method will delete all deck.
         Although this method make backup automatically, you should double check before calling this method."""
@@ -271,18 +329,23 @@ class DeckList(DB):
         Analyze report. Type: :class:`discord.Embed`
 
         ."""
-        data = {k: v for k, v in self._runSQL("SELECT class, COUNT(*) FROM DECKLIST GROUP BY class")}
-        total = sum(data.values())
-        print(data)
+        statistic = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=None,
+            parser=Parser(only_values=True, clazz=Parser.Type.Select)
+        )
+        classes = set(statistic)
+        total = len(statistic)
+        data = { clazz: statistic.count(clazz) for clazz in classes }
 
         embed = discord.Embed(
             title=f'총 {total}개 덱 분석 결과',
             color=0x72e4f3
         )
-        for clazz in data.keys():
+        for clazz in classes:
             embed.add_field(
                 name=clazz,
-                value=f"{data[clazz]:2}개 (점유율: {round(data[clazz]/total*100):5.2f}%)"
+                value=f"{data[clazz]}개 (점유율: {round(data[clazz]/total*100):.2f}%)"
             )
         return embed
 

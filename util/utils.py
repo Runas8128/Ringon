@@ -1,25 +1,22 @@
+from typing import List
 from datetime import datetime, timedelta, timezone
 
-from .baseDB import DB
+from .pytion import Notion, ID
 
-class Util(DB):
+class Util:
     def __init__(self):
-        super().__init__('DB/util.db')
+        self.notion = Notion()
     
     def now(self):
         return datetime.now(tz=timezone(offset=timedelta(hours=9)))
     
     def getBlockWord(self):
-        return [
-            row['value'] for row in
-            self._runSQL("SELECT value FROM UTIL WHERE prop='wordBlock'")
-        ]
+        return self.notion.get_block_text_list(ID.block.word)
     
     def getPackInfo(self):
-        result = self._runSQL("SELECT value FROM UTIL WHERE prop='pack'")
-        return result[0]['value']
+        return self.notion.get_block_text(ID.block.pack)
     
     def setPackName(self, name: str):
-        self._runSQL("UPDATE UTIL SET value=? WHERE prop='pack'", name)
+        self.notion.update_block_text(ID.block.pack, name)
 
 util = Util()

@@ -3,7 +3,7 @@ from typing import List
 import discord
 from discord.ext import commands
 
-from .load_token import load_token
+from .load_token import provider
 
 class MyBot(commands.Bot):
     def __init__(self, is_testing: bool, testCogs: List[str] = []):
@@ -14,7 +14,8 @@ class MyBot(commands.Bot):
             case_insensitive=True
         )
 
-        self.is_testing = is_testing
+        if is_testing:
+            provider.enable_test()
         self.target_guild = discord.Object(
             id=823359663973072957 if self.is_testing else 758478112979288094
         )
@@ -22,7 +23,7 @@ class MyBot(commands.Bot):
     
     def run(self):
         """get token automatically and run bot."""
-        token = load_token('discord', self.is_testing)
+        token = provider.load_token('discord')
         super().run(token)
     
     async def setup_hook(self):

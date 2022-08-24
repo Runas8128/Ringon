@@ -85,6 +85,8 @@ class CogCheck(commands.Cog):
             - all member who reacted with emoji not in `indiEmoji` are stored in "그 외" key
             - all member who didn't reacted are stored in "반응 안함" key
 
+        NOTE: set 반응 안함 keys to "All user not in another keys or has ignore role"
+
         ."""
 
         userList: List[discord.Member] = [user for user in guild.members if not user.bot]
