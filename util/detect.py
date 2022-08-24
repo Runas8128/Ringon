@@ -1,6 +1,6 @@
 import random
 
-from pytion import filter, prop, ID
+from pytion import filter, ID
 from pytion import Notion, Filter, Parser
 
 class Detect:
