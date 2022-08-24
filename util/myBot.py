@@ -14,8 +14,10 @@ class MyBot(commands.Bot):
             case_insensitive=True
         )
 
-        if is_testing:
-            provider.enable_test()
+        self.is_testing = is_testing
+
+        if self.is_testing: provider.enable_test()
+        
         self.target_guild = discord.Object(
             id=823359663973072957 if self.is_testing else 758478112979288094
         )
