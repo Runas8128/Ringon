@@ -48,6 +48,13 @@ class CogEvent(commands.Cog):
                 return
     
     @commands.Cog.listener()
+    async def on_thread_create(self, thread: discord.Thread):
+        if self.bot.is_testing:
+            await thread.send("Hello! I found some new thread")
+        else:
+            await thread.add_user(discord.Object(272266200812093441))
+    
+    @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandNotFound):
             return
