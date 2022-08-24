@@ -1,7 +1,8 @@
 from typing import List
 from datetime import datetime, timedelta, timezone
 
-from .pytion import Notion, ID
+from pytion import ID
+from pytion import Notion
 
 class Util:
     def __init__(self):
