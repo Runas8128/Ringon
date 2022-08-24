@@ -13,7 +13,7 @@ from pytion import Notion, Filter, Parser
 class DeckList:
     def __init__(self):
         self.notion = Notion()
-        self.ID_extractor = Parser(ID=Type.Number, only_values=True)
+        self.ID_extractor = Parser(only_values=True, ID=Parser.Type.Number)
     
     def loadHistCh(self, bot: MyBot):
         """Load `역사관` channel when bot is ready

@@ -76,7 +76,7 @@ class Notion:
             method="POST",
             url=f"/databases/{dbID}/query",
             data=None if filter == None else {'filter': filter.to_dict()}
-        ).json()['results']
+        ).json().get('results', [])
         
         return [parser(result) for result in results]
     

@@ -11,7 +11,7 @@ class Parser:
         Number = auto()
     
     def __init__(self, only_values: bool = False, **kwargs):
-        self.func = self.parse_only_values if self.only_values else self.parse_with_key
+        self.func = self.parse_only_values if only_values else self.parse_with_key
         self.kwargs = kwargs
     
     def __call__(self, result: dict):
