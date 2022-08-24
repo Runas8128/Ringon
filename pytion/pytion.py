@@ -26,7 +26,7 @@ class Notion:
             headers={
                 "Authorization":    "Bearer " + provider.load_token('notion'),
                 "Content-Type":     "application/json",
-                "Notion-Version":   version.value
+                "Notion-Version":   version
             }
         )
     
