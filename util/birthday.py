@@ -1,13 +1,8 @@
 from typing import List
 from datetime import datetime
 
-from .pytion import Notion, ID
-
-def birthdayParser(result: dict) -> int:
-    """NOTE: Replace to pytion.Parser(id=Type.Number)"""
-
-    properties = result['properties']
-    return properties['id']['number']
+from pytion import ID, filter
+from pytion import Notion, Filter, Parser
 
 class BirthdayDB:
     def __init__(self):
@@ -26,8 +21,8 @@ class BirthdayDB:
         date = now.strftime("%m/%d")
         self.notion.query_database(
             dbID=ID.database.birthday,
-            filter={ 'property': 'date', 'rich_text': { 'equals': date } },
-            parser=birthdayParser
+            filter=Filter(date=filter.Text(equals=date)),
+            parser=Parser(only_values=True, id=Parser.Type.Number)
         )
 
 birthdayDB = BirthdayDB()
