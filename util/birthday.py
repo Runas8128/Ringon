@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime
 
-from pytion import ID, filter
+from pytion import ID, filter, parser
 from pytion import Notion, Filter, Parser
 
 class BirthdayDB:
@@ -22,7 +22,7 @@ class BirthdayDB:
         self.notion.query_database(
             dbID=ID.database.birthday,
             filter=Filter(date=filter.Text(equals=date)),
-            parser=Parser(only_values=True, id=Parser.Type.Number)
+            parser=Parser(only_values=True, id=parser.Number)
         )
 
 birthdayDB = BirthdayDB()

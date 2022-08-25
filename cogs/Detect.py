@@ -14,7 +14,7 @@ class CogDetect(commands.Cog):
     async def on_message(self, message: discord.Message):
         rst = detect.tryGet(message.content)
         if rst != None:
-            await message.channel.trigger_typing()
+            await message.channel.typing()
             await message.channel.send(rst)
     
     @app_commands.command(

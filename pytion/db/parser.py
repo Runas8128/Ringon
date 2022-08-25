@@ -2,14 +2,21 @@
 parser=Parser(ID=Type.Number)
 """
 
-from enum import Enum, auto
+from dataclasses import dataclass
+
+@dataclass
+class Type:
+    _type: str
+    
+    @property
+    def type(self):
+        return self._type
+
+Text = Type("Text")
+Number = Type("Number")
+Select = Type("Select")
 
 class Parser:
-    class Type(Enum):
-        Text = auto()
-        Select = auto()
-        Number = auto()
-    
     def __init__(self, only_values: bool = False, **kwargs):
         self.func = self.parse_only_values if only_values else self.parse_with_key
         self.kwargs = kwargs
@@ -22,7 +29,7 @@ class Parser:
         data = []
 
         for name in self.kwargs.keys():
-            type = self.kwargs[name]
+            type: Type = self.kwargs[name]
             if not isinstance(type, Type):
                 raise TypeError(type)
 
@@ -31,12 +38,13 @@ class Parser:
             except KeyError as E:
                 raise ValueError(name) from E
             
-            if type == Type.Text:
-                prop = prop.get('title', prop).get('rich_text', prop)
+            if type == Text:
+                if 'title' in prop: prop = prop['title']
+                if 'rich_text' in prop: prop = prop['rich_text']
                 data.append(prop[0]['plain_text'])
-            elif type == Type.Select:
+            elif type == Select:
                 data.append(prop['select']['name'])
-            elif type == Type.Number:
+            elif type == Number:
                 data.append(prop['number'])
             else:
                 raise NotImplementedError(type)
@@ -58,16 +66,15 @@ class Parser:
             except KeyError as E:
                 raise ValueError(name) from E
             
-            if type == Type.Text:
-                prop = prop.get('title', prop).get('rich_text', prop)
+            if type == Text:
+                if 'title' in prop: prop = prop['title']
+                if 'rich_text' in prop: prop = prop['rich_text']
                 data[name] = prop[0]['plain_text']
-            elif type == Type.Select:
+            elif type == Select:
                 data[name] = prop['select']['name']
-            elif type == Type.Number:
+            elif type == Number:
                 data[name] = prop['number']
             else:
                 raise NotImplementedError(type)
         
-        if self.rstType == list:
-            data = list(data.values())
         return data

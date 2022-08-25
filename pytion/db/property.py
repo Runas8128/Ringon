@@ -21,7 +21,7 @@ class Title(RichText, BaseProperty):
 @dataclass
 class Text(RichText, BaseProperty):
     def to_dict(self):
-        data = super(Title, self).to_dict()
+        data = super(Text, self).to_dict()
         return { 'rich_text': data }
 
 @dataclass

@@ -1,6 +1,6 @@
 import random
 
-from pytion import filter, ID
+from pytion import filter, parser, ID
 from pytion import Notion, Filter, Parser
 
 class Detect:
@@ -15,7 +15,7 @@ class Detect:
             filter=None,
             parser=Parser(
                 only_values=True,
-                target=Parser.Type.Text, result=Parser.Type.Text
+                target=parser.Text, result=parser.Text
             )
         )
 
@@ -24,7 +24,7 @@ class Detect:
             filter=None,
             parser=Parser(
                 only_values=True,
-                target=Parser.Type.Text, result=Parser.Type.Text, ratio=Parser.Type.Number
+                target=parser.Text, result=parser.Text, ratio=parser.Number
             )
         )
 
@@ -50,12 +50,12 @@ class Detect:
         full = len(self.notion.query_database(
             dbID=ID.database.detect.full,
             filter=None,
-            parser=Parser(only_values=True, target=Parser.Type.Text)
+            parser=Parser(only_values=True, target=parser.Text)
         ))
         prob = len(set(self.notion.query_database(
             dbID=ID.database.detect.prob,
             filter=None,
-            parser=Parser(only_values=True, target=Parser.Type.Text)
+            parser=Parser(only_values=True, target=parser.Text)
         )))
         return full + prob
     
@@ -64,17 +64,17 @@ class Detect:
         FullMatch = self.notion.query_database(
             dbID=ID.database.detect.full,
             filter=Filter(target=filter.Text(equals=tar)),
-            parser=Parser(only_values=True, result=Parser.Type.Text)
+            parser=Parser(only_values=True, result=parser.Text)
         )
-        if len(FullMatch) > 1:
+        if len(FullMatch) >= 1:
             return FullMatch[0]
         
         ProbMatch = self.notion.query_database(
             dbID=ID.database.detect.prob,
             filter=Filter(target=filter.Text(equals=tar)),
-            parser=Parser(only_values=True, result=Parser.Type.Text, ratio=Parser.Type.Number)
+            parser=Parser(only_values=True, result=parser.Text, ratio=parser.Number)
         )
-        if len(ProbMatch) > 1:
+        if len(ProbMatch) >= 1:
             rsts, ratios = zip(*ProbMatch)
             rst = random.choices(rsts, weights=ratios, k=1)
             return rst[0]

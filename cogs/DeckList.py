@@ -54,7 +54,7 @@ class CogDeckList(commands.Cog):
             # This auto-add Logic is not triggered in above channels
             return
         
-        await message.add_reaction("<:Tldlr:805678671527936010>")
+        await message.add_reaction(self.emojiMap[message.channel.name])
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
@@ -64,11 +64,15 @@ class CogDeckList(commands.Cog):
             proceed deck add logic
         """
 
-        if not (isinstance(payload.emoji, (discord.Emoji, discord.PartialEmoji)) and payload.emoji.id == 805678671527936010):
-            # This auto-add Logic triggered with this emoji
+        channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
+
+        if not (
+            isinstance(payload.emoji, (discord.Emoji, discord.PartialEmoji)) and
+            payload.emoji.id == self.emojiMap[channel.name].id
+        ):
+            # This auto-add Logic triggered with pre-defined emoji
             return
         
-        channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
         orgMsg = await channel.fetch_message(payload.message_id)
         
         if orgMsg.author != payload.member:
@@ -120,7 +124,7 @@ class CogDeckList(commands.Cog):
         author: discord.Member = None
     ):
         try:
-            view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author), self.emojiMap)
+            view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author.id), self.emojiMap)
             await interaction.response.send_message(embed=view.makeEmbed(), view=view)
         except ValueError as E:
             await interaction.response.send_message(E.args[0])
@@ -214,7 +218,7 @@ class CogDeckList(commands.Cog):
         author = orgMsg.author.id
 
         deckList.addDeck(name, clazz, desc, imageURL, author)
-        await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!")
+        await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
     
     async def _updateDeck(self, orgMsg: discord.Message, name: str):
         """|coro|
@@ -239,7 +243,7 @@ class CogDeckList(commands.Cog):
         
         try:
             deckList.updateDeck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
-            await orgMsg.reply("덱 업데이트를 성공적으로 마쳤습니다!")
+            await orgMsg.reply("덱 업데이트를 성공적으로 마쳤습니다!", mention_author=False)
         except ValueError as v:
             await orgMsg.reply(str(v))
 

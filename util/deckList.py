@@ -7,13 +7,13 @@ from discord.ext import commands
 from .myBot import MyBot
 from .utils import util
 
-from pytion import filter, prop, ID
+from pytion import filter, parser, prop, ID
 from pytion import Notion, Filter, Parser
 
 class DeckList:
     def __init__(self):
         self.notion = Notion()
-        self.ID_extractor = Parser(only_values=True, ID=Parser.Type.Number)
+        self.ID_extractor = Parser(only_values=True, ID=parser.Number)
     
     def loadHistCh(self, bot: MyBot):
         """Load `역사관` channel when bot is ready
@@ -54,16 +54,16 @@ class DeckList:
             dbID=ID.database.deck.data,
             filter=Filter(ID=filter.Number(equals=id)),
             parser=Parser(
-                ID=Type.Number,
-                name=Type.Text, clazz=Type.Select, desc=Type.Text, author=Type.Number,
-                imageURL=Type.Text, timestamp=Type.Text, version=Type.Number
+                ID=parser.Number,
+                name=parser.Text, clazz=parser.Select, desc=parser.Text, author=parser.Number,
+                imageURL=parser.Text, timestamp=parser.Text, version=parser.Number
             )
         )[0]
 
         deckInfo['contrib'] = self.notion.query_database(
             dbID=ID.database.deck.contrib,
             filter=Filter(DeckID=filter.Number(equals=id)),
-            parser=Parser(ContribID=Type.Number, only_values=True)
+            parser=Parser(ContribID=parser.Number, only_values=True)
         )
 
         return deckInfo
@@ -105,7 +105,7 @@ class DeckList:
         contrib = self.notion.query_database(
             dbID=ID.database.deck.data,
             filter=Filter(ContribID=filter.Number(equals=author)),
-            parser=Parser(DeckID=Type.Number, only_values=True)
+            parser=Parser(DeckID=parser.Number, only_values=True)
         )
         
         return set(author) | set(contrib)
@@ -170,7 +170,7 @@ class DeckList:
         This method returns whether database has deck with that name. Type: :class:`bool`
 
         ."""
-
+        
         return sum(self.notion.query_database(
             dbID=ID.database.deck.data,
             filter=Filter(name=filter.Text(equals=name)),
@@ -332,7 +332,7 @@ class DeckList:
         statistic = self.notion.query_database(
             dbID=ID.database.deck.data,
             filter=None,
-            parser=Parser(only_values=True, clazz=Parser.Type.Select)
+            parser=Parser(only_values=True, clazz=parser.Select)
         )
         classes = set(statistic)
         total = len(statistic)
