@@ -1,3 +1,4 @@
+from typing import Optional
 import httpx
 
 from util.load_token import provider
@@ -22,6 +23,9 @@ class Block:
                 "Notion-Version":   version
             }
         )
+    
+    def request(self, method: str, url: str, data: Optional[dict]=None):
+        return self.client.request(method, url, data=None if data == None else json.dumps(data).encode())
     
     def get_text(self):
         content = self.request(method="GET", url="/").json()
