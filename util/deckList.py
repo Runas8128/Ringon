@@ -146,7 +146,7 @@ class DeckList:
             else: rst = tmp
         
         if author != None:
-            tmp = self._searchAuthor(author.id)
+            tmp = self._searchAuthor(str(author.id))
             if rst: rst &= tmp
             else: rst = tmp
         
