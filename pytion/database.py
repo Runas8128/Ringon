@@ -3,24 +3,14 @@ import json, httpx
 
 from util.load_token import provider
 
+from .version import Version
 from .db.filter import Filter
-from .db.property import BaseProperty, Text
+from .db.property import BaseProperty
 
-def parse_richtext(richTextObj: dict):
-    if 'title' in richTextObj:
-        richTextObj = richTextObj['title']
-    if 'rich_text' in richTextObj:
-        richTextObj = richTextObj['rich_text']
-    return richTextObj[0]['plain_text']
-
-class Notion:
-    class Version:
-        v1 =            "2021-05-13"
-        v2 =            "2021-08-16"
-        v3 = default =  "2022-02-22"
-        v4 =            "2022-06-28"
-    
-    def __init__(self, *, version: Version = Version.default):
+class Database:
+    def __init__(self, *, dbID: str, version: str = Version.default):
+        self.id = dbID
+        
         self.client = httpx.Client(
             base_url="https://api.notion.com/v1",
             headers={
@@ -33,10 +23,9 @@ class Notion:
     def request(self, method: str, url: str, data: Optional[dict]=None):
         return self.client.request(method, url, data=None if data == None else json.dumps(data).encode())
     
-    def add_database(self, dbID: str, **properties: BaseProperty):
+    def add_database(self, **properties: BaseProperty):
         """ Usage
         notion.add_database(
-            dbID=ID.database.deck.data,
             name=property.Title(name),
             desc=property.Text(desc),
             clazz=property.Select(clazz),
@@ -52,20 +41,18 @@ class Notion:
         resp = self.request(
             method='POST',
             url='/pages',
-            data={'parent': { 'database_id': dbID }, 'properties': properties, 'children': []}
+            data={'parent': { 'database_id': self.id }, 'properties': properties, 'children': []}
         )
 
         return resp.is_success
     
     def query_database(
         self,
-        dbID: str,
         filter: Optional[Filter],
         parser: Callable[[dict], Any]
     ):
         """ Usage
             notion.query_database(
-                dbID=ID.database.deck.data,
                 filter=Filter(rule="and", name=filter.Text(contains=kw), ...),
                 parser=Parser(ID=Type.Number, only_values=True)
             )
@@ -74,7 +61,7 @@ class Notion:
         
         results = self.request(
             method="POST",
-            url=f"/databases/{dbID}/query",
+            url=f"/databases/{self.id}/query",
             data=None if filter == None else {'filter': filter.to_dict()}
         ).json().get('results', [])
         
@@ -103,38 +90,6 @@ class Notion:
             method='PATCH',
             url=f'/pages/{pageID}',
             data={'properties': properties}
-        )
-
-        return resp.is_success
-    
-    def get_block_text(self, blockID: str):
-        content = self.request(method="GET", url=f"/blocks/{blockID}").json()
-        return parse_richtext(content['paragraph'])
-    
-    def get_block_text_list(self, rootBlockID: str):
-        content = self.request(method="GET", url=f"/blocks/{rootBlockID}/children").json()
-        return [parse_richtext(item['paragraph']) for item in content['results']]
-
-    def update_block_text(self, blockID: str, newText: str):
-        resp = self.request(
-            method="PATCH",
-            url=f"/blocks/{blockID}",
-            data={ "paragraph": Text(newText).to_dict() }
-        )
-
-        return resp.is_success
-    
-    def append_text(self, rootBlockID: str, newText: str):
-        resp = self.request(
-            method="PATCH",
-            url=f"/blocks/{rootBlockID}/children",
-            data={
-                "children": [{
-                    "object": "block",
-                    "type": "paragraph",
-                    "paragraph": Text(newText).to_dict()
-                }]
-            }
         )
 
         return resp.is_success
