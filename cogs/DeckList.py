@@ -124,7 +124,7 @@ class CogDeckList(commands.Cog):
         author: discord.Member = None
     ):
         try:
-            view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author.id), self.emojiMap)
+            view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author), self.emojiMap)
             await interaction.response.send_message(embed=view.makeEmbed(), view=view)
         except ValueError as E:
             await interaction.response.send_message(E.args[0])

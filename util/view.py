@@ -157,8 +157,8 @@ class DeckListView(baseView):
             options=[
                 discord.SelectOption(
                     label=deck['name'],
-                    description=deck['description'],
-                    emoji=self.emojiMap[deck['class']],
+                    description=deck['desc'],
+                    emoji=self.emojiMap[deck['clazz']],
                     value=str(idx)
                 )
                 for idx, deck in enumerate(self.decks)

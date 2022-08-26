@@ -105,7 +105,7 @@ class DeckList:
         
         return set(author) | set(contrib)
 
-    def searchDeck(self, query: str, clazz: str, author: int):
+    def searchDeck(self, query: str, clazz: str, author: discord.User):
         """Search decks with one or more keywords
         
         Parameters
@@ -115,8 +115,8 @@ class DeckList:
             - this function will split it by space automatically.
         * clazz: :class:`str`
             - your class to search, None to All class
-        * author: :class:`int`
-            - ID of deck author, None to All member
+        * author: :class:`discord.User`
+            - deck author object, None to All member
         
         Return value
         ------------
@@ -146,7 +146,7 @@ class DeckList:
             else: rst = tmp
         
         if author != None:
-            tmp = self._searchAuthor(author)
+            tmp = self._searchAuthor(author.id)
             if rst: rst &= tmp
             else: rst = tmp
         
