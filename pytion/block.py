@@ -10,7 +10,7 @@ def parse_richtext(richTextObj: dict):
         richTextObj = richTextObj['rich_text']
     return richTextObj[0]['plain_text']
 
-class Page:
+class Block:
     def __init__(self, *, blockID: str, version: str = Version.default):
         self.client = httpx.Client(
             base_url=f"https://api.notion.com/v1/blocks/{blockID}",
@@ -21,14 +21,14 @@ class Page:
             }
         )
     
-    def get_block_text(self, blockID):
+    def get_text(self, blockID):
         content = self.request(method="GET", url="/").json()
         return parse_richtext(content['paragraph'])
     
-    def get_block_text_list(self):
+    def get_text_list(self):
         content = self.request(method="GET", url="/children").json()
         return [parse_richtext(item['paragraph']) for item in content['results']]
 
-    def update_block_text(self, newText: str):
+    def update_text(self, newText: str):
         resp = self.request(method="PATCH", url="/", data={"paragraph": Text(newText).to_dict()})
         return resp.is_success

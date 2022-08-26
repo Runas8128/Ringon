@@ -10,7 +10,7 @@ from .db.property import BaseProperty
 class Database:
     def __init__(self, *, dbID: str, version: str = Version.default):
         self.id = dbID
-        
+
         self.client = httpx.Client(
             base_url="https://api.notion.com/v1",
             headers={
@@ -23,7 +23,7 @@ class Database:
     def request(self, method: str, url: str, data: Optional[dict]=None):
         return self.client.request(method, url, data=None if data == None else json.dumps(data).encode())
     
-    def add_database(self, **properties: BaseProperty):
+    def append(self, **properties: BaseProperty):
         """ Usage
         notion.add_database(
             name=property.Title(name),
@@ -46,7 +46,7 @@ class Database:
 
         return resp.is_success
     
-    def query_database(
+    def query(
         self,
         filter: Optional[Filter],
         parser: Callable[[dict], Any]
@@ -67,10 +67,10 @@ class Database:
         
         return [parser(result) for result in results]
     
-    def delete_database(self, pageID: str):
+    def delete(self, pageID: str):
         return self.request('DELETE', f'/blocks/{pageID}').is_success
     
-    def update_database(self, pageID: str, **properties: BaseProperty):
+    def update(self, pageID: str, **properties: BaseProperty):
         """ Usage
         notion.update_database(
             pageID=pageID,

@@ -1,7 +1,7 @@
 from . import ID
 
 from .database import Database
-from .page import Page
+from .block import Block
 from .version import Version
 
 from .db import property as prop, filter, parser
