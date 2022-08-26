@@ -81,7 +81,7 @@ class Notion:
         return [parser(result) for result in results]
     
     def delete_database(self, pageID: str):
-        return self.request('DELETE', f'/blocks/{pageID}')
+        return self.request('DELETE', f'/blocks/{pageID}').is_success
     
     def update_database(self, dbID: str, **properties: BaseProperty):
         """ Usage
