@@ -80,6 +80,33 @@ class Notion:
         
         return [parser(result) for result in results]
     
+    def delete_database(self, pageID: str):
+        return self.request('DELETE', f'/blocks/{pageID}')
+    
+    def update_database(self, dbID: str, **properties: BaseProperty):
+        """ Usage
+        notion.update_database(
+            dbID=ID.database.deck.data,
+            desc=property.Text(desc),
+            clazz=property.Select(clazz),
+            version=property.Number(ver+1),
+            ...
+        )
+        """
+
+        properties = {
+            key: properties[key].to_dict()
+            for key in properties.keys()
+        }
+
+        resp = self.request(
+            method='PATCH',
+            url='/pages',
+            data={'properties': properties}
+        )
+
+        return resp.is_success
+    
     def get_block_text(self, blockID: str):
         content = self.request(method="GET", url=f"/blocks/{blockID}").json()
         return parse_richtext(content['paragraph'])
