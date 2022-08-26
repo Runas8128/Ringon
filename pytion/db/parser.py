@@ -17,6 +17,38 @@ Number = Type("Number")
 Select = Type("Select")
 PageID = Type("PageID")
 
+def parse_richText(rich_text: dict):
+    if 'paragraph' in rich_text.keys():
+        rich_text = rich_text['paragraph']
+    if 'title' in rich_text.keys():
+        rich_text = rich_text['title']
+    if 'rich_text' in rich_text.keys():
+        rich_text = rich_text['rich_text']
+    
+    try:
+        return rich_text[0]['plain_text']
+    except IndexError:
+        return ""
+
+parser_map = {
+    Text: parse_richText,
+    Number: lambda prop: prop['number'],
+    Select: lambda prop: prop['select']['name']
+}
+
+def _parser_base(result: dict, name: str, type: Type):
+    if not isinstance(type, Type):
+        raise TypeError(type)
+    
+    if type == PageID:
+        return result['id']
+    
+    properties = result['properties']
+    if type in parser_map.keys():
+        return parser_map[type](result['properties'][name])
+    else:
+        raise NotImplementedError(type)
+
 class Parser:
     def __init__(self, only_values: bool = False, **kwargs):
         self.func = self.parse_only_values if only_values else self.parse_with_key
@@ -26,64 +58,9 @@ class Parser:
         return self.func(result)
     
     def parse_only_values(self, result: dict):
-        properties = result['properties']
-        data = []
-
-        for name in self.kwargs.keys():
-            type: Type = self.kwargs[name]
-            if not isinstance(type, Type):
-                raise TypeError(type)
-            
-            if type == PageID:
-                data.append(result['id'])
-                continue
-
-            try:
-                prop = properties[name]
-            except KeyError as E:
-                raise ValueError(name) from E
-            
-            if type == Text:
-                if 'title' in prop: prop = prop['title']
-                if 'rich_text' in prop: prop = prop['rich_text']
-                data.append(prop[0]['plain_text'])
-            elif type == Select:
-                data.append(prop['select']['name'])
-            elif type == Number:
-                data.append(prop['number'])
-            else:
-                raise NotImplementedError(type)
-        
+        data = [_parser_base(result, name, self.kwargs[name]) for name in self.kwargs.keys()]
         if len(data) == 1: data = data[0]
         return data
 
     def parse_with_key(self, result: dict):
-        properties = result['properties']
-        data = {}
-
-        for name in self.kwargs.keys():
-            type = self.kwargs[name]
-            if not isinstance(type, Type):
-                raise TypeError(type)
-            
-            if type == PageID:
-                data[name] = result['id']
-                continue
-
-            try:
-                prop = properties[name]
-            except KeyError as E:
-                raise ValueError(name) from E
-            
-            if type == Text:
-                if 'title' in prop: prop = prop['title']
-                if 'rich_text' in prop: prop = prop['rich_text']
-                data[name] = prop[0]['plain_text']
-            elif type == Select:
-                data[name] = prop['select']['name']
-            elif type == Number:
-                data[name] = prop['number']
-            else:
-                raise NotImplementedError(type)
-        
-        return data
+        return {name: _parser_base(result, name, self.kwargs[name]) for name in self.kwargs.keys()}
