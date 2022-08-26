@@ -5,7 +5,6 @@ from pytion import Database, Filter, Parser
 
 class Detect:
     def __init__(self):
-        self.notion = Notion()
         self.full_db = Database(dbID=ID.database.detect.full)
         self.prob_db = Database(dbID=ID.database.detect.prob)
     

@@ -1,3 +1,5 @@
+import httpx
+
 from util.load_token import provider
 
 from .version import Version
