@@ -8,12 +8,13 @@ from .myBot import MyBot
 from .utils import util
 
 from pytion import filter, parser, prop, ID
-from pytion import Database, Filter, Parser
+from pytion import Database, Block, Filter, Parser
 
 class DeckList:
     def __init__(self):
         self.data_db = Database(dbID=ID.database.deck.data)
         self.contrib_db = Database(dbID=ID.database.deck.contrib)
+        self.ID_block = Block(blockID=ID.block.deckID)
         self.ID_extractor = Parser(only_values=True, ID=parser.Number)
     
     def loadHistCh(self, bot: MyBot):
@@ -193,6 +194,9 @@ class DeckList:
         
         ."""
 
+        ID = int(self.ID_block.get_text()) + 1
+        self.ID_block.update_text(str(ID))
+
         self.data_db.append(
             name=prop.Title(name),
             desc=prop.Text(desc),
@@ -200,7 +204,8 @@ class DeckList:
             author=prop.Number(author),
             imageURL=prop.Text(imageURL),
             timestamp=prop.Text(util.now().strftime("%Y/%m/%d")),
-            version=prop.Number(1)
+            version=prop.Number(1),
+            ID=prop.Number(ID)
         )
 
     def updateDeck(self, name: str, contrib: int, imageURL: str, desc: str = ''):
