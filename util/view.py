@@ -92,8 +92,8 @@ class DeckListView(baseView):
                 self.btnGoto.label = "-"
                 self.btnDelete.disabled = True
     
-    def __getMention(self, id: int):
-        member = self.guild.get_member(id)
+    def __getMention(self, id: str):
+        member = self.guild.get_member(int(id))
         return "(정보 없음)" if member == None else member.mention
 
     def makeEmbed(self):

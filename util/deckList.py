@@ -44,11 +44,11 @@ class DeckList:
         Return value
         ------------
         Deck info for provided id. Type: :class:`dict`
-        * ID `int`, author `int`
+        * ID `int`, author `str`
         * name `str`, class `str`, description `str`
         * version `int`
         * imageURL `str`, timestamp `str`
-        * contrib `List[int]`
+        * contrib `List[str]`
         
         ."""
 
@@ -56,14 +56,14 @@ class DeckList:
             filter=Filter(ID=filter.Number(equals=id)),
             parser=Parser(
                 ID=parser.Number,
-                name=parser.Text, clazz=parser.Select, desc=parser.Text, author=parser.Number,
+                name=parser.Text, clazz=parser.Select, desc=parser.Text, author=parser.Text,
                 imageURL=parser.Text, timestamp=parser.Text, version=parser.Number
             )
         )[0]
 
         deckInfo['contrib'] = self.contrib_db.query(
             filter=Filter(DeckID=filter.Number(equals=id)),
-            parser=Parser(ContribID=parser.Number, only_values=True)
+            parser=Parser(ContribID=parser.Text, only_values=True)
         )
 
         return deckInfo
@@ -201,7 +201,7 @@ class DeckList:
             name=prop.Title(name),
             desc=prop.Text(desc),
             clazz=prop.Select(clazz),
-            author=prop.Number(author),
+            author=prop.Text(author),
             imageURL=prop.Text(imageURL),
             timestamp=prop.Text(util.now().strftime("%Y/%m/%d")),
             version=prop.Number(1),
@@ -235,7 +235,7 @@ class DeckList:
         ."""
         payload = self.data_db.query(
             filter=Filter(name=filter.Text(equals=name)),
-            parser=Parser(pageID=parser.PageID, ID=parser.Number, author=parser.Number, version=parser.Number)
+            parser=Parser(pageID=parser.PageID, ID=parser.Number, author=parser.Text, version=parser.Number)
         )[0]
 
         properties = { 'imageURL': prop.Text(imageURL), 'version': prop.Number(payload['version']+1) }
@@ -246,14 +246,14 @@ class DeckList:
             **properties
         )
         _contrib = self.contrib_db.query(
-            filter=Filter(DeckID=filter.Number(equals=payload['ID']), ContribID=filter.Number(equals=contrib)),
+            filter=Filter(DeckID=filter.Number(equals=payload['ID']), ContribID=filter.Text(equals=contrib)),
             parser=lambda result: 1
         )
 
-        if payload['author'] != contrib and _contrib == []:
+        if payload['author'] != str(contrib) and _contrib == []:
             self.contrib_db.append(
                 DeckID=prop.Number(payload['ID']),
-                ContribID=prop.Number(contrib)
+                ContribID=prop.Text(str(contrib))
             )
 
     def deleteDeck(self, deckID: int, reqID: int):
@@ -285,10 +285,10 @@ class DeckList:
         ."""
         payload = self.data_db.query(
             filter=Filter(ID=filter.Number(equals=deckID)),
-            parser=Parser(author=parser.Number, ID=parser.PageID)
+            parser=Parser(author=parser.Text, ID=parser.PageID)
         )[0]
         
-        if payload['author'] != reqID:
+        if payload['author'] != str(reqID):
             raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
         
         deckInfo = self.searchDeckByID(deckID)
