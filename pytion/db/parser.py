@@ -15,6 +15,7 @@ class Type:
 Text = Type("Text")
 Number = Type("Number")
 Select = Type("Select")
+PageID = Type("PageID")
 
 class Parser:
     def __init__(self, only_values: bool = False, **kwargs):
@@ -32,6 +33,10 @@ class Parser:
             type: Type = self.kwargs[name]
             if not isinstance(type, Type):
                 raise TypeError(type)
+            
+            if type == PageID:
+                data.append(result['id'])
+                continue
 
             try:
                 prop = properties[name]
@@ -60,6 +65,10 @@ class Parser:
             type = self.kwargs[name]
             if not isinstance(type, Type):
                 raise TypeError(type)
+            
+            if type == PageID:
+                data.append(result['id'])
+                continue
 
             try:
                 prop = properties[name]

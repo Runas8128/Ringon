@@ -212,10 +212,8 @@ class DeckList:
             version=prop.Number(1)
         )
 
-    def updateDeck(self, name: str, contrib: int, imageURL: str = '', desc: str = ''):
-        """DEPRECATED: I didnt added `update database` feature: will be updated soon
-        
-        Update deck image or description
+    def updateDeck(self, name: str, contrib: int, imageURL: str, desc: str = ''):
+        """Update deck image or description
 
         This method automatically add contributor information and increase version number
 
@@ -229,10 +227,9 @@ class DeckList:
             - ID of contributor
         * imageURL: :class:`str`
             - Image URL of updated deck
-            - This can be empty (`''`, not `None`)
         * desc: :class:`str`
             - Description of updated deck
-            - This can be empty (`''`, not `None`)
+            - If empty, not update description
         
         Exceptions
         ----------
@@ -240,35 +237,34 @@ class DeckList:
             - raised when both imageURL and desc are empty
 
         ."""
-        query = "UPDATE DECKLIST SET "
-        param = []
+        payload = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(name=filter.Text(equals=name)),
+            parser=Parser(pageID=parser.PageID, ID=parser.Number, author=parser.Number, version=parser.Number)
+        )[0]
 
-        if imageURL == '':
-            if desc == '':
-                raise ValueError("이미지파일과 설명이 모두 비어있습니다!")
-            
-            query += "description=?"
-            param.append(desc)
-        else:
-            query += "imageURL=?"
-            param.append(imageURL)
-            if desc != '':
-                query += ", description=?"
-                param.append(desc)
-        
-        query += " WHERE name=?"
-        param.append(name)
-        self._runSQL(query, *param)
+        properties = { 'imageURL': prop.Text(imageURL), 'version': prop.Number(payload['version']+1) }
+        if desc != '': properties['desc'] = prop.Text(desc)
 
-        deckID, author = self._runSQL("SELECT ID, author FROM DECKLIST WHERE name=?", name)[0]
-        if author != contrib and self._runSQL("SELECT * FROM CONTRIBUTORS WHERE DeckID=? and ContribID=?", deckID, contrib) == []:
-            self._runSQL("INSERT INTO CONTRIBUTORS (DeckID, ContribID) VALUES(?,?)", deckID, contrib)
-        self._runSQL("UPDATE DECKLIST SET version = version + 1 WHERE ID=?", deckID)
+        self.notion.update_database(
+            pageID=payload['pageID'],
+            **properties
+        )
+        _contrib = self.notion.query_database(
+            dbID=ID.database.deck.contrib,
+            filter=Filter(DeckID=filter.Number(equals=payload['ID']), ContribID=filter.Number(equals=contrib)),
+            parser=lambda result: 1
+        )
+
+        if payload['author'] != contrib and _contrib == []:
+            self.notion.add_database(
+                dbID=ID.database.deck.contrib,
+                DeckID=prop.Number(payload['ID']),
+                ContribID=prop.Number(contrib)
+            )
 
     def deleteDeck(self, deckID: int, reqID: int):
-        """DEPRECATED: I didnt added `delete database` feature: will be updated soon
-
-        Delete deck from database
+        """Delete deck from database
 
         Only uploader must be able to delete the deck.
 
@@ -294,18 +290,17 @@ class DeckList:
             - raised when requester is not deck author
 
         ."""
-        author = self._runSQL("SELECT author FROM DECKLIST WHERE ID=?", deckID)[0][0]
+        payload = self.notion.query_database(
+            dbID=ID.database.deck.data,
+            filter=Filter(ID=filter.Number(equals=deckID)),
+            parser=Parser(author=parser.Number, ID=parser.PageID)
+        )[0]
         
-        if author != reqID:
+        if payload['author'] != reqID:
             raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
         
-        deckInfo = dict(self._runSQL("SELECT * FROM DECKLIST WHERE ID=?", deckID)[0])
-        deckInfo["contrib"] = [
-            contribID
-            for tp in self._runSQL("SELECT ContribID FROM CONTRIBUTORS WHERE DeckID=?", deckID)
-            for contribID in tp
-        ]
-        self._runSQL("DELETE FROM DECKLIST WHERE ID=?", deckID)
+        deckInfo = self.searchDeckByID(deckID)
+        self.notion.delete_database(payload['ID'])
         
         return deckInfo
 

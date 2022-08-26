@@ -83,10 +83,10 @@ class Notion:
     def delete_database(self, pageID: str):
         return self.request('DELETE', f'/blocks/{pageID}').is_success
     
-    def update_database(self, dbID: str, **properties: BaseProperty):
+    def update_database(self, pageID: str, **properties: BaseProperty):
         """ Usage
         notion.update_database(
-            dbID=ID.database.deck.data,
+            pageID=pageID,
             desc=property.Text(desc),
             clazz=property.Select(clazz),
             version=property.Number(ver+1),
@@ -101,7 +101,7 @@ class Notion:
 
         resp = self.request(
             method='PATCH',
-            url='/pages',
+            url=f'/pages/{pageID}',
             data={'properties': properties}
         )
 
