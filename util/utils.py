@@ -6,8 +6,8 @@ from pytion import Block
 
 class Util:
     def __init__(self):
-        self.blockWord = Block(ID.block.word)
-        self.pack = Block(ID.block.pack)
+        self.blockWord = Block(blockID=ID.block.word)
+        self.pack = Block(blockID=ID.block.pack)
     
     def now(self):
         return datetime.now(tz=timezone(offset=timedelta(hours=9)))
