@@ -67,7 +67,7 @@ class Parser:
                 raise TypeError(type)
             
             if type == PageID:
-                data.append(result['id'])
+                data[name] = result['id']
                 continue
 
             try:

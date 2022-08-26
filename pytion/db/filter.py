@@ -83,6 +83,7 @@ class Select(SupportEquals, SupportIsEmpty):
 
 class Filter:
     def __init__(self, rule: str="and", **kwargs: BaseOption):
+        self.rule = rule
         self.kwargs = kwargs
     
     def _to_dict(self, key: str):
@@ -95,5 +96,5 @@ class Filter:
         if len(ls) == 0:    return None
         elif len(ls) == 1:  return ls[0]
         else:
-            if rule not in ('and', 'or'): raise ValueError(rule)
-            return { rule: ls }
+            if self.rule not in ('and', 'or'): raise ValueError(self.rule)
+            return { self.rule: ls }
