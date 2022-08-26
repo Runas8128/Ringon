@@ -21,7 +21,7 @@ class Block:
             }
         )
     
-    def get_text(self, blockID):
+    def get_text(self):
         content = self.request(method="GET", url="/").json()
         return parse_richtext(content['paragraph'])
     

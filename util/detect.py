@@ -1,17 +1,18 @@
 import random
 
 from pytion import filter, parser, ID
-from pytion import Notion, Filter, Parser
+from pytion import Database, Filter, Parser
 
 class Detect:
     def __init__(self):
         self.notion = Notion()
+        self.full_db = Database(dbID=ID.database.detect.full)
+        self.prob_db = Database(dbID=ID.database.detect.prob)
     
     def getList(self):
         """get all full-detect keyword-result map with Embed-form"""
 
-        full = self.notion.query_database(
-            dbID=ID.database.detect.full,
+        full = self.full_db.query(
             filter=None,
             parser=Parser(
                 only_values=True,
@@ -19,8 +20,7 @@ class Detect:
             )
         )
 
-        prob = self.notion.query_database(
-            dbID=ID.database.detect.prob,
+        prob = self.prob_db.query(
             filter=None,
             parser=Parser(
                 only_values=True,
@@ -47,13 +47,11 @@ class Detect:
     def getCount(self):
         """get full-detect map length + probability-based detect map length(only count keywords)"""
 
-        full = len(self.notion.query_database(
-            dbID=ID.database.detect.full,
+        full = len(self.full_db.query(
             filter=None,
-            parser=Parser(only_values=True, target=parser.Text)
+            parser=lambda result: 1
         ))
-        prob = len(set(self.notion.query_database(
-            dbID=ID.database.detect.prob,
+        prob = len(set(self.prob_db.query(
             filter=None,
             parser=Parser(only_values=True, target=parser.Text)
         )))
@@ -61,16 +59,14 @@ class Detect:
     
     def tryGet(self, tar: str) -> str:
         """try to get matching result from database"""
-        FullMatch = self.notion.query_database(
-            dbID=ID.database.detect.full,
+        FullMatch = self.full_db.query(
             filter=Filter(target=filter.Text(equals=tar)),
             parser=Parser(only_values=True, result=parser.Text)
         )
         if len(FullMatch) >= 1:
             return FullMatch[0]
         
-        ProbMatch = self.notion.query_database(
-            dbID=ID.database.detect.prob,
+        ProbMatch = self.prob_db.query(
             filter=Filter(target=filter.Text(equals=tar)),
             parser=Parser(only_values=True, result=parser.Text, ratio=parser.Number)
         )

@@ -8,11 +8,12 @@ from .myBot import MyBot
 from .utils import util
 
 from pytion import filter, parser, prop, ID
-from pytion import Notion, Filter, Parser
+from pytion import Database, Filter, Parser
 
 class DeckList:
     def __init__(self):
-        self.notion = Notion()
+        self.data_db = Database(dbID=ID.database.deck.data)
+        self.contrib_db = Database(dbID=ID.database.deck.contrib)
         self.ID_extractor = Parser(only_values=True, ID=parser.Number)
     
     def loadHistCh(self, bot: MyBot):
@@ -50,8 +51,7 @@ class DeckList:
         
         ."""
 
-        deckInfo = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        deckInfo = self.data_db.query(
             filter=Filter(ID=filter.Number(equals=id)),
             parser=Parser(
                 ID=parser.Number,
@@ -60,8 +60,7 @@ class DeckList:
             )
         )[0]
 
-        deckInfo['contrib'] = self.notion.query_database(
-            dbID=ID.database.deck.contrib,
+        deckInfo['contrib'] = self.contrib_db.query(
             filter=Filter(DeckID=filter.Number(equals=id)),
             parser=Parser(ContribID=parser.Number, only_values=True)
         )
@@ -71,14 +70,12 @@ class DeckList:
     def _searchDeck(self, kw: str):
         """Search decks with one keyword. Check for name/hashtag (Private use only)"""
 
-        name = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        name = self.data_db.query(
             filter=Filter(name=filter.Text(contains=kw)),
             parser=self.ID_extractor
         )
 
-        hashtag = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        hashtag = self.data_db.query(
             filter=Filter(desc=filter.Text(contains='#'+kw)),
             parser=self.ID_extractor
         )
@@ -87,8 +84,7 @@ class DeckList:
 
     def _searchClass(self, clazz: str):
         """Search Only for provided class (Private use only)"""
-        return set(self.notion.query_database(
-            dbID=ID.database.deck.data,
+        return set(self.data_db.query(
             filter=Filter(clazz=filter.Select(equals=clazz)),
             parser=self.ID_extractor
         ))
@@ -96,14 +92,12 @@ class DeckList:
     def _searchAuthor(self, author: int):
         """Search only for author id (Private use only)"""
         
-        author = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        author = self.data_db.query(
             filter=Filter(author=filter.Number(equals=author)),
             parser=self.ID_extractor
         )
 
-        contrib = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        contrib = self.data_db.query(
             filter=Filter(ContribID=filter.Number(equals=author)),
             parser=Parser(DeckID=parser.Number, only_values=True)
         )
@@ -171,11 +165,10 @@ class DeckList:
 
         ."""
         
-        return sum(self.notion.query_database(
-            dbID=ID.database.deck.data,
+        return self.data_db.query(
             filter=Filter(name=filter.Text(equals=name)),
             parser=lambda result: 1
-        )) > 0
+        ) != []
 
     def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
         """Add deck in database
@@ -200,9 +193,7 @@ class DeckList:
         
         ."""
 
-        self.notion.add_database(
-            dbID=ID.database.deck.data,
-
+        self.data_db.append(
             name=prop.Title(name),
             desc=prop.Text(desc),
             clazz=prop.Select(clazz),
@@ -237,8 +228,7 @@ class DeckList:
             - raised when both imageURL and desc are empty
 
         ."""
-        payload = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        payload = self.data_db.query(
             filter=Filter(name=filter.Text(equals=name)),
             parser=Parser(pageID=parser.PageID, ID=parser.Number, author=parser.Number, version=parser.Number)
         )[0]
@@ -246,19 +236,17 @@ class DeckList:
         properties = { 'imageURL': prop.Text(imageURL), 'version': prop.Number(payload['version']+1) }
         if desc != '': properties['desc'] = prop.Text(desc)
 
-        self.notion.update_database(
+        self.data_db.update(
             pageID=payload['pageID'],
             **properties
         )
-        _contrib = self.notion.query_database(
-            dbID=ID.database.deck.contrib,
+        _contrib = self.contrib_db.query(
             filter=Filter(DeckID=filter.Number(equals=payload['ID']), ContribID=filter.Number(equals=contrib)),
             parser=lambda result: 1
         )
 
         if payload['author'] != contrib and _contrib == []:
-            self.notion.add_database(
-                dbID=ID.database.deck.contrib,
+            self.contrib_db.append(
                 DeckID=prop.Number(payload['ID']),
                 ContribID=prop.Number(contrib)
             )
@@ -290,8 +278,7 @@ class DeckList:
             - raised when requester is not deck author
 
         ."""
-        payload = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        payload = self.data_db.query(
             filter=Filter(ID=filter.Number(equals=deckID)),
             parser=Parser(author=parser.Number, ID=parser.PageID)
         )[0]
@@ -300,12 +287,12 @@ class DeckList:
             raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
         
         deckInfo = self.searchDeckByID(deckID)
-        self.notion.delete_database(payload['ID'])
+        self.data_db.delete(payload['ID'])
         
         return deckInfo
 
     def changePack(self, newPack: str):
-        """DEPRECATED: I didnt added `delete database` feature: will be updated soon
+        """DEPRECATED: I didnt added `delete all database` feature: will be updated soon
 
         Delete all deck in database, and change pack name
 
@@ -324,8 +311,7 @@ class DeckList:
         Analyze report. Type: :class:`discord.Embed`
 
         ."""
-        statistic = self.notion.query_database(
-            dbID=ID.database.deck.data,
+        statistic = self.data_db.query(
             filter=None,
             parser=Parser(only_values=True, clazz=parser.Select)
         )

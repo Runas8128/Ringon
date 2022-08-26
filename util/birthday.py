@@ -2,11 +2,11 @@ from typing import List
 from datetime import datetime
 
 from pytion import ID, filter, parser
-from pytion import Notion, Filter, Parser
+from pytion import Database, Filter, Parser
 
 class BirthdayDB:
     def __init__(self):
-        self.notion = Notion()
+        self.db = Database(dbID=ID.database.birthday)
     
     def getToday(self, now: datetime) -> List[int]:
         """get IDs for members whom birthday is today
@@ -19,8 +19,7 @@ class BirthdayDB:
         ."""
 
         date = now.strftime("%m/%d")
-        self.notion.query_database(
-            dbID=ID.database.birthday,
+        return self.db.query(
             filter=Filter(date=filter.Text(equals=date)),
             parser=Parser(only_values=True, id=parser.Number)
         )
