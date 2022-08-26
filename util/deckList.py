@@ -90,16 +90,16 @@ class DeckList:
             parser=self.ID_extractor
         ))
     
-    def _searchAuthor(self, author: int):
+    def _searchAuthor(self, author: str):
         """Search only for author id (Private use only)"""
         
         author = self.data_db.query(
-            filter=Filter(author=filter.Number(equals=author)),
+            filter=Filter(author=filter.Text(equals=author)),
             parser=self.ID_extractor
         )
 
         contrib = self.data_db.query(
-            filter=Filter(ContribID=filter.Number(equals=author)),
+            filter=Filter(ContribID=filter.Text(equals=author)),
             parser=Parser(DeckID=parser.Number, only_values=True)
         )
         
