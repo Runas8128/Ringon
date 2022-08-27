@@ -12,10 +12,36 @@ from pytion import Database, Block, Filter, Parser
 
 class DeckList:
     def __init__(self):
+        self.ID_extractor = Parser(only_values=True, ID=parser.Number)
+
+    def load(self):
         self.data_db = Database(dbID=ID.database.deck.data)
         self.contrib_db = Database(dbID=ID.database.deck.contrib)
         self.ID_block = Block(blockID=ID.block.deckID)
-        self.ID_extractor = Parser(only_values=True, ID=parser.Number)
+
+        self.data = self.data_db.query(
+            filter=None,
+            parser=Parser(
+                ID=parser.Number,
+                name=parser.Text, clazz=parser.Select, desc=parser.Text, author=parser.Text,
+                imageURL=parser.Text, timestamp=parser.Text, version=parser.Number
+            )
+        )
+
+        self.contrib = self.contrib_db.query(filter=None, parser=Parser(DeckID=parser.Number, ContribID=parser.Text))
+        
+        for _contrib in contrib:
+            try:
+                deckInfo = next(deck for deck in self.data if deck['ID'] == _contrib['DeckID'])
+            except StopIteration:
+                raise ValueError(_contrib['DeckID'])
+            
+            if 'contrib' in deckInfo:
+                deckInfo['contrib'].append(_contrib['ContribID'])
+            else:
+                deckInfo['contrib'] = [_contrib['ContribID']]
+        
+        self.lastID = int(self.ID_block.get_text())
     
     def loadHistCh(self, bot: MyBot):
         """Load `역사관` channel when bot is ready
@@ -51,59 +77,12 @@ class DeckList:
         * contrib `List[str]`
         
         ."""
-
-        deckInfo = self.data_db.query(
-            filter=Filter(ID=filter.Number(equals=id)),
-            parser=Parser(
-                ID=parser.Number,
-                name=parser.Text, clazz=parser.Select, desc=parser.Text, author=parser.Text,
-                imageURL=parser.Text, timestamp=parser.Text, version=parser.Number
-            )
-        )[0]
-
-        deckInfo['contrib'] = self.contrib_db.query(
-            filter=Filter(DeckID=filter.Number(equals=id)),
-            parser=Parser(ContribID=parser.Text, only_values=True)
-        )
-
-        return deckInfo
-    
-    def _searchDeck(self, kw: str):
-        """Search decks with one keyword. Check for name/hashtag (Private use only)"""
-
-        name = self.data_db.query(
-            filter=Filter(name=filter.Text(contains=kw)),
-            parser=self.ID_extractor
-        )
-
-        hashtag = self.data_db.query(
-            filter=Filter(desc=filter.Text(contains='#'+kw)),
-            parser=self.ID_extractor
-        )
-
-        return set(name) | set(hashtag)
-
-    def _searchClass(self, clazz: str):
-        """Search Only for provided class (Private use only)"""
-        return set(self.data_db.query(
-            filter=Filter(clazz=filter.Select(equals=clazz)),
-            parser=self.ID_extractor
-        ))
-    
-    def _searchAuthor(self, author: str):
-        """Search only for author id (Private use only)"""
         
-        author = self.data_db.query(
-            filter=Filter(author=filter.Text(equals=author)),
-            parser=self.ID_extractor
-        )
-
-        contrib = self.data_db.query(
-            filter=Filter(ContribID=filter.Text(equals=author)),
-            parser=Parser(DeckID=parser.Number, only_values=True)
-        )
-        
-        return set(author) | set(contrib)
+        try:
+            return next(deck for deck in self.data if deck['ID'] == id)
+        except StopIteration:
+            print('malformed data: id #', id, sep='')
+            return None
 
     def searchDeck(self, query: str, clazz: str, author: discord.User):
         """Search decks with one or more keywords
@@ -136,17 +115,22 @@ class DeckList:
         rst = set()
 
         if len(query) > 0:
-            rst = self._searchDeck(query.pop())
-            for kw in query:
-                rst |= self._searchDeck(kw)
+            rst = {
+                deck['ID'] for deck in self.data
+                if any(
+                    kw in deck['name'] or '#' + kw in deck['desc']
+                    for kw in query
+                )
+            }
         
         if clazz != None:
-            tmp = self._searchClass(clazz)
+            tmp = { deck['ID'] for deck in self.data if clazz == deck['clazz'] }
             if rst: rst &= tmp
             else: rst = tmp
         
         if author != None:
-            tmp = self._searchAuthor(str(author.id))
+            author = str(author.id)
+            tmp = { deck['ID'] for deck in self.data if author == deck['author'] or author in deck['contrib'] }
             if rst: rst &= tmp
             else: rst = tmp
         
@@ -166,10 +150,7 @@ class DeckList:
 
         ."""
         
-        return self.data_db.query(
-            filter=Filter(name=filter.Text(equals=name)),
-            parser=lambda result: 1
-        ) != []
+        return name in [deck['name'] for deck in self.data]
 
     def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
         """Add deck in database
@@ -194,8 +175,10 @@ class DeckList:
         
         ."""
 
-        ID = int(self.ID_block.get_text()) + 1
-        self.ID_block.update_text(str(ID))
+        self.lastID += 1
+        self.ID_block.update_text(str(self.lastID))
+
+        timestamp = util.now().strftime("%Y/%m/%d")
 
         self.data_db.append(
             name=prop.Title(name),
@@ -203,10 +186,21 @@ class DeckList:
             clazz=prop.Select(clazz),
             author=prop.Text(author),
             imageURL=prop.Text(imageURL),
-            timestamp=prop.Text(util.now().strftime("%Y/%m/%d")),
+            timestamp=prop.Text(timestamp),
             version=prop.Number(1),
-            ID=prop.Number(ID)
+            ID=prop.Number(self.lastID)
         )
+
+        self.data.append(dict(
+            name=name,
+            desc=desc,
+            clazz=clazz,
+            author=author,
+            imageURl=imageURL,
+            timestamp=timestamp,
+            version=1,
+            ID=self.lastID
+        ))
 
     def updateDeck(self, name: str, contrib: int, imageURL: str, desc: str = ''):
         """Update deck image or description
@@ -233,26 +227,28 @@ class DeckList:
             - raised when both imageURL and desc are empty
 
         ."""
-        payload = self.data_db.query(
+
+        deckInfo = next(deck for deck in self.data if deck['name'] == name)
+        deckInfo['imageURL'] = imageURL
+        deckInfo['version'] += 1
+
+        properties = { 'imageURL': prop.Text(imageURL), 'version': prop.Number(deckInfo['version']+1) }
+
+        if desc != '':
+            deckInfo['desc'] = desc
+            properties['desc'] = prop.Text(desc)
+
+        pageID = self.data_db.query(
             filter=Filter(name=filter.Text(equals=name)),
-            parser=Parser(pageID=parser.PageID, ID=parser.Number, author=parser.Text, version=parser.Number)
-        )[0]
+            parser=Parser(pageID=parser.PageID)
+        )[0]['pageID']
+        self.data_db.update(pageID=pageID, **properties)
 
-        properties = { 'imageURL': prop.Text(imageURL), 'version': prop.Number(payload['version']+1) }
-        if desc != '': properties['desc'] = prop.Text(desc)
-
-        self.data_db.update(
-            pageID=payload['pageID'],
-            **properties
-        )
-        _contrib = self.contrib_db.query(
-            filter=Filter(DeckID=filter.Number(equals=payload['ID']), ContribID=filter.Text(equals=contrib)),
-            parser=lambda result: 1
-        )
-
-        if payload['author'] != str(contrib) and _contrib == []:
+        contObj = {'DeckID': deckInfo['ID'], 'ContribID': str(contrib)}
+        if deckInfo['author'] != str(contrib) and contObj not in self.contrib:
+            self.contrib.append(contObj)
             self.contrib_db.append(
-                DeckID=prop.Number(payload['ID']),
+                DeckID=prop.Number(deckInfo['ID']),
                 ContribID=prop.Text(str(contrib))
             )
 
@@ -283,16 +279,19 @@ class DeckList:
             - raised when requester is not deck author
 
         ."""
-        payload = self.data_db.query(
-            filter=Filter(ID=filter.Number(equals=deckID)),
-            parser=Parser(author=parser.Text, ID=parser.PageID)
-        )[0]
-        
-        if payload['author'] != str(reqID):
+
+        deckInfo = next(deck for deck in self.data if deck['ID'] == deckID)
+
+        if deckInfo['author'] != str(reqID):
             raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
+
+        pageID = self.data_db.query(
+            filter=Filter(ID=filter.Number(equals=deckID)),
+            parser=Parser(pageID=parser.PageID)
+        )[0]['pageID']
         
-        deckInfo = self.searchDeckByID(deckID)
-        self.data_db.delete(payload['ID'])
+        self.data.remove(deckInfo)
+        self.data_db.delete(pageID)
         
         return deckInfo
 
@@ -316,10 +315,7 @@ class DeckList:
         Analyze report. Type: :class:`discord.Embed`
 
         ."""
-        statistic = self.data_db.query(
-            filter=None,
-            parser=Parser(only_values=True, clazz=parser.Select)
-        )
+        statistic = [deck['clazz'] for deck in self.data]
         classes = set(statistic)
         total = len(statistic)
         data = { clazz: statistic.count(clazz) for clazz in classes }

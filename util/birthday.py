@@ -6,7 +6,15 @@ from pytion import Database, Filter, Parser
 
 class BirthdayDB:
     def __init__(self):
-        self.db = Database(dbID=ID.database.birthday)
+        self.load()
+
+    def load(self):
+        db = Database(dbID=ID.database.birthday)
+
+        self.data = db.query(
+            filter=None,
+            parser=Parser(id=parser.Number, date=parser.Number)
+        )
     
     def getToday(self, now: datetime) -> List[int]:
         """get IDs for members whom birthday is today
@@ -19,9 +27,7 @@ class BirthdayDB:
         ."""
 
         date = now.strftime("%m/%d")
-        return self.db.query(
-            filter=Filter(date=filter.Text(equals=date)),
-            parser=Parser(only_values=True, id=parser.Number)
-        )
+
+        return [_data['id'] for _data in self.data if _data['date'] == date]
 
 birthdayDB = BirthdayDB()

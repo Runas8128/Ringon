@@ -5,13 +5,11 @@ from pytion import Database, Filter, Parser
 
 class Detect:
     def __init__(self):
-        self.full_db = Database(dbID=ID.database.detect.full)
-        self.prob_db = Database(dbID=ID.database.detect.prob)
+        self.load()
     
-    def getList(self):
-        """get all full-detect keyword-result map with Embed-form"""
-
-        full = self.full_db.query(
+    def load(self):
+        full_db = Database(dbID=ID.database.detect.full)
+        self.full = full_db.query(
             filter=None,
             parser=Parser(
                 only_values=True,
@@ -19,22 +17,26 @@ class Detect:
             )
         )
 
-        prob = self.prob_db.query(
+        prob_db = Database(dbID=ID.database.detect.prob)
+        self.prob = prob_db.query(
             filter=None,
             parser=Parser(
                 only_values=True,
                 target=parser.Text, result=parser.Text, ratio=parser.Number
             )
         )
+    
+    def getList(self):
+        """get all full-detect keyword-result map with Embed-form"""
 
         _fields = {}
-        for tar, rst, ratio in prob:
+        for tar, rst, ratio in self.prob:
             if tar in _fields.keys():
                 _fields[tar] += f", {rst}(가중치: {ratio})"
             else:
                 _fields[tar] = f"{rst}(가중치: {ratio})"
 
-        fields = full
+        fields = self.full[:]
         fields.extend([(tar+" (확률적)", _fields[tar]) for tar in _fields.keys()])
 
         return (
@@ -46,30 +48,19 @@ class Detect:
     def getCount(self):
         """get full-detect map length + probability-based detect map length(only count keywords)"""
 
-        full = len(self.full_db.query(
-            filter=None,
-            parser=lambda result: 1
-        ))
-        prob = len(set(self.prob_db.query(
-            filter=None,
-            parser=Parser(only_values=True, target=parser.Text)
-        )))
-        return full + prob
+        return len(self.full) + len({data['target'] for data in self.prob})
     
     def tryGet(self, tar: str) -> str:
         """try to get matching result from database"""
-        FullMatch = self.full_db.query(
-            filter=Filter(target=filter.Text(equals=tar)),
-            parser=Parser(only_values=True, result=parser.Text)
-        )
-        if len(FullMatch) >= 1:
-            return FullMatch[0]
+
+        try:
+            return next(data['result'] for data in self.full if data['target'] == tar)
+        except StopIteration:
+            pass
+
+        ProbMatch = [(data['result'], data['ratio']) for data in self.prob if data['target'] == tar]
         
-        ProbMatch = self.prob_db.query(
-            filter=Filter(target=filter.Text(equals=tar)),
-            parser=Parser(only_values=True, result=parser.Text, ratio=parser.Number)
-        )
-        if len(ProbMatch) >= 1:
+        if len(ProbMatch) != 0:
             rsts, ratios = zip(*ProbMatch)
             rst = random.choices(rsts, weights=ratios, k=1)
             return rst[0]
