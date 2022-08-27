@@ -15,15 +15,9 @@ class CogManager(commands.Cog):
         ]
     
     async def load_all(self):
-        for cogName in self.all_cog:
-            await self._load(cogName)
+        for cogName in self.all_cog: await self._load(cogName)
+        if self.bot.is_testing: await self._load('Debug')
         
-        if self.bot.is_testing:
-            await self._load('Debug')
-        
-        await self.sync()
-    
-    async def sync(self):
         await self.bot.tree.sync(guild=self.bot.target_guild)
     
     async def _load(self, name: str):
@@ -36,82 +30,6 @@ class CogManager(commands.Cog):
             print(f"Loaded {name}")
         except commands.ExtensionAlreadyLoaded:
             print(f"Skipping loading cog {name}: Already loaded")
-    
-    async def _unload(self, name: str):
-        """|coro|
-
-        this coroutine unloads extension, ignore `AlreadyLoaded` exception.
-        """
-        try:
-            await self.bot.unload_extension('cogs.' + name)
-            print(f"Unloaded {name}")
-        except commands.ExtensionNotLoaded:
-            print(f"Skipping unloading cog {name}: Not loaded")
-
-    @app_commands.command(
-        name="ㅎ_manage",
-        description="[개발자 전용] 특정 커맨드 그룹을 로드하거나 언로드합니다."
-    )
-    @app_commands.describe(
-        name="대상 커맨드 그룹을 지정합니다.",
-        option="실행할 행동을 지정합니다."
-    )
-    @app_commands.choices(
-        name=[
-            app_commands.Choice(name='Events',      value='Events'),
-            app_commands.Choice(name='DeckList',    value='DeckList'),
-            app_commands.Choice(name='Detect',      value='Detect'),
-            app_commands.Choice(name='Birthday',    value='Birthday'),
-            app_commands.Choice(name='Check',       value='Check'),
-            app_commands.Choice(name='Other',       value='Other'),
-            app_commands.Choice(name='Debug',       value='Debug'),
-        ],
-        option=[
-            app_commands.Choice(name="Load",    value="load"),
-            app_commands.Choice(name="Unload",  value="unload"),
-            app_commands.Choice(name="Reload",  value="reload")
-        ]
-    )
-    async def manage(self, interaction: discord.Interaction, name: str, option: str):
-        if interaction.user.id == self.bot.owner_id:
-            if option == "load":
-                await self._load(name)
-            elif option == "unload":
-                await self._unload(name)
-            elif option == "reload":
-                await self._unload(name)
-                await self._load(name)
-            await self.sync()
-            await interaction.response.send_message("Success", ephemeral=True)
-        else:
-            await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)
-            print(interaction.user.id, self.bot.owner_id)
-    
-    @app_commands.command(
-        name="ㅎ_reload",
-        description="[개발자 전용] 현재 테스트중인 / 구동중인 모든 커맨드 그룹을 다시 로드합니다."
-    )
-    async def reload(self, interaction: discord.Interaction):
-        if interaction.user.id == self.bot.owner_id:
-            await interaction.response.defer(ephemeral=True)
-
-            success = self.all_cog[:]
-            await interaction.followup.send(f"Reloading cogs... target = {self.all_cog}", ephemeral=True)
-            for cogName in success:
-                try:
-                    await self._unload(cogName)
-                    await self._load(cogName)
-                except Exception as E:
-                    success.remove(cogName)
-                    await interaction.followup.send(
-                        f"Reloading Cog {cogName} Failed.\nException message: {E.args}\nskipping...",
-                        ephemeral=True
-                    )
-            await self.sync()
-            await interaction.followup.send(f"Successfully reload All Cogs: {success}", ephemeral=True)
-        else:
-            await interaction.response.send_message("해당 명령어는 개발자 전용 명령어입니다.", ephemeral=True)
-            print(interaction.user.id, self.bot.owner_id)
 
 async def setup(bot: MyBot):
     manager = CogManager(bot)
