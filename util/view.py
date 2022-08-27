@@ -115,10 +115,8 @@ class DeckListView(baseView):
             if len(deck["contrib"]) > 0:
                 embed.add_field(name="기여자 목록", value=', '.join([self.__getMention(id) for id in deck["contrib"]]))
         
-        embed._fields[-1]['inline'] = False
-        
         if deck['desc'] != '':
-            embed.add_field(name="덱 설명", value=deck['desc'], inline=False)
+            embed.add_field(name="덱 설명", value=deck['desc'])
             hashtag_list = re.findall("#(\w+)", deck['desc'])
             if len(hashtag_list) > 0:
                 embed.add_field(name="해시태그", value=', '.join(['#' + tag for tag in hashtag_list]))

@@ -11,6 +11,9 @@ class Type:
     @property
     def type(self):
         return self._type
+    
+    def __hash__(self):
+        return hash(self._type)
 
 Text = Type("Text")
 Number = Type("Number")
@@ -18,11 +21,11 @@ Select = Type("Select")
 PageID = Type("PageID")
 
 def parse_richText(rich_text: dict):
-    if 'paragraph' in rich_text.keys():
+    if 'paragraph' in rich_text:
         rich_text = rich_text['paragraph']
-    if 'title' in rich_text.keys():
+    if 'title' in rich_text:
         rich_text = rich_text['title']
-    if 'rich_text' in rich_text.keys():
+    if 'rich_text' in rich_text:
         rich_text = rich_text['rich_text']
     
     try:

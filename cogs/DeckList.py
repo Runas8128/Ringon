@@ -301,9 +301,9 @@ class CogDeckList(commands.Cog):
         btnReinput = discord.ui.Button(label="재입력", custom_id="btn_reinput", emoji="➡️")
         async def onClick_btnReinput(interaction: discord.Interaction):
             await interaction.response.send_message("덱 이름을 재입력받습니다.", ephemeral=True)
-        btnReinput = onClick_btnReinput
+        btnReinput.callback = onClick_btnReinput
         
-        chkView = discord.View(timeout=60.0)\
+        chkView = discord.ui.View(timeout=60.0)\
             .add_item(btnUpdate)\
             .add_item(btnReinput)
 
