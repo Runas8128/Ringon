@@ -292,16 +292,36 @@ class CogDeckList(commands.Cog):
         `asyncio.TimeoutError` when timeout(1min)
 
         ."""
-        def check(message: discord.Message):
-            return orgMsg.author == message.author and orgMsg.channel == message.channel and message.content in ["재입력", "업데이트"]
         
-        await orgMsg.reply(embed=discord.Embed(
-            title=":pause_button: 이미 있는 덱 이름입니다!",
-            description="이름을 바꾸려면 `재입력`을, 덱을 업데이트하려면 `업데이트`를 입력해주세요.\n시간 제한: 1분"
-        ), mention_author=False)
+        btnUpdate = discord.ui.Button(label="업데이트", custom_id="btn_update", emoji="↩️")
+        async def onClick_btnUpdate(interaction: discord.Interaction):
+            await interaction.response.send_message("덱을 업데이트합니다.", ephemeral=True)
+        btnUpdate.callback = onClick_btnUpdate
+
+        btnReinput = discord.ui.Button(label="재입력", custom_id="btn_reinput", emoji="➡️")
+        async def onClick_btnReinput(interaction: discord.Interaction):
+            await interaction.response.send_message("덱 이름을 재입력받습니다.", ephemeral=True)
+        btnReinput = onClick_btnReinput
         
-        msgCheck: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0)
-        return msgCheck.content == "업데이트"
+        chkView = discord.View(timeout=60.0)\
+            .add_item(btnUpdate)\
+            .add_item(btnReinput)
+
+        chkMsg = await orgMsg.reply(
+            embed=discord.Embed(
+                title=":pause_button: 이미 있는 덱 이름입니다!",
+                description="이름을 바꾸려면 `재입력`을, 덱을 업데이트하려면 `업데이트`를 선택해주세요.\n시간 제한: 1분"
+            ),
+            view=chkView,
+            mention_author=False
+        )
+
+        def check(interaction: discord.Interaction):
+            return orgMsg.author.id == interaction.user.id and \
+                interaction.data.get('custom_id') in ['btn_update', 'btn_reinput']
+        
+        chk: discord.Interaction = await self.bot.wait_for('interaction', check=check, timeout=60.0)
+        return chk.data['custom_id'] == "btn_update"
     
     async def getDeckDesc(self, orgMsg: discord.Message):
         """ get description of deck
