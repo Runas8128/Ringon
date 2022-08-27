@@ -95,6 +95,10 @@ class DeckListView(baseView):
     def __getMention(self, id: str):
         member = self.guild.get_member(int(id))
         return "(정보 없음)" if member == None else member.mention
+    
+    def __getAuthorInfo(self, id: str):
+        member = self.guild.get_member(int(id))
+        return {'name': "(정보 없음)"} if member == None else {'name': member.display_name, 'icon_url': member.display_avatar.url}
 
     def makeEmbed(self):
         if len(self.decks) == 0:
@@ -105,18 +109,19 @@ class DeckListView(baseView):
             )
         
         deck = self.decks[self.index]
-        embed = discord.Embed(title=deck['name'], description=f"작성자: {self.__getMention(deck['author'])}", color=0x2b5468)
+        embed = discord.Embed(title=deck['name'], color=0x2b5468)
+        embed.set_author(**self.__getAuthorInfo(deck['author']))
 
         embed.add_field(name="클래스", value=deck['clazz'])
         embed.add_field(name="등록일", value=deck['timestamp'])
 
         if deck['version'] > 1:
-            embed.add_field(name="업데이트 횟수", value=deck['version'])
+            embed.add_field(name="업데이트 횟수", value=deck['version'] - 1)
             if len(deck["contrib"]) > 0:
                 embed.add_field(name="기여자 목록", value=', '.join([self.__getMention(id) for id in deck["contrib"]]))
         
         if deck['desc'] != '':
-            embed.add_field(name="덱 설명", value=deck['desc'])
+            embed.add_field(name="덱 설명", value=deck['desc'], inline=False)
             hashtag_list = re.findall("#(\w+)", deck['desc'])
             if len(hashtag_list) > 0:
                 embed.add_field(name="해시태그", value=', '.join(['#' + tag for tag in hashtag_list]))
