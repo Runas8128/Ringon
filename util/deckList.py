@@ -12,7 +12,7 @@ from pytion import Database, Block, Filter, Parser
 
 class DeckList:
     def __init__(self):
-        self.ID_extractor = Parser(only_values=True, ID=parser.Number)
+        self.load()
 
     def load(self):
         self.data_db = Database(dbID=ID.database.deck.data)
@@ -30,7 +30,7 @@ class DeckList:
 
         self.contrib = self.contrib_db.query(filter=None, parser=Parser(DeckID=parser.Number, ContribID=parser.Text))
         
-        for _contrib in contrib:
+        for _contrib in self.contrib:
             try:
                 deckInfo = next(deck for deck in self.data if deck['ID'] == _contrib['DeckID'])
             except StopIteration:
