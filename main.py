@@ -1,3 +1,5 @@
+"""Main runner file for Ringon."""
+
 from util.myBot import MyBot
 
 if __name__ == '__main__':
