@@ -9,7 +9,7 @@ class BirthdayDB:
         self.load()
 
     def load(self):
-        db = Database(dbID=ID.database.birthday)
+        db = Database(dbID=ID.database.BIRTHDAY)
 
         self.data = db.query(
             filter=None,

@@ -28,9 +28,9 @@ class DeckList:
         self.load()
 
     def load(self):
-        self.data_db = Database(dbID=ID.database.deck.data)
-        self.contrib_db = Database(dbID=ID.database.deck.contrib)
-        self.ID_block = Block(blockID=ID.block.deckID)
+        self.data_db = Database(dbID=ID.database.deck.DATA)
+        self.contrib_db = Database(dbID=ID.database.deck.CONTRIB)
+        self.ID_block = Block(blockID=ID.block.DECK_ID)
 
         self.data: List[Deck] = self.data_db.query(
             filter=None,

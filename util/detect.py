@@ -8,7 +8,7 @@ class Detect:
         self.load()
     
     def load(self):
-        full_db = Database(dbID=ID.database.detect.full)
+        full_db = Database(dbID=ID.database.detect.FULL)
         self.full = full_db.query(
             filter=None,
             parser=Parser(
@@ -16,7 +16,7 @@ class Detect:
             )
         )
 
-        prob_db = Database(dbID=ID.database.detect.prob)
+        prob_db = Database(dbID=ID.database.detect.PROB)
         self.prob = prob_db.query(
             filter=None,
             parser=Parser(

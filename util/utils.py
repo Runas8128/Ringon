@@ -9,8 +9,8 @@ class Util:
         self.load()
     
     def load(self):
-        self.blockWords = Block(blockID=ID.block.word).get_text_list()
-        self.pack_block = Block(blockID=ID.block.pack)
+        self.blockWords = Block(blockID=ID.block.BLOCK_WORD).get_text_list()
+        self.pack_block = Block(blockID=ID.block.PACK)
     
     def now(self):
         return datetime.now(tz=timezone(offset=timedelta(hours=9)))
