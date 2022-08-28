@@ -12,7 +12,6 @@ class Detect:
         self.full = full_db.query(
             filter=None,
             parser=Parser(
-                only_values=True,
                 target=parser.Text, result=parser.Text
             )
         )
@@ -21,7 +20,6 @@ class Detect:
         self.prob = prob_db.query(
             filter=None,
             parser=Parser(
-                only_values=True,
                 target=parser.Text, result=parser.Text, ratio=parser.Number
             )
         )
@@ -30,7 +28,9 @@ class Detect:
         """get all full-detect keyword-result map with Embed-form"""
 
         _fields = {}
-        for tar, rst, ratio in self.prob:
+        for data in self.prob:
+            tar, rst, ratio = data['target'], data['result'], data['ratio']
+            
             if tar in _fields.keys():
                 _fields[tar] += f", {rst}(가중치: {ratio})"
             else:
