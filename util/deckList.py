@@ -1,5 +1,6 @@
 from typing import List
 import shutil
+from dataclasses import dataclass, field
 
 import discord
 from discord.ext import commands
@@ -10,6 +11,18 @@ from .utils import util
 from pytion import filter, parser, prop, ID
 from pytion import Database, Block, Filter, Parser
 
+@dataclass
+class Deck:
+    ID: int
+    name: str
+    clazz: str
+    desc: str
+    author: str
+    imageURL: str
+    timestamp: str
+    version: int
+    contrib: List[str] = field(default_factory=list)
+
 class DeckList:
     def __init__(self):
         self.load()
@@ -19,27 +32,30 @@ class DeckList:
         self.contrib_db = Database(dbID=ID.database.deck.contrib)
         self.ID_block = Block(blockID=ID.block.deckID)
 
-        self.data = self.data_db.query(
+        self.data: List[Deck] = self.data_db.query(
             filter=None,
-            parser=Parser(
-                ID=parser.Number,
-                name=parser.Text, clazz=parser.Select, desc=parser.Text, author=parser.Text,
-                imageURL=parser.Text, timestamp=parser.Text, version=parser.Number
-            )
+            parser=lambda result: Deck(**Parser(
+                ID=parser.Number, name=parser.Text,
+                clazz=parser.Select, desc=parser.Text, author=parser.Text,
+                imageURL=parser.Text, timestamp=parser.Text,
+                version=parser.Number
+            )(result))
         )
 
-        self.contrib = self.contrib_db.query(filter=None, parser=Parser(DeckID=parser.Number, ContribID=parser.Text))
+        self.contrib = self.contrib_db.query(
+            filter=None,
+            parser=Parser(DeckID=parser.Number, ContribID=parser.Text)
+        )
         
         for _contrib in self.contrib:
             try:
-                deckInfo = next(deck for deck in self.data if deck['ID'] == _contrib['DeckID'])
+                deckInfo = next(
+                    deck for deck in self.data
+                    if deck.ID == _contrib['DeckID']
+                )
+                deckInfo.contrib.append(_contrib['ContribID'])
             except StopIteration:
                 raise ValueError(_contrib['DeckID'])
-            
-            if 'contrib' in deckInfo:
-                deckInfo['contrib'].append(_contrib['ContribID'])
-            else:
-                deckInfo['contrib'] = [_contrib['ContribID']]
         
         self.lastID = int(self.ID_block.get_text())
     
@@ -79,7 +95,7 @@ class DeckList:
         ."""
         
         try:
-            return next(deck for deck in self.data if deck['ID'] == id)
+            return next(deck for deck in self.data if deck.ID == id)
         except StopIteration:
             print('malformed data: id #', id, sep='')
             return None
@@ -116,21 +132,24 @@ class DeckList:
 
         if len(query) > 0:
             rst = {
-                deck['ID'] for deck in self.data
+                deck.ID for deck in self.data
                 if any(
-                    kw in deck['name'] or '#' + kw in deck['desc']
+                    kw in deck.name or '#' + kw in deck.desc
                     for kw in query
                 )
             }
         
         if clazz != None:
-            tmp = { deck['ID'] for deck in self.data if clazz == deck['clazz'] }
+            tmp = {deck.ID for deck in self.data if clazz == deck.clazz}
             if rst: rst &= tmp
             else: rst = tmp
         
         if author != None:
             author = str(author.id)
-            tmp = { deck['ID'] for deck in self.data if author == deck['author'] or author in deck['contrib'] }
+            tmp = {
+                deck.ID for deck in self.data
+                if author == deck.author or author in deck.contrib
+            }
             if rst: rst &= tmp
             else: rst = tmp
         
@@ -150,7 +169,7 @@ class DeckList:
 
         ."""
         
-        return name in [deck['name'] for deck in self.data]
+        return name in [deck.name for deck in self.data]
 
     def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
         """Add deck in database
@@ -191,15 +210,15 @@ class DeckList:
             ID=prop.Number(self.lastID)
         )
 
-        self.data.append(dict(
+        self.data.append(Deck(
+            ID=self.lastID,
             name=name,
-            desc=desc,
             clazz=clazz,
+            desc=desc,
             author=author,
             imageURl=imageURL,
             timestamp=timestamp,
-            version=1,
-            ID=self.lastID
+            version=1
         ))
 
     def updateDeck(self, name: str, contrib: int, imageURL: str, desc: str = ''):
@@ -228,14 +247,17 @@ class DeckList:
 
         ."""
 
-        deckInfo = next(deck for deck in self.data if deck['name'] == name)
-        deckInfo['imageURL'] = imageURL
-        deckInfo['version'] += 1
+        deckInfo = next(deck for deck in self.data if deck.name == name)
+        deckInfo.imageURL = imageURL
+        deckInfo.version += 1
 
-        properties = { 'imageURL': prop.Text(imageURL), 'version': prop.Number(deckInfo['version']+1) }
+        properties = {
+            'imageURL': prop.Text(imageURL),
+            'version': prop.Number(deckInfo.version + 1)
+        }
 
         if desc != '':
-            deckInfo['desc'] = desc
+            deckInfo.desc = desc
             properties['desc'] = prop.Text(desc)
 
         pageID = self.data_db.query(
@@ -245,7 +267,8 @@ class DeckList:
         self.data_db.update(pageID=pageID, **properties)
 
         contObj = {'DeckID': deckInfo['ID'], 'ContribID': str(contrib)}
-        if deckInfo['author'] != str(contrib) and contObj not in self.contrib:
+        if deckInfo.author != str(contrib) and contObj not in self.contrib:
+            deckInfo.contrib.append(str(contrib))
             self.contrib.append(contObj)
             self.contrib_db.append(
                 DeckID=prop.Number(deckInfo['ID']),
@@ -280,9 +303,9 @@ class DeckList:
 
         ."""
 
-        deckInfo = next(deck for deck in self.data if deck['ID'] == deckID)
+        deckInfo = next(deck for deck in self.data if deck.ID == deckID)
 
-        if deckInfo['author'] != str(reqID):
+        if deckInfo.author != str(reqID):
             raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
 
         pageID = self.data_db.query(
@@ -315,10 +338,10 @@ class DeckList:
         Analyze report. Type: :class:`discord.Embed`
 
         ."""
-        statistic = [deck['clazz'] for deck in self.data]
+        statistic = [deck.clazz for deck in self.data]
         classes = set(statistic)
         total = len(statistic)
-        data = { clazz: statistic.count(clazz) for clazz in classes }
+        data = {clazz: statistic.count(clazz) for clazz in classes}
 
         embed = discord.Embed(
             title=f'총 {total}개 덱 분석 결과',

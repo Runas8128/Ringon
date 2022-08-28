@@ -3,7 +3,7 @@ import re
 
 import discord
 
-from .deckList import deckList
+from .deckList import deckList, Deck
 from .utils import util
 
 class baseView(discord.ui.View):
@@ -76,11 +76,11 @@ class EmbedView(baseView):
 
 class DeckListView(baseView):
     """EmbedView for Deck Search results"""
-    def __init__(self, initInter: discord.Interaction, decks: list, emojiMap: Dict[str, discord.Emoji]):
+    def __init__(self, initInter: discord.Interaction, decks: List[Deck], emojiMap: Dict[str, discord.Emoji]):
         super().__init__("vDeckList")
 
         self.guild = initInter.guild
-        self.decks = sorted(decks, key=lambda deck: deck['ID'])
+        self.decks = sorted(decks, key=lambda deck: deck.ID)
         self.emojiMap = emojiMap
         self.index = 0
         
@@ -109,25 +109,25 @@ class DeckListView(baseView):
             )
         
         deck = self.decks[self.index]
-        embed = discord.Embed(title=deck['name'], color=0x2b5468)
-        embed.set_author(**self.__getAuthorInfo(deck['author']))
+        embed = discord.Embed(title=deck.name, color=0x2b5468)
+        embed.set_author(**self.__getAuthorInfo(deck.author))
 
-        embed.add_field(name="클래스", value=deck['clazz'])
-        embed.add_field(name="등록일", value=deck['timestamp'])
+        embed.add_field(name="클래스", value=deck.clazz)
+        embed.add_field(name="등록일", value=deck.timestamp)
 
-        if deck['version'] > 1:
-            embed.add_field(name="업데이트 횟수", value=deck['version'] - 1)
-            if len(deck["contrib"]) > 0:
-                embed.add_field(name="기여자 목록", value=', '.join([self.__getMention(id) for id in deck["contrib"]]))
+        if deck.version > 1:
+            embed.add_field(name="업데이트 횟수", value=deck.version - 1)
+            if len(deck.contrib) != 0:
+                embed.add_field(name="기여자 목록", value=', '.join([self.__getMention(id) for id in deck.contrib]))
         
-        if deck['desc'] != '':
-            embed.add_field(name="덱 설명", value=deck['desc'], inline=False)
-            hashtag_list = re.findall("#(\w+)", deck['desc'])
+        if deck.desc != '':
+            embed.add_field(name="덱 설명", value=deck.desc, inline=False)
+            hashtag_list = re.findall("#(\w+)", deck.desc)
             if len(hashtag_list) > 0:
                 embed.add_field(name="해시태그", value=', '.join(['#' + tag for tag in hashtag_list]))
         
-        embed.set_image(url=deck['imageURL'])
-        embed.set_footer(text=f"ID: {deck['ID']}")
+        embed.set_image(url=deck.imageURL)
+        embed.set_footer(text=f"ID: {deck.ID}")
 
         return embed
 
@@ -159,9 +159,9 @@ class DeckListView(baseView):
             placeholder="덱을 골라보세요!",
             options=[
                 discord.SelectOption(
-                    label=deck['name'],
-                    description=deck['desc'],
-                    emoji=self.emojiMap[deck['clazz']],
+                    label=deck.name,
+                    description=deck.desc,
+                    emoji=self.emojiMap[deck.clazz],
                     value=str(idx)
                 )
                 for idx, deck in enumerate(self.decks)
@@ -188,5 +188,5 @@ class DeckListView(baseView):
     async def btnDelete_onClicked(self, interaction: discord.Interaction, button: discord.ui.Button):
         await deckList.hisCh.send(embed=self.makeEmbed())
         nowDeck = self.decks.pop(self.index)
-        deckList.deleteDeck(nowDeck['ID'], interaction.user.id)
+        deckList.deleteDeck(nowDeck.ID, interaction.user.id)
         await self.update(interaction)
