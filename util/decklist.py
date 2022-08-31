@@ -14,7 +14,7 @@ import discord
 from pytion import filter, parser, prop, ID
 from pytion import Database, Block, Filter, Parser
 
-from .ringon import MyBot
+from ringon import Ringon
 from .utils import util
 
 @dataclass
@@ -79,7 +79,7 @@ class DeckList:
 
         self.last_id = int(self.id_block.get_text())
 
-    def load_histroy_channel(self, bot: MyBot):
+    def load_histroy_channel(self, bot: Ringon):
         """Load `역사관` channel when bot is ready
 
         ### Args ::

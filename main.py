@@ -1,7 +1,6 @@
 """Main runner file for Ringon."""
 
-from util.myBot import MyBot
+from ringon import Ringon
 
 if __name__ == '__main__':
-    bot = MyBot(is_testing=True)
-    bot.run()
+    Ringon(is_testing=True).run()

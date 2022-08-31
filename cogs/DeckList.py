@@ -2,7 +2,6 @@ from typing import Dict
 
 import asyncio
 import requests
-import io
 
 import discord
 from discord import app_commands
@@ -10,13 +9,13 @@ from discord.ext import commands
 
 from util.decklist import deckList
 from util.view import DeckListView
-from util.ringon import MyBot
+from ringon import Ringon
 
 class CogDeckList(commands.Cog):
-    def __init__(self, bot: MyBot):
+    def __init__(self, bot: Ringon):
         self.bot = bot
         self.emojiMap: Dict[str, discord.Emoji] = {}
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         deckList.load_histroy_channel(self.bot)
@@ -45,21 +44,21 @@ class CogDeckList(commands.Cog):
         if message.channel.category.name != "Lab":
             # This auto-add logic only deal with `Lab` category
             return
-        
+
         if len(message.attachments) == 0:
             # This auto-add logic triggered when the message has at least one attachment
             return
-        
+
         if message.channel.name in ["덱리커스텀_상성확인실", "unlimited", "2pick"]:
             # This auto-add Logic is not triggered in above channels
             return
-        
+
         await message.add_reaction(self.emojiMap[message.channel.name])
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         """ Detect all reaction even if origin message is not in cache
-        
+
         If reaction is pre-defined emoji
             proceed deck add logic
         """
@@ -72,13 +71,13 @@ class CogDeckList(commands.Cog):
         ):
             # This auto-add Logic triggered with pre-defined emoji
             return
-        
+
         orgMsg = await channel.fetch_message(payload.message_id)
-        
+
         if orgMsg.author != payload.member:
             # This auto-add Logic triggered when author add reaction
             return
-        
+
         try:
             while True:
                 name = await self.getDeckName(orgMsg)
@@ -95,26 +94,29 @@ class CogDeckList(commands.Cog):
         except asyncio.TimeoutError:
             await channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
-    
+
     @app_commands.command(
         name="덱검색",
         description="DB에 저장된 덱을 검색합니다."
     )
     @app_commands.describe(
-        query="검색할 키워드를 입력합니다. 공백을 기준으로 분리해 덱 이름이나 덱 설명에서만 검색합니다.",
+        query=(
+            "검색할 키워드를 입력합니다. "
+            "공백을 기준으로 분리해 덱 이름이나 덱 설명에서만 검색합니다."
+        ),
         clazz="검색할 클래스를 지정합니다.",
         author="검색할 덱의 작성자/기여자를 선택합니다."
     )
     @app_commands.choices(
         clazz=[
-            app_commands.Choice(name="엘프",        value="엘프"),
-            app_commands.Choice(name="로얄",        value="로얄"),
-            app_commands.Choice(name="위치",        value="위치"),
-            app_commands.Choice(name="드래곤",      value="드래곤"),
-            app_commands.Choice(name="네크로맨서",  value="네크로맨서"),
-            app_commands.Choice(name="뱀파이어",    value="뱀파이어"),
-            app_commands.Choice(name="비숍",        value="비숍"),
-            app_commands.Choice(name="네메시스",    value="네메시스")
+            app_commands.Choice(name="엘프", value="엘프"),
+            app_commands.Choice(name="로얄", value="로얄"),
+            app_commands.Choice(name="위치", value="위치"),
+            app_commands.Choice(name="드래곤", value="드래곤"),
+            app_commands.Choice(name="네크로맨서", value="네크로맨서"),
+            app_commands.Choice(name="뱀파이어", value="뱀파이어"),
+            app_commands.Choice(name="비숍", value="비숍"),
+            app_commands.Choice(name="네메시스", value="네메시스")
         ]
     )
     async def cmdSearchDeck(
@@ -124,11 +126,18 @@ class CogDeckList(commands.Cog):
         author: discord.Member = None
     ):
         try:
-            view = DeckListView(interaction, deckList.search_query(query or '', clazz, author), self.emojiMap)
-            await interaction.response.send_message(embed=view.makeEmbed(), view=view)
+            view = DeckListView(
+                interaction,
+                deckList.search_query(query or '', clazz, author),
+                self.emojiMap
+            )
+            await interaction.response.send_message(
+                embed=view.makeEmbed(),
+                view=view
+            )
         except ValueError as E:
             await interaction.response.send_message(E.args[0])
-    
+
     @app_commands.command(
         name="덱분석",
         description="현재 등록된 덱들을 간단하게 분석해줍니다. 클래스별 덱 갯수 및 점유율을 표시합니다."
@@ -151,7 +160,8 @@ class CogDeckList(commands.Cog):
     ):
         response = requests.get(
             'https://shadowverse-portal.com/api/v1/deck/import',
-            params={'format': 'json', 'deck_code': deck_code}
+            params={'format': 'json', 'deck_code': deck_code},
+            timeout=60.0
         )
         d = response.json()['data']
 
@@ -173,26 +183,42 @@ class CogDeckList(commands.Cog):
     @commands.command(name="팩이름")
     @commands.has_permissions(administrator=True)
     async def cmdChangePackName(self, ctx: commands.Context, newName: str=None):
-        if newName == None:
-            return await ctx.send("사용법: `!팩이름 (신팩 이름: 띄어쓰기 X)")
-        
+        if newName is None:
+            await ctx.send("사용법: `!팩이름 (신팩 이름: 띄어쓰기 X)")
+            return
+
         notify: discord.Message = await ctx.send(
             embed=discord.Embed(
-                title="⚠️ 이 명령어는 현재 등록된 덱리를 모두 삭제할 수 있습니다.",
-                description="사용하시려면 `확인`을 입력해주세요! 1분 후 자동으로 취소됩니다.",
+                title=(
+                    "⚠️ 이 명령어는 현재 등록된 덱리를 "
+                    "모두 삭제할 수 있습니다."
+                ),
+                description=(
+                    "사용하시려면 `확인`을 입력해주세요! "
+                    "1분 후 자동으로 취소됩니다."
+                ),
                 color=0x2b5468
             )
         )
 
         try:
             def check(msg: discord.Message):
-                return msg.author == ctx.author and msg.channel == ctx.channel and msg.content == "확인"
-            
+                return all([
+                    msg.author == ctx.author,
+                    msg.channel == ctx.channel,
+                    msg.content == "확인"
+                ])
+
             await self.bot.wait_for('message', check=check, timeout=60.0)
             deckList.change_pack(newName)
             await ctx.send("팩 이름을 {newName}로 고쳤습니다!")
         except asyncio.TimeoutError:
-            await notify.edit(embed=discord.Embed(title="⚠️ 시간 초과, 명령어 사용을 취소합니다.", color=0x2b5468))
+            await notify.edit(
+                embed=discord.Embed(
+                    title="⚠️ 시간 초과, 명령어 사용을 취소합니다.",
+                    color=0x2b5468
+                )
+            )
 
     async def _addDeck(self, orgMsg: discord.Message, name: str):
         """|coro|
@@ -219,7 +245,7 @@ class CogDeckList(commands.Cog):
 
         deckList.add_deck(name, clazz, desc, imageURL, author)
         await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
-    
+
     async def _updateDeck(self, orgMsg: discord.Message, name: str):
         """|coro|
         front-end method for updating deck in database
@@ -235,14 +261,14 @@ class CogDeckList(commands.Cog):
         ."""
         try:
             desc = await self.getDeckDesc(orgMsg)
-        except:
+        except asyncio.TimeoutError:
             await orgMsg.channel.send("시간 초과, 덱 업데이트를 취소합니다.")
             return
-        
+
         imageURL = '' if len(orgMsg.attachments) == 0 else orgMsg.attachments[0].url
-        
+
         try:
-            deckList.update_deck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
+            deckList.update_deck(name, orgMsg.author.id, imageURL, desc=desc)
             await orgMsg.reply("덱 업데이트를 성공적으로 마쳤습니다!", mention_author=False)
         except ValueError as v:
             await orgMsg.reply(str(v))
@@ -254,7 +280,7 @@ class CogDeckList(commands.Cog):
         ----------
         * orgMsg: :class:`discord.Message`
             - origin message to reply
-        
+
         Return value
         ------------
         return got deck name
@@ -265,16 +291,19 @@ class CogDeckList(commands.Cog):
 
         ."""
         def check(message: discord.Message):
-            return orgMsg.author == message.author and orgMsg.channel == message.channel
-        
+            return all([
+                orgMsg.author == message.author,
+                orgMsg.channel == message.channel
+            ])
+
         await orgMsg.reply(embed=discord.Embed(
             title=":ledger: 덱의 이름을 입력해주세요!",
             description="시간 제한: 1분"
         ), mention_author=False)
-        
+
         msgName: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0)
         return msgName.content
-    
+
     async def getIfUpdate(self, orgMsg: discord.Message):
         """ get boolean data whether update deck or re-input name
 
@@ -282,7 +311,7 @@ class CogDeckList(commands.Cog):
         ----------
         * orgMsg: :class:`discord.Message`
             - origin message to reply
-        
+
         Return value
         ------------
         return if author selected update
@@ -292,7 +321,7 @@ class CogDeckList(commands.Cog):
         `asyncio.TimeoutError` when timeout(1min)
 
         ."""
-        
+
         btnUpdate = discord.ui.Button(label="업데이트", custom_id="btn_update", emoji="↩️")
         async def onClick_btnUpdate(interaction: discord.Interaction):
             await interaction.response.send_message("덱을 업데이트합니다.", ephemeral=True)
@@ -302,27 +331,32 @@ class CogDeckList(commands.Cog):
         async def onClick_btnReinput(interaction: discord.Interaction):
             await interaction.response.send_message("덱 이름을 재입력받습니다.", ephemeral=True)
         btnReinput.callback = onClick_btnReinput
-        
+
         chkView = discord.ui.View(timeout=60.0)\
             .add_item(btnUpdate)\
             .add_item(btnReinput)
 
-        chkMsg = await orgMsg.reply(
+        await orgMsg.reply(
             embed=discord.Embed(
                 title=":pause_button: 이미 있는 덱 이름입니다!",
-                description="이름을 바꾸려면 `재입력`을, 덱을 업데이트하려면 `업데이트`를 선택해주세요.\n시간 제한: 1분"
+                description=(
+                    "이름을 바꾸려면 `재입력`을, 덱을 업데이트하려면 "
+                    "`업데이트`를 선택해주세요.\n시간 제한: 1분"
+                )
             ),
             view=chkView,
             mention_author=False
         )
 
         def check(interaction: discord.Interaction):
-            return orgMsg.author.id == interaction.user.id and \
+            return all([
+                orgMsg.author.id == interaction.user.id,
                 interaction.data.get('custom_id') in ['btn_update', 'btn_reinput']
-        
+            ])
+
         chk: discord.Interaction = await self.bot.wait_for('interaction', check=check, timeout=60.0)
         return chk.data['custom_id'] == "btn_update"
-    
+
     async def getDeckDesc(self, orgMsg: discord.Message):
         """ get description of deck
 
@@ -330,7 +364,7 @@ class CogDeckList(commands.Cog):
         ----------
         * orgMsg: :class:`discord.Message`
             - origin message to reply
-        
+
         Return value
         ------------
         return got description
@@ -342,7 +376,7 @@ class CogDeckList(commands.Cog):
         ."""
         def check(message: discord.Message):
             return orgMsg.author == message.author and orgMsg.channel == message.channel
-        
+
         await orgMsg.reply(embed=discord.Embed(
             title=":ledger: 덱의 설명을 입력해주세요!",
             description="시간 제한 X\n덱 설명을 생략하려면 `생략`을 입력해주세요."
@@ -351,8 +385,9 @@ class CogDeckList(commands.Cog):
         msgDesc: discord.Message = await self.bot.wait_for('message', check=check)
 
         desc = msgDesc.content.strip()
-        if desc == "생략": desc = ""
+        if desc == "생략":
+            desc = ""
         return desc
 
-async def setup(bot: MyBot):
+async def setup(bot: Ringon):
     await bot.add_cog(CogDeckList(bot), guild=bot.target_guild)
