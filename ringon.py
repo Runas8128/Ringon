@@ -5,15 +5,15 @@ from typing import List, Optional
 import discord
 from discord.ext import commands
 
-from .load_token import provider
+from util.load_token import provider
 
-class MyBot(commands.Bot):
+class Ringon(commands.Bot):
     """Simple ringon instance factory.
 
     ### Attributes ::
         is_testing (bool):
             indicates if the bot instance is in testing mode.
-        test_cogs (list of str, optional):
+        test_cogs (List[str], optional):
             indicates list of cog name to test.
             If this parameter is missing, load all cogs (pre-defined).
     """
@@ -33,7 +33,12 @@ class MyBot(commands.Bot):
         self.target_guild = discord.Object(
             id=823359663973072957 if self.is_testing else 758478112979288094
         )
-        self.test_cogs = test_cogs
+        self.all_cogs = test_cogs or [
+            'Events',
+            'DeckList', 'Detect', 'Birthday',
+            'Check', 'Other',
+            'Backup',
+        ]
 
     def run(self):
         """get token automatically and run bot."""
@@ -44,5 +49,21 @@ class MyBot(commands.Bot):
         app_info = await self.application_info()
         self.owner_id = app_info.owner.id
 
-        await self.load_extension('cogs.CogManager')
+        for cogName in self.all_cogs:
+            await self._load(cogName)
+
+        if self.is_testing:
+            await self._load('Debug')
+
         await self.tree.sync(guild=self.target_guild)
+
+    async def _load(self, name: str):
+        """|coro|
+
+        this coroutine loads extension, ignore `NotLoaded` exception.
+        """
+        try:
+            await self.bot.load_extension('cogs.' + name)
+            print(f"Loaded {name}")
+        except commands.ExtensionAlreadyLoaded:
+            print(f"Skipping loading cog {name}: Already loaded")
