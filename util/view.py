@@ -1,3 +1,9 @@
+"""Provides some View object.
+
+This also provides `BaseView` class, which enables you to access buttons
+with member variable style.
+"""
+
 from typing import Tuple, Dict, List
 import re
 
@@ -6,6 +12,13 @@ import discord
 from .decklist import deckList, Deck
 
 class BaseView(discord.ui.View):
+    """Base class for making View class.
+
+    This class enables you to access your button like member variable.
+
+    It also provides type hinting with __getattribute__ function to expect
+    type if not defined in class.
+    """
     def __init__(self, prefix):
         super().__init__()
 
@@ -43,6 +56,7 @@ class EmbedView(BaseView):
             self.btnDown.disabled = True
 
     def make_embed(self):
+        """serve embed for now top index."""
         embed: discord.Embed = self.base_embed.copy()
         for name, value in self.fields[self.top_index:self.top_index+10]:
             embed.add_field(name=name, value=value)
@@ -51,7 +65,8 @@ class EmbedView(BaseView):
     async def update(self, interaction: discord.Interaction):
         """|coro|
         Update embed with `topIndex`
-        This coroutine is automatically called when button clicked"""
+        This coroutine is automatically called when button clicked
+        """
 
         self.btnTop.disabled = self.top_index == 0
         self.btnUp.disabled = self.top_index == 0
@@ -73,6 +88,7 @@ class EmbedView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Move to top of embed."""
         self.top_index = 0
         await self.update(interaction)
 
@@ -86,6 +102,7 @@ class EmbedView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Up 10 fields of embed."""
         self.top_index -= 10
         if self.top_index < 0:
             self.top_index = 0
@@ -100,6 +117,7 @@ class EmbedView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Down 10 fields of embed."""
         self.top_index += 10
         if self.top_index > self.count - 10:
             self.top_index = self.count - 10
@@ -114,6 +132,7 @@ class EmbedView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Move to bottom of embed."""
         self.top_index = self.count - 10
         await self.update(interaction)
 
@@ -162,6 +181,7 @@ class DeckListView(BaseView):
             }
 
     def make_embed(self):
+        """serve embed for target deck."""
         if len(self.decks) == 0:
             return discord.Embed(
                 title="검색 결과가 없습니다!",
@@ -201,6 +221,7 @@ class DeckListView(BaseView):
         return embed
 
     async def update(self, interaction: discord.Interaction):
+        """Update embed and button text"""
         try:
             if len(self.decks) == 0:
                 self.btnPrev.disabled = True
@@ -232,6 +253,7 @@ class DeckListView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Make embed for previous deck."""
         if self.index > 0:
             self.index -= 1
         await self.update(interaction)
@@ -245,6 +267,7 @@ class DeckListView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Make embed for selected deck."""
         select = discord.ui.Select(
             placeholder="덱을 골라보세요!",
             options=[
@@ -277,6 +300,7 @@ class DeckListView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Make embed for next deck."""
         if self.index < len(self.decks) - 1:
             self.index += 1
         await self.update(interaction)
@@ -290,6 +314,7 @@ class DeckListView(BaseView):
         self,
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
+        """Delete deck from database and move to next deck"""
         await deckList.history_channel.send(embed=self.make_embed())
         target = self.decks.pop(self.index)
         deckList.delete_deck(target.deck_id, interaction.user.id)
