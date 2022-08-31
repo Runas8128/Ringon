@@ -37,7 +37,6 @@ class Ringon(commands.Bot):
             'Events',
             'DeckList', 'Detect', 'Birthday',
             'Check', 'Other',
-            'Backup',
         ]
 
     def run(self):
@@ -58,9 +57,13 @@ class Ringon(commands.Bot):
         await self.tree.sync(guild=self.target_guild)
 
     async def _load(self, name: str):
-        """|coro|
+        """this coroutine loads extension, ignore `NotLoaded` exception.
 
-        this coroutine loads extension, ignore `NotLoaded` exception.
+        This function is coroutine.
+
+        ### Args ::
+            name (str):
+                indicates cog name to load
         """
         try:
             await self.bot.load_extension('cogs.' + name)
