@@ -2,12 +2,12 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from util.myBot import MyBot
+from util.ringon import MyBot
 
 class CogManager(commands.Cog):
     def __init__(self, bot: MyBot):
         self.bot = bot
-        self.all_cog = self.bot.testCogs or [
+        self.all_cog = self.bot.test_cogs or [
             'Events',
             'DeckList', 'Detect', 'Birthday',
             'Check', 'Other',

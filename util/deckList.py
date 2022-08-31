@@ -1,43 +1,63 @@
+"""Provides wrapper for `Decklist` database
+
+Typical usage example:
+    print(decklist.analyze())
+"""
+
 from typing import List
 import shutil
 from dataclasses import dataclass, field
 
 import discord
-from discord.ext import commands
 
-from .myBot import MyBot
-from .utils import util
-
+# pylint: disable=redefined-builtin
 from pytion import filter, parser, prop, ID
 from pytion import Database, Block, Filter, Parser
 
+from .ringon import MyBot
+from .utils import util
+
 @dataclass
 class Deck:
-    ID: int
+    """Indicate Deck object.
+
+    ### Attributes ::
+        deck_id (int): ID of deck.
+        name (str): name of deck.
+        clazz (str): class of deck.
+        desc (str): description of deck.
+        author (str): author id of deck.
+        image_url (str): deck image url.
+    """
+    deck_id: int
     name: str
     clazz: str
     desc: str
     author: str
-    imageURL: str
+    image_url: str
     timestamp: str
     version: int
     contrib: List[str] = field(default_factory=list)
 
 class DeckList:
+    """Database for managing deck list.
+    """
     def __init__(self):
+        self.history_channel: discord.TextChannel = None
         self.load()
 
     def load(self):
+        """Load all data from database"""
         self.data_db = Database(dbID=ID.database.deck.DATA)
         self.contrib_db = Database(dbID=ID.database.deck.CONTRIB)
-        self.ID_block = Block(blockID=ID.block.DECK_ID)
+        self.id_block = Block(blockID=ID.block.DECK_ID)
 
         self.data: List[Deck] = self.data_db.query(
             filter=None,
             parser=lambda result: Deck(**Parser(
-                ID=parser.Number, name=parser.Text,
+                deck_id=parser.Number, name=parser.Text,
                 clazz=parser.Select, desc=parser.Text, author=parser.Text,
-                imageURL=parser.Text, timestamp=parser.Text,
+                image_url=parser.Text, timestamp=parser.Text,
                 version=parser.Number
             )(result))
         )
@@ -46,34 +66,34 @@ class DeckList:
             filter=None,
             parser=Parser(DeckID=parser.Number, ContribID=parser.Text)
         )
-        
+
         for _contrib in self.contrib:
             try:
-                deckInfo = next(
+                deck_info = next(
                     deck for deck in self.data
-                    if deck.ID == _contrib['DeckID']
+                    if deck.deck_id == _contrib['DeckID']
                 )
-                deckInfo.contrib.append(_contrib['ContribID'])
-            except StopIteration:
-                raise ValueError(_contrib['DeckID'])
-        
-        self.lastID = int(self.ID_block.get_text())
-    
-    def loadHistCh(self, bot: MyBot):
+                deck_info.contrib.append(_contrib['ContribID'])
+            except StopIteration as exc:
+                raise ValueError(_contrib['DeckID']) from exc
+
+        self.last_id = int(self.id_block.get_text())
+
+    def load_histroy_channel(self, bot: MyBot):
         """Load `역사관` channel when bot is ready
-        
+
         Parameters
         ----------
         * bot: :class:`commands.Bot`
             - Ringon bot instance
-        
+
         ."""
         if bot.is_testing:
-            self.hisCh: discord.TextChannel = bot.get_channel(1004611688802287626)
+            self.history_channel: discord.TextChannel = bot.get_channel(1004611688802287626)
         else:
-            self.hisCh: discord.TextChannel = bot.get_channel(804614670178320394)
-    
-    def searchDeckByID(self, id: int):
+            self.history_channel: discord.TextChannel = bot.get_channel(804614670178320394)
+
+    def search_id(self, deck_id: int):
         """Search decks by ID
 
         Calling this function id-by-id is needed after `searchDeck` function
@@ -82,27 +102,27 @@ class DeckList:
         ----------
         * id: :class:`int`
             - Deck ID you want to get
-        
+
         Return value
         ------------
         Deck info for provided id. Type: :class:`dict`
         * ID `int`, author `str`
         * name `str`, class `str`, description `str`
         * version `int`
-        * imageURL `str`, timestamp `str`
+        * image_url `str`, timestamp `str`
         * contrib `List[str]`
-        
+
         ."""
-        
+
         try:
-            return next(deck for deck in self.data if deck.ID == id)
+            return next(deck for deck in self.data if deck.deck_id == deck_id)
         except StopIteration:
-            print('malformed data: id #', id, sep='')
+            print('malformed data: id #', deck_id, sep='')
             return None
 
-    def searchDeck(self, query: str, clazz: str, author: discord.User):
+    def search_query(self, query: str, clazz: str, author: discord.User):
         """Search decks with one or more keywords
-        
+
         Parameters
         ----------
         * query: :class:`str`
@@ -112,7 +132,7 @@ class DeckList:
             - your class to search, None to All class
         * author: :class:`discord.User`
             - deck author object, None to All member
-        
+
         Return value
         ------------
         Searched deck info. Type: List[:class:`Deck`]
@@ -121,57 +141,61 @@ class DeckList:
         ----------
         :class:`ValueError`
             raised when query is empty
-        
+
         ."""
 
         query = query.split()
-        if len(query) == 0 and clazz == None and author == None:
+        if len(query) == 0 and clazz is None and author is None:
             raise ValueError("검색할 단어를 입력해주세요")
-        
+
         rst = set()
 
         if len(query) > 0:
             rst = {
-                deck.ID for deck in self.data
+                deck.deck_id for deck in self.data
                 if any(
                     kw in deck.name or '#' + kw in deck.desc
                     for kw in query
                 )
             }
-        
-        if clazz != None:
-            tmp = {deck.ID for deck in self.data if clazz == deck.clazz}
-            if rst: rst &= tmp
-            else: rst = tmp
-        
-        if author != None:
+
+        if clazz is not None:
+            tmp = {deck.deck_id for deck in self.data if clazz == deck.clazz}
+            if rst:
+                rst &= tmp
+            else:
+                rst = tmp
+
+        if author is not None:
             author = str(author.id)
             tmp = {
-                deck.ID for deck in self.data
+                deck.deck_id for deck in self.data
                 if author == deck.author or author in deck.contrib
             }
-            if rst: rst &= tmp
-            else: rst = tmp
-        
-        return [self.searchDeckByID(id) for id in rst]
+            if rst:
+                rst &= tmp
+            else:
+                rst = tmp
 
-    def hasDeck(self, name: str):
+        return [self.search_id(id) for id in rst]
+
+    def has_deck(self, name: str):
         """Check if database has deck with provided name
 
         Parameters
         ----------
         * name: :class:`str`
             - target name of finding deck
-        
+
         Return value
         ------------
         This method returns whether database has deck with that name. Type: :class:`bool`
 
         ."""
-        
+
         return name in [deck.name for deck in self.data]
 
-    def addDeck(self, name: str, clazz: str, desc: str, imageURL: str, author: int):
+    def add_deck(self, name: str, clazz: str, desc: str, image_url: str, author: int):
         """Add deck in database
 
         WARNING: You have to check if db has deck with same name
@@ -186,42 +210,42 @@ class DeckList:
         * desc: :class:`str`
             - Description of deck.
             - It can be empty(`''`, Not `None`)
-        * imageURL: :class:`str`
+        * image_url: :class:`str`
             - Image of deck.
             - It should be http-url
         * author: :class:`int`
             - ID of author of this deck
-        
+
         ."""
 
-        self.lastID += 1
-        self.ID_block.update_text(str(self.lastID))
+        self.last_id += 1
+        self.id_block.update_text(str(self.last_id))
 
-        timestamp = util.now().strftime("%Y/%m/%d")
+        timestamp = util.now.strftime("%Y/%m/%d")
 
         self.data_db.append(
             name=prop.Title(name),
             desc=prop.Text(desc),
             clazz=prop.Select(clazz),
             author=prop.Text(author),
-            imageURL=prop.Text(imageURL),
+            image_url=prop.Text(image_url),
             timestamp=prop.Text(timestamp),
             version=prop.Number(1),
-            ID=prop.Number(self.lastID)
+            deck_id=prop.Number(self.last_id)
         )
 
         self.data.append(Deck(
-            ID=self.lastID,
+            deck_id=self.last_id,
             name=name,
             clazz=clazz,
             desc=desc,
             author=author,
-            imageURl=imageURL,
+            image_url=image_url,
             timestamp=timestamp,
             version=1
         ))
 
-    def updateDeck(self, name: str, contrib: int, imageURL: str, desc: str = ''):
+    def update_deck(self, name: str, contrib: int, image_url: str, desc: str = ''):
         """Update deck image or description
 
         This method automatically add contributor information and increase version number
@@ -234,48 +258,48 @@ class DeckList:
             - The name of deck
         * contrib: :class:`int`
             - ID of contributor
-        * imageURL: :class:`str`
+        * image_url: :class:`str`
             - Image URL of updated deck
         * desc: :class:`str`
             - Description of updated deck
             - If empty, not update description
-        
+
         Exceptions
         ----------
         * ValueError
-            - raised when both imageURL and desc are empty
+            - raised when both image_url and desc are empty
 
         ."""
 
-        deckInfo = next(deck for deck in self.data if deck.name == name)
-        deckInfo.imageURL = imageURL
-        deckInfo.version += 1
+        deck_info = next(deck for deck in self.data if deck.name == name)
+        deck_info.image_url = image_url
+        deck_info.version += 1
 
         properties = {
-            'imageURL': prop.Text(imageURL),
-            'version': prop.Number(deckInfo.version + 1)
+            'image_url': prop.Text(image_url),
+            'version': prop.Number(deck_info.version + 1)
         }
 
         if desc != '':
-            deckInfo.desc = desc
+            deck_info.desc = desc
             properties['desc'] = prop.Text(desc)
 
-        pageID = self.data_db.query(
+        page_id = self.data_db.query(
             filter=Filter(name=filter.Text(equals=name)),
             parser=Parser(pageID=parser.PageID)
         )[0]['pageID']
-        self.data_db.update(pageID=pageID, **properties)
+        self.data_db.update(pageID=page_id, **properties)
 
-        contObj = {'DeckID': deckInfo['ID'], 'ContribID': str(contrib)}
-        if deckInfo.author != str(contrib) and contObj not in self.contrib:
-            deckInfo.contrib.append(str(contrib))
-            self.contrib.append(contObj)
+        contributor_object = {'DeckID': deck_info['ID'], 'ContribID': str(contrib)}
+        if deck_info.author != str(contrib) and contributor_object not in self.contrib:
+            deck_info.contrib.append(str(contrib))
+            self.contrib.append(contributor_object)
             self.contrib_db.append(
-                DeckID=prop.Number(deckInfo['ID']),
+                DeckID=prop.Number(deck_info.deck_id),
                 ContribID=prop.Text(str(contrib))
             )
 
-    def deleteDeck(self, deckID: int, reqID: int):
+    def delete_deck(self, deck_id: int, req_id: int):
         """Delete deck from database
 
         Only uploader must be able to delete the deck.
@@ -286,16 +310,16 @@ class DeckList:
             - name of deck which will be deleted
         * reqID: :class:`int`
             - ID of member who requested to delete this deck
-        
+
         Return value
         ------------
         Deck info for provided id. Type: :class:`dict`
         * ID `int`, author `int`
         * name `str`, class `str`, description `str`
         * version `int`
-        * imageURL `str`, timestamp `str`
+        * image_url `str`, timestamp `str`
         * contrib `List[int]`
-        
+
         Exceptions
         ----------
         * ValueError
@@ -303,33 +327,34 @@ class DeckList:
 
         ."""
 
-        deckInfo = next(deck for deck in self.data if deck.ID == deckID)
+        deck_info = next(deck for deck in self.data if deck.deck_id == deck_id)
 
-        if deckInfo.author != str(reqID):
+        if deck_info.author != str(req_id):
             raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
 
-        pageID = self.data_db.query(
-            filter=Filter(ID=filter.Number(equals=deckID)),
+        page_id = self.data_db.query(
+            filter=Filter(deck_id=filter.Number(equals=deck_id)),
             parser=Parser(pageID=parser.PageID)
         )[0]['pageID']
-        
-        self.data.remove(deckInfo)
-        self.data_db.delete(pageID)
-        
-        return deckInfo
 
-    def changePack(self, newPack: str):
+        self.data.remove(deck_info)
+        self.data_db.delete(page_id)
+
+        return deck_info
+
+    def change_pack(self, new_pack: str):
         """DEPRECATED: I didnt added `delete all database` feature: will be updated soon
 
         Delete all deck in database, and change pack name
 
         WARNING: This method will delete all deck.
-        Although this method make backup automatically, you should double check before calling this method."""
-        shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{util.getPackInfo()}.db")
-        self._runSQL("DELETE FROM DECKLIST")
-        self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
-        util.setPackName(newPack)
-    
+        Although this method make backup automatically,
+        you should double check before calling this method."""
+        shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{util.pack}.db")
+        #self._runSQL("DELETE FROM DECKLIST")
+        #self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
+        util.pack = new_pack
+
     def analyze(self):
         """Get deck analyze report by embed object
 

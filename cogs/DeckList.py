@@ -8,9 +8,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from util.deckList import deckList
+from util.decklist import deckList
 from util.view import DeckListView
-from util.myBot import MyBot
+from util.ringon import MyBot
 
 class CogDeckList(commands.Cog):
     def __init__(self, bot: MyBot):
@@ -19,17 +19,17 @@ class CogDeckList(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        deckList.loadHistCh(self.bot)
+        deckList.load_histroy_channel(self.bot)
 
         self.emojiMap = {
-            '엘프':         self.bot.get_emoji(1004600679433777182),
-            '로얄':         self.bot.get_emoji(1004600684517261422),
-            '위치':         self.bot.get_emoji(1004600687688163418),
-            '드래곤':       self.bot.get_emoji(1004600677751848961),
-            '네크로맨서':   self.bot.get_emoji(1004600681266675782),
-            '뱀파이어':     self.bot.get_emoji(1004600685985271859),
-            '비숍':         self.bot.get_emoji(1004600676053155860),
-            '네메시스':     self.bot.get_emoji(1004600682902462465),
+            '엘프': self.bot.get_emoji(1004600679433777182),
+            '로얄': self.bot.get_emoji(1004600684517261422),
+            '위치': self.bot.get_emoji(1004600687688163418),
+            '드래곤': self.bot.get_emoji(1004600677751848961),
+            '네크로맨서': self.bot.get_emoji(1004600681266675782),
+            '뱀파이어': self.bot.get_emoji(1004600685985271859),
+            '비숍': self.bot.get_emoji(1004600676053155860),
+            '네메시스': self.bot.get_emoji(1004600682902462465),
         }
 
     @commands.Cog.listener()
@@ -83,7 +83,7 @@ class CogDeckList(commands.Cog):
             while True:
                 name = await self.getDeckName(orgMsg)
 
-                if deckList.hasDeck(name):
+                if deckList.has_deck(name):
                     if await self.getIfUpdate(orgMsg):
                         await self._updateDeck(orgMsg, name)
                         return
@@ -124,7 +124,7 @@ class CogDeckList(commands.Cog):
         author: discord.Member = None
     ):
         try:
-            view = DeckListView(interaction, deckList.searchDeck(query or '', clazz, author), self.emojiMap)
+            view = DeckListView(interaction, deckList.search_query(query or '', clazz, author), self.emojiMap)
             await interaction.response.send_message(embed=view.makeEmbed(), view=view)
         except ValueError as E:
             await interaction.response.send_message(E.args[0])
@@ -189,7 +189,7 @@ class CogDeckList(commands.Cog):
                 return msg.author == ctx.author and msg.channel == ctx.channel and msg.content == "확인"
             
             await self.bot.wait_for('message', check=check, timeout=60.0)
-            deckList.changePack(newName)
+            deckList.change_pack(newName)
             await ctx.send("팩 이름을 {newName}로 고쳤습니다!")
         except asyncio.TimeoutError:
             await notify.edit(embed=discord.Embed(title="⚠️ 시간 초과, 명령어 사용을 취소합니다.", color=0x2b5468))
@@ -217,7 +217,7 @@ class CogDeckList(commands.Cog):
         imageURL = orgMsg.attachments[0].url
         author = orgMsg.author.id
 
-        deckList.addDeck(name, clazz, desc, imageURL, author)
+        deckList.add_deck(name, clazz, desc, imageURL, author)
         await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
     
     async def _updateDeck(self, orgMsg: discord.Message, name: str):
@@ -242,7 +242,7 @@ class CogDeckList(commands.Cog):
         imageURL = '' if len(orgMsg.attachments) == 0 else orgMsg.attachments[0].url
         
         try:
-            deckList.updateDeck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
+            deckList.update_deck(name, orgMsg.author.id, imageURL=imageURL, desc=desc)
             await orgMsg.reply("덱 업데이트를 성공적으로 마쳤습니다!", mention_author=False)
         except ValueError as v:
             await orgMsg.reply(str(v))

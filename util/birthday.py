@@ -1,28 +1,42 @@
+"""Provides wrapper for `birthday` database
+
+Typical usage example:
+    print(birthdayDB.get_today('06/02'))
+"""
+
 from typing import List
 from datetime import datetime
 
-from pytion import ID, filter, parser
-from pytion import Database, Filter, Parser
+from pytion import ID, parser
+from pytion import Database, Parser
 
 class BirthdayDB:
+    """Provides wrapper for `birthday` database
+
+    ### Example ::
+        print(birthdayDB.get_today('06/02'))
+    """
     def __init__(self):
         self.load()
 
     def load(self):
-        db = Database(dbID=ID.database.BIRTHDAY)
+        """Load data from notion database"""
+        database = Database(dbID=ID.database.BIRTHDAY)
 
-        self.data = db.query(
+        self.data = database.query(
             filter=None,
-            parser=Parser(id=parser.Number, date=parser.Number)
+            parser=Parser(id=parser.Text, date=parser.Text)
         )
-    
-    def getToday(self, now: datetime) -> List[int]:
+
+    def get_today(self, now: datetime) -> List[str]:
         """get IDs for members whom birthday is today
 
-        Parameters
-        ----------
-        * now: :class:`datetime.datetime`
-            - datetime object that refers to now
+        ### Args ::
+            now (datetime.datetime):
+                datetime object that refers now
+
+        ### Returns ::
+            ID of members whom birthday is today
 
         ."""
 
