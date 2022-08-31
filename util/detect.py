@@ -29,7 +29,11 @@ class Detect:
         )
 
     def get_list(self):
-        """get all full-detect keyword-result map with Embed-form"""
+        """get all full-detect keyword-result map with Embed-form
+
+        ### Returns ::
+            List[Tuple[str, str]]: detect map with embed-form
+        """
 
         _fields = {}
         for data in self.prob:

@@ -82,12 +82,10 @@ class DeckList:
     def load_histroy_channel(self, bot: MyBot):
         """Load `역사관` channel when bot is ready
 
-        Parameters
-        ----------
-        * bot: :class:`commands.Bot`
-            - Ringon bot instance
-
-        ."""
+        ### Args ::
+            bot (commands.Bot):
+                Ringon bot instance
+        """
         if bot.is_testing:
             self.history_channel: discord.TextChannel = bot.get_channel(1004611688802287626)
         else:
@@ -98,21 +96,15 @@ class DeckList:
 
         Calling this function id-by-id is needed after `searchDeck` function
 
-        Parameters
-        ----------
-        * id: :class:`int`
-            - Deck ID you want to get
+        ### Args ::
+            deck_id (int):
+                Deck ID you want to get
 
-        Return value
-        ------------
-        Deck info for provided id. Type: :class:`dict`
-        * ID `int`, author `str`
-        * name `str`, class `str`, description `str`
-        * version `int`
-        * image_url `str`, timestamp `str`
-        * contrib `List[str]`
-
-        ."""
+        ### Returns ::
+            Optional[Deck]:
+                Search result.
+                If cannot find matching deck, then log it and return None.
+        """
 
         try:
             return next(deck for deck in self.data if deck.deck_id == deck_id)
@@ -123,26 +115,22 @@ class DeckList:
     def search_query(self, query: str, clazz: str, author: discord.User):
         """Search decks with one or more keywords
 
-        Parameters
-        ----------
-        * query: :class:`str`
-            - keywords which will be used to search.
-            - this function will split it by space automatically.
-        * clazz: :class:`str`
-            - your class to search, None to All class
-        * author: :class:`discord.User`
-            - deck author object, None to All member
+        ### Args ::
+            query (str):
+                keywords which will be used to search.
+                this function will split it by space automatically.
+            clazz (str):
+                your class to search, None to All class
+            author (discord.User):
+                deck author object, None to All member
 
-        Return value
-        ------------
-        Searched deck info. Type: List[:class:`Deck`]
+        ### Returns ::
+            List[Deck]: All searched deck info.
 
-        Exceptions
-        ----------
-        :class:`ValueError`
-            raised when query is empty
-
-        ."""
+        ### Raises ::
+            ValueError
+                raised when parameters are all empty.
+        """
 
         query = query.split()
         if len(query) == 0 and clazz is None and author is None:
@@ -182,41 +170,37 @@ class DeckList:
     def has_deck(self, name: str):
         """Check if database has deck with provided name
 
-        Parameters
-        ----------
-        * name: :class:`str`
-            - target name of finding deck
+        ### Args ::
+            name (str):
+                target name of finding deck
 
-        Return value
-        ------------
-        This method returns whether database has deck with that name. Type: :class:`bool`
-
-        ."""
+        ### Returns ::
+            bool: whether database has deck with that name.
+        """
 
         return name in [deck.name for deck in self.data]
 
     def add_deck(self, name: str, clazz: str, desc: str, image_url: str, author: int):
         """Add deck in database
 
-        WARNING: You have to check if db has deck with same name
+        ### WARNING ::
+           You have to check if db has deck with same name
 
-        Parameters
-        ----------
-        * name: :class:`str`
-            - The name of deck
-        * clazz: :class:`str`
-            - The class of deck.
-            - It should be one of class in shadowverse.
-        * desc: :class:`str`
-            - Description of deck.
-            - It can be empty(`''`, Not `None`)
-        * image_url: :class:`str`
-            - Image of deck.
-            - It should be http-url
-        * author: :class:`int`
-            - ID of author of this deck
-
-        ."""
+        ### Args ::
+            name (str):
+                The name of deck
+            clazz (str):
+                The class of deck.
+                It should be one of class in shadowverse.
+            desc (str):
+                Description of deck.
+                It can be empty(`''`, Not `None`)
+            image_url (str):
+                Image of deck.
+                It should be http-url
+            author (int):
+                ID of author of this deck
+        """
 
         self.last_id += 1
         self.id_block.update_text(str(self.last_id))
@@ -250,24 +234,23 @@ class DeckList:
 
         This method automatically add contributor information and increase version number
 
-        WARNING: You have to check if db has the deck
+        ### WARNING ::
+            You have to check if db has the deck
 
-        Parameters
-        ----------
-        * name: :class:`str`
-            - The name of deck
-        * contrib: :class:`int`
-            - ID of contributor
-        * image_url: :class:`str`
-            - Image URL of updated deck
-        * desc: :class:`str`
-            - Description of updated deck
-            - If empty, not update description
+        ### Args ::
+            name (str):
+                The name of deck
+            contrib (int):
+                ID of contributor
+            image_url (str):
+                Image URL of updated deck
+            desc (str):
+                Description of updated deck
+                If empty, not update description
 
-        Exceptions
-        ----------
-        * ValueError
-            - raised when both image_url and desc are empty
+        ### Raises ::
+            ValueError
+                raised when both image_url and desc are empty
 
         ."""
 
@@ -304,28 +287,19 @@ class DeckList:
 
         Only uploader must be able to delete the deck.
 
-        Parameters
-        ----------
-        * name: :class:`str`
-            - name of deck which will be deleted
-        * reqID: :class:`int`
-            - ID of member who requested to delete this deck
+        ### Args ::
+            name (str):
+                name of deck which will be deleted
+            reqID (int):
+                ID of member who requested to delete this deck
 
-        Return value
-        ------------
-        Deck info for provided id. Type: :class:`dict`
-        * ID `int`, author `int`
-        * name `str`, class `str`, description `str`
-        * version `int`
-        * image_url `str`, timestamp `str`
-        * contrib `List[int]`
+        ### Returns ::
+            Deck: Deck info for provided id.
 
-        Exceptions
-        ----------
-        * ValueError
-            - raised when requester is not deck author
-
-        ."""
+        ### Raises ::
+            ValueError
+                raised when requester is not deck author
+        """
 
         deck_info = next(deck for deck in self.data if deck.deck_id == deck_id)
 
@@ -343,13 +317,17 @@ class DeckList:
         return deck_info
 
     def change_pack(self, new_pack: str):
-        """DEPRECATED: I didnt added `delete all database` feature: will be updated soon
+        """Delete all deck in database, and change pack name
 
-        Delete all deck in database, and change pack name
+        ### DEPRECATED ::
+            I didnt added `delete all database` feature
+            will be updated soon
 
-        WARNING: This method will delete all deck.
-        Although this method make backup automatically,
-        you should double check before calling this method."""
+        ### WARNING ::
+            This method will delete all deck.
+            Although this method make backup automatically,
+            you should double check before calling this method.
+        """
         shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{util.pack}.db")
         #self._runSQL("DELETE FROM DECKLIST")
         #self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
@@ -358,11 +336,9 @@ class DeckList:
     def analyze(self):
         """Get deck analyze report by embed object
 
-        Return value
-        ------------
-        Analyze report. Type: :class:`discord.Embed`
-
-        ."""
+        ### Returns ::
+            discord.Embed: Analyze report embed.
+        """
         statistic = [deck.clazz for deck in self.data]
         classes = set(statistic)
         total = len(statistic)
