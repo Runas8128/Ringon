@@ -57,31 +57,25 @@ class CogCheck(commands.Cog):
 
     async def getMemberMap(
         self,
-        guild: discord.Guild, allReact: List[discord.Reaction], indiEmoji: List[T_Emoji
-    ]) -> Dict[T_Emoji, List[discord.Member]]:
-        """|coro|
+        guild: discord.Guild, allReact: List[discord.Reaction], indiEmoji: List[T_Emoji]
+    ) -> Dict[T_Emoji, List[discord.Member]]:
+        """Makes emoji-member map.
+        If member reacted with two or more emoji, then check first emoji only.
+        This function is coroutine.
 
-        This function makes emoji-member map.
-        if member reacted with two or more emoji, then check first emoji only.
+        ### Args ::
+            guild (discord.Guild):
+                guild object for this context
+            allReact (List[discord.Reaction]):
+                all reaction of target message.
+            indiEmoji (List[TEmoji]):
+                emoji which will be counted individually.
 
-        Parameters
-        ----------
-        * guild: :class:`discord.Guild`
-            - guild object for this context
-        * allReact: :class:`List[discord.Reaction]`
-            - all reaction of target message.
-        * indiEmoji: :class:`List[discord.Emoji|discord.PartialEmoji|str]`
-            - emoji which will be counted individually.
-
-        Return value
-        ------------
-        * emoji - member list map, :class:`Dict[T_Emoji, List[discord.Member]]`
-            - all member who reacted with emoji not in `indiEmoji` are stored in "그 외" key
-            - all member who didn't reacted are stored in "반응 안함" key
-
-        NOTE: set 반응 안함 keys to "All user not in another keys or has ignore role"
-
-        ."""
+        ### Returns ::
+            dict[T_Emoji, List[discord.Member]]: emoji - member list map
+                all member who reacted with emoji not in `indiEmoji` are stored in "그 외" key
+                all member who didn't reacted are stored in "반응 안함" key
+        """
 
         userList: List[discord.Member] = [user for user in guild.members if not user.bot]
 

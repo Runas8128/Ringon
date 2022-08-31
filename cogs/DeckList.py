@@ -33,11 +33,6 @@ class CogDeckList(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        """ Detect all message
-
-        If message is in `Lab` category and has attached image
-            add a reaction (which is not in WMTD Server, but Bot server)
-        """
         if message.author.bot:
             return
 
@@ -57,12 +52,6 @@ class CogDeckList(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        """ Detect all reaction even if origin message is not in cache
-
-        If reaction is pre-defined emoji
-            proceed deck add logic
-        """
-
         channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
 
         if not (
@@ -221,18 +210,19 @@ class CogDeckList(commands.Cog):
             )
 
     async def _addDeck(self, orgMsg: discord.Message, name: str):
-        """|coro|
-        front-end method for adding deck in database
+        """front-end method for adding deck in database
 
-        Parameters
-        ----------
-        * orgMsg: :class:`discord.Message`
-            - origin message to reply
-        * name: :class:`str`
-            - name of deck which will be added
-            - WARNING: deck with same name should not be in database
+        This function is coroutine.
 
-        ."""
+        ### Args ::
+            orgMsg (discord.Message):
+                origin message to reply
+            name (str):
+                name of deck which will be added
+
+        ### NOTE ::
+            deck with same name should not be in database
+        """
         try:
             desc = await self.getDeckDesc(orgMsg)
         except asyncio.TimeoutError:
@@ -247,18 +237,19 @@ class CogDeckList(commands.Cog):
         await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
 
     async def _updateDeck(self, orgMsg: discord.Message, name: str):
-        """|coro|
-        front-end method for updating deck in database
+        """front-end method for updating deck in database
 
-        Parameters
-        ----------
-        * orgMsg: :class:`discord.Message`
-            - origin message to reply
-        * name: :class:`str`
-            - name of deck which will be updated
-            - WARNING: deck with same name should be in database
+        This function is coroutine.
 
-        ."""
+        ### Args ::
+            orgMsg (discord.Message):
+                origin message to reply
+            name (str):
+                name of deck which will be updated
+
+        ### NOTE ::
+            deck with same name should be in database
+        """
         try:
             desc = await self.getDeckDesc(orgMsg)
         except asyncio.TimeoutError:
@@ -274,20 +265,20 @@ class CogDeckList(commands.Cog):
             await orgMsg.reply(str(v))
 
     async def getDeckName(self, orgMsg: discord.Message):
-        """ get deck name with origin message
+        """get deck name with origin message
 
-        Parameters
-        ----------
-        * orgMsg: :class:`discord.Message`
-            - origin message to reply
+        This function is coroutine.
 
-        Return value
-        ------------
-        return got deck name
+        ### Args ::
+            orgMsg (discord.Message):
+                origin message to reply
 
-        Raises
-        ------
-        `asyncio.TimeoutError` when timeout(1min)
+        ### Returns ::
+            str: got deck name
+
+        ### Raises ::
+            asyncio.TimeoutError
+                raised when response is timed out (1min)
 
         ."""
         def check(message: discord.Message):
@@ -305,22 +296,21 @@ class CogDeckList(commands.Cog):
         return msgName.content
 
     async def getIfUpdate(self, orgMsg: discord.Message):
-        """ get boolean data whether update deck or re-input name
+        """get boolean data whether update deck or re-input name
 
-        Parameters
-        ----------
-        * orgMsg: :class:`discord.Message`
-            - origin message to reply
+        This function is coroutine.
 
-        Return value
-        ------------
-        return if author selected update
+        ### Args ::
+            orgMsg (discord.Message):
+                origin message to reply
 
-        Raises
-        ------
-        `asyncio.TimeoutError` when timeout(1min)
+        ### Returns ::
+            bool: if author selected update
 
-        ."""
+        ### Raises ::
+            asyncio.TimeoutError
+                raised when response is timed out (1min)
+        """
 
         btnUpdate = discord.ui.Button(label="업데이트", custom_id="btn_update", emoji="↩️")
         async def onClick_btnUpdate(interaction: discord.Interaction):
@@ -358,22 +348,21 @@ class CogDeckList(commands.Cog):
         return chk.data['custom_id'] == "btn_update"
 
     async def getDeckDesc(self, orgMsg: discord.Message):
-        """ get description of deck
+        """get description of deck
 
-        Parameters
-        ----------
-        * orgMsg: :class:`discord.Message`
-            - origin message to reply
+        This function is coroutine.
 
-        Return value
-        ------------
-        return got description
+        ### Args ::
+            orgMsg (discord.Message):
+                origin message to reply
 
-        Raises
-        ------
-        `asyncio.TimeoutError` when timeout(15min)
+        ### Returns ::
+            str: got description
 
-        ."""
+        ### Raises ::
+            asyncio.TimeoutError
+                raised when response is timed out (15min)
+        """
         def check(message: discord.Message):
             return orgMsg.author == message.author and orgMsg.channel == message.channel
 
