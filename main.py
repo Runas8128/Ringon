@@ -3,4 +3,6 @@
 from ringon import Ringon
 
 if __name__ == '__main__':
-    Ringon(is_testing=True).run()
+    Ringon(
+        is_testing=True,
+    ).run()

@@ -29,7 +29,7 @@ class CogDetect(commands.Cog):
         description="링곤이의 단어장을 보여줍니다. 추가/삭제는 개발자에게 직접 요청해주시기 바랍니다."
     )
     async def cmdGetFullWordMap(self, interaction: discord.Interaction):
-        view = EmbedView(interaction, *detect.get_list())
+        view = EmbedView(*detect.get_list())
         await interaction.response.send_message(embed=view.make_embed(), view=view)
 
 async def setup(bot: Ringon):

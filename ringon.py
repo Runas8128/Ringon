@@ -66,7 +66,7 @@ class Ringon(commands.Bot):
                 indicates cog name to load
         """
         try:
-            await self.bot.load_extension('cogs.' + name)
+            await self.load_extension('cogs.' + name)
             print(f"Loaded {name}")
         except commands.ExtensionAlreadyLoaded:
             print(f"Skipping loading cog {name}: Already loaded")

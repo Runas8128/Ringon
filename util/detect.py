@@ -35,6 +35,11 @@ class Detect:
             List[Tuple[str, str]]: detect map with embed-form
         """
 
+        fields = []
+        for data in self.full:
+            tar, rst = data['target'], data['result']
+            fields.append((tar, rst))
+
         _fields = {}
         for data in self.prob:
             tar, rst, ratio = data['target'], data['result'], data['ratio']
@@ -44,7 +49,6 @@ class Detect:
             else:
                 _fields[tar] = f"{rst}(가중치: {ratio})"
 
-        fields = self.full[:]
         fields.extend([(tar+" (확률적)", field) for tar, field in _fields.items()])
 
         return (
