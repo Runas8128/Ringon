@@ -11,7 +11,7 @@ class CogOther(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        util.load()
+        await util.load()
 
     @app_commands.command(
         name='금칙어',

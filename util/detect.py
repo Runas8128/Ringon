@@ -19,7 +19,7 @@ class Detect:
         self.prob: List[Dict[str, str]] = []
 
     @loader(logger)
-    def load(self):
+    async def load(self):
         """Load database things"""
         full_db = Database(dbID=ID.database.detect.FULL)
         self.full = full_db.query(

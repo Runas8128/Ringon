@@ -12,7 +12,7 @@ class CogDetect(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        detect.load()
+        await detect.load()
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

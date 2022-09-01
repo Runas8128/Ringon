@@ -17,7 +17,7 @@ class Birthday(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        birthdayDB.load()
+        await birthdayDB.load()
 
         self.guild = self.bot.get_guild(self.bot.target_guild.id)
 
