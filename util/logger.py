@@ -19,7 +19,7 @@ def loader(logger: logging.Logger):
                 logger.name
             )
 
-        async def inner(ref: SupportLoad):
+        async def inner(ref: SupportLoad, *args, **kwargs):
             if ref.inited:
                 logger.warning(
                     "Skipping loading module '%s': already loaded",
@@ -30,7 +30,7 @@ def loader(logger: logging.Logger):
             logger.info("Loading module '%s'", logger.name)
             ref.inited = True
 
-            await _loader(ref)
+            await _loader(ref, *args, **kwargs)
             logger.info("module '%s' loaded", logger.name)
         return inner
     return deco

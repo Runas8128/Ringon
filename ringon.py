@@ -2,6 +2,7 @@
 
 from typing import Optional
 import logging
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -73,6 +74,9 @@ class Ringon(commands.Bot):
 
         self.all_cogs = (test_cogs or CogArgs.all()).cog_list
 
+        if self.is_testing:
+            self.all_cogs.append('Debug')
+
         logger.info("Bot Init: is testing=%s, test cogs=%s", is_testing, self.all_cogs)
 
     def run(self):
@@ -84,11 +88,9 @@ class Ringon(commands.Bot):
         app_info = await self.application_info()
         self.owner_id = app_info.owner.id
 
-        for cogName in self.all_cogs:
-            await self._load(cogName)
-
-        if self.is_testing:
-            await self._load('Debug')
+        await asyncio.gather(*[
+            self._load(cog_name) for cog_name in self.all_cogs
+        ])
 
         await self.tree.sync(guild=self.target_guild)
         logger.info("Syncing success")
