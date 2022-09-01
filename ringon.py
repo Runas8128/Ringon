@@ -85,6 +85,7 @@ class Ringon(commands.Bot):
         super().run(token, log_handler=None)
 
     async def setup_hook(self):
+        logger.info("Setup hook starts")
         app_info = await self.application_info()
         self.owner_id = app_info.owner.id
 

@@ -10,18 +10,23 @@ class SupportLoad:
 def loader(logger: Logger):
     def deco(_loader: Callable):
         def inner(ref: SupportLoad):
-            module_name = type(ref).__name__
             if ref.inited:
                 logger.warning(
                     "Skipping loading module '%s': already loaded",
-                    module_name
+                    logger.name
                 )
                 return
 
-            logger.info("Loading module '%s'", module_name)
-            ref.inited = True
+            logger.info("Loading module '%s'", logger.name)
 
-            _loader(ref)
-            logger.info("module '%s' loaded", module_name)
+            try:
+                _loader(ref)
+                ref.inited = True
+                logger.info("module '%s' loaded", logger.name)
+            except Exception as exc: # pylint: disable=broad-except
+                logger.error(
+                    "While loading module '%s', An Exception occured.",
+                    logger.name, exc_info=exc
+                )
         return inner
     return deco
