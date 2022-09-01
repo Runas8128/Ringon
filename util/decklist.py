@@ -59,7 +59,7 @@ class DeckList:
         self.last_id: int = 0
 
     @loader(logger)
-    async def load(self, bot: Ringon):
+    def load(self, bot: Ringon):
         """Load all data from database
 
         ### Args ::

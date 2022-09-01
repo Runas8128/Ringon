@@ -1,36 +1,27 @@
-from typing import Callable, Any, TypeVar
-from collections.abc import Coroutine
-import logging
-import inspect
-
-Coro = TypeVar('Coro', bound=Callable[..., Coroutine[Any, Any, Any]])
+from typing import Callable
+from logging import Logger
 
 class SupportLoad:
     inited: bool
 
-    async def load(self):
+    def load(self):
         pass
 
-def loader(logger: logging.Logger):
-    def deco(_loader: Coro):
-        if not inspect.iscoroutinefunction(_loader):
-            logger.error(
-                "Skipping loading module '%s': Loader is not a coroutine function",
-                logger.name
-            )
-
-        async def inner(ref: SupportLoad, *args, **kwargs):
+def loader(logger: Logger):
+    def deco(_loader: Callable):
+        def inner(ref: SupportLoad):
+            module_name = type(ref).__name__
             if ref.inited:
                 logger.warning(
                     "Skipping loading module '%s': already loaded",
-                    logger.name
+                    module_name
                 )
                 return
 
-            logger.info("Loading module '%s'", logger.name)
+            logger.info("Loading module '%s'", module_name)
             ref.inited = True
 
-            await _loader(ref, *args, **kwargs)
-            logger.info("module '%s' loaded", logger.name)
+            _loader(ref)
+            logger.info("module '%s' loaded", module_name)
         return inner
     return deco

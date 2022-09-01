@@ -32,7 +32,7 @@ class Util:
         self._pack: str = ''
 
     @loader(logger)
-    async def load(self):
+    def load(self):
         """Load blocks"""
         self._block_words = Block(blockID=ID.block.BLOCK_WORD).get_text_list()
         self.pack_block = Block(blockID=ID.block.PACK)

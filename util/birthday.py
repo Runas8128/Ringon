@@ -27,7 +27,7 @@ class BirthdayDB:
         self.data: List[Dict[str, str]] = None
 
     @loader(logger)
-    async def load(self):
+    def load(self):
         """Load data from notion database"""
         database = Database(dbID=ID.database.BIRTHDAY)
 

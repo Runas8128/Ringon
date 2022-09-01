@@ -21,8 +21,6 @@ class CogEvent(commands.Cog):
             activity=discord.Game("덱, 프로필, 전적을 관리")
         )
 
-        await util.load()
-
         self.error_log_channel = self.bot.get_channel(863719856061939723)
         if self.bot.is_testing:
             self.admin_channel = self.bot.get_channel(823359663973072960)
@@ -32,6 +30,8 @@ class CogEvent(commands.Cog):
         await self.bot.get_channel(1005348204965015563).send(
             f"Ringon is alive since <t:{int(time())}>"
         )
+
+        util.load()
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
