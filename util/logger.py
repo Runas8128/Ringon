@@ -11,13 +11,14 @@ def loader(logger: Logger):
     def deco(_loader: Callable):
         def inner(ref: SupportLoad):
             module_name = type(ref).__name__
-            logger.info("Loading module '%s'", module_name)
             if ref.inited:
                 logger.warning(
                     "Skipping loading module '%s': already loaded",
                     module_name
                 )
                 return
+
+            logger.info("Loading module '%s'", module_name)
             ref.inited = True
 
             _loader(ref)
