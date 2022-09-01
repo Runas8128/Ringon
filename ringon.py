@@ -1,11 +1,44 @@
 """Simple ringon instance factory."""
 
-from typing import List, Optional
+from typing import Optional
 
 import discord
 from discord.ext import commands
 
 from util.load_token import provider
+
+class CogArgs:
+    def __init__(
+        self, *,
+        events: bool = False,
+        decklist: bool = False,
+        detect: bool = False,
+        birthday: bool = False,
+        check: bool = False,
+        other: bool = False
+    ):
+        self.cog_list = []
+
+        if events:
+            self.cog_list.append('Events')
+        if decklist:
+            self.cog_list.append('DeckList')
+        if detect:
+            self.cog_list.append('Detect')
+        if birthday:
+            self.cog_list.append('Birthday')
+        if check:
+            self.cog_list.append('Check')
+        if other:
+            self.cog_list.append('Other')
+
+    @classmethod
+    def all(cls):
+        return cls(
+            events=True,
+            decklist=True, detect=True,
+            birthday=True, check=True, other=True
+        )
 
 class Ringon(commands.Bot):
     """Simple ringon instance factory.
@@ -13,11 +46,11 @@ class Ringon(commands.Bot):
     ### Attributes ::
         is_testing (bool):
             indicates if the bot instance is in testing mode.
-        test_cogs (List[str], optional):
+        test_cogs (CogArgs, optional):
             indicates list of cog name to test.
             If this parameter is missing, load all cogs (pre-defined).
     """
-    def __init__(self, is_testing: bool, test_cogs: Optional[List[str]] = None):
+    def __init__(self, is_testing: bool, test_cogs: Optional[CogArgs] = None):
         super().__init__(
             command_prefix='!',
             help_command=None,
@@ -33,11 +66,7 @@ class Ringon(commands.Bot):
         self.target_guild = discord.Object(
             id=823359663973072957 if self.is_testing else 758478112979288094
         )
-        self.all_cogs = test_cogs or [
-            'Events',
-            'DeckList', 'Detect', 'Birthday',
-            'Check', 'Other',
-        ]
+        self.all_cogs = (test_cogs or CogArgs.all()).cog_list
 
     def run(self):
         """get token automatically and run bot."""
