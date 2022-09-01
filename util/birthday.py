@@ -11,6 +11,8 @@ from datetime import datetime
 from pytion import ID, parser
 from pytion import Database, Parser
 
+from .logger import loader
+
 logger = logging.getLogger(__name__)
 
 class BirthdayDB:
@@ -24,6 +26,7 @@ class BirthdayDB:
         self.inited: bool = False
         self.data: List[Dict[str, str]] = None
 
+    @loader(logger)
     def load(self):
         """Load data from notion database"""
         database = Database(dbID=ID.database.BIRTHDAY)

@@ -6,6 +6,7 @@ Typical usage example:
 
 from typing import List, Dict
 import shutil
+import logging
 from dataclasses import dataclass, field
 
 import discord
@@ -16,6 +17,9 @@ from pytion import Database, Block, Filter, Parser
 
 from ringon import Ringon
 from .utils import util
+from .logger import loader
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Deck:
@@ -54,6 +58,7 @@ class DeckList:
         self.contrib: List[Dict[str, str]] = None
         self.last_id: int = 0
 
+    @loader(logger)
     def load(self, bot: Ringon):
         """Load all data from database
 
@@ -115,7 +120,7 @@ class DeckList:
         try:
             return next(deck for deck in self.data if deck.deck_id == deck_id)
         except StopIteration:
-            print('malformed data: id #', deck_id, sep='')
+            logger.warning('malformed data: id #%d', deck_id)
             return None
 
     def search_query(self, query: str, clazz: str, author: discord.User):
