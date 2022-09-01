@@ -94,7 +94,7 @@ class Ringon(commands.Bot):
         ])
 
         await self.tree.sync(guild=self.target_guild)
-        logger.info("Syncing success")
+        logger.info("Syncing success. all loaded cogs: %s", self.cogs.keys())
 
     async def _load(self, name: str):
         """this coroutine loads extension, ignore `NotLoaded` exception.
@@ -109,3 +109,5 @@ class Ringon(commands.Bot):
             await self.load_extension('cogs.' + name)
         except commands.ExtensionAlreadyLoaded:
             logger.warning("skipping loading cog: %s: Already loaded", name)
+        except Exception: # pylint: disable=broad-except
+            logger.error("skipping loading cog: %s: Unexpected exception raised", name)

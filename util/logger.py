@@ -23,10 +23,11 @@ def loader(logger: Logger):
                 _loader(ref)
                 ref.inited = True
                 logger.info("module '%s' loaded", logger.name)
-            except Exception as exc: # pylint: disable=broad-except
+            except Exception as exc:
                 logger.error(
-                    "While loading module '%s', An Exception occured.",
+                    "While loading module '%s', an exception occured.",
                     logger.name, exc_info=exc
                 )
+                raise exc from None
         return inner
     return deco
