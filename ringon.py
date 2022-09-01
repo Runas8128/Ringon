@@ -1,11 +1,14 @@
 """Simple ringon instance factory."""
 
 from typing import Optional
+import logging
 
 import discord
 from discord.ext import commands
 
 from util.load_token import provider
+
+logger = logging.getLogger(__name__)
 
 class CogArgs:
     def __init__(
@@ -63,15 +66,19 @@ class Ringon(commands.Bot):
         if self.is_testing:
             provider.enable_test()
 
-        self.target_guild = discord.Object(
-            id=823359663973072957 if self.is_testing else 758478112979288094
-        )
+        if self.is_testing:
+            self.target_guild = discord.Object(id=823359663973072957)
+        else:
+            self.target_guild = discord.Object(id=758478112979288094)
+
         self.all_cogs = (test_cogs or CogArgs.all()).cog_list
+
+        logger.info("Bot Init: is testing=%s, test cogs=%s", is_testing, self.all_cogs)
 
     def run(self):
         """get token automatically and run bot."""
         token = provider.load_token('discord')
-        super().run(token)
+        super().run(token, log_handler=None)
 
     async def setup_hook(self):
         app_info = await self.application_info()
@@ -96,6 +103,5 @@ class Ringon(commands.Bot):
         """
         try:
             await self.load_extension('cogs.' + name)
-            print(f"Loaded {name}")
         except commands.ExtensionAlreadyLoaded:
-            print(f"Skipping loading cog {name}: Already loaded")
+            logger.warning("skipping loading cog: %s: Already loaded", name)

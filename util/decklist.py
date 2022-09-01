@@ -4,7 +4,7 @@ Typical usage example:
     print(decklist.analyze())
 """
 
-from typing import List
+from typing import List, Dict
 import shutil
 from dataclasses import dataclass, field
 
@@ -43,11 +43,24 @@ class DeckList:
     """Database for managing deck list.
     """
     def __init__(self):
+        self.inited: bool = False
         self.history_channel: discord.TextChannel = None
-        self.load()
 
-    def load(self):
-        """Load all data from database"""
+        self.data_db: Database = None
+        self.contrib_db: Database = None
+        self.id_block: Block = None
+
+        self.data: List[Deck] = None
+        self.contrib: List[Dict[str, str]] = None
+        self.last_id: int = 0
+
+    def load(self, bot: Ringon):
+        """Load all data from database
+
+        ### Args ::
+            bot (commands.Bot):
+                Readied ringon bot instance
+        """
         self.data_db = Database(dbID=ID.database.deck.DATA)
         self.contrib_db = Database(dbID=ID.database.deck.CONTRIB)
         self.id_block = Block(blockID=ID.block.DECK_ID)
@@ -79,13 +92,6 @@ class DeckList:
 
         self.last_id = int(self.id_block.get_text())
 
-    def load_histroy_channel(self, bot: Ringon):
-        """Load `역사관` channel when bot is ready
-
-        ### Args ::
-            bot (commands.Bot):
-                Ringon bot instance
-        """
         if bot.is_testing:
             self.history_channel: discord.TextChannel = bot.get_channel(1004611688802287626)
         else:
@@ -251,8 +257,7 @@ class DeckList:
         ### Raises ::
             ValueError
                 raised when both image_url and desc are empty
-
-        ."""
+        """
 
         deck_info = next(deck for deck in self.data if deck.name == name)
         deck_info.image_url = image_url

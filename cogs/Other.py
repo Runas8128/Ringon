@@ -2,12 +2,16 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from ringon import Ringon
 from util.utils import util
+from ringon import Ringon
 
 class CogOther(commands.Cog):
     def __init__(self, bot: Ringon):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        util.load()
 
     @app_commands.command(
         name='금칙어',

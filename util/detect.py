@@ -1,15 +1,24 @@
 """Database for Detecting texts"""
 
+from typing import List, Dict
+import logging
 import random
 
 from pytion import parser, ID
 from pytion import Database, Parser
 
+from util.logger import loader
+
+logger = logging.getLogger(__name__)
+
 class Detect:
     """Database for Detecting texts"""
     def __init__(self):
-        self.load()
+        self.inited: bool = False
+        self.full: List[Dict[str, str]] = []
+        self.prob: List[Dict[str, str]] = []
 
+    @loader(logger)
     def load(self):
         """Load database things"""
         full_db = Database(dbID=ID.database.detect.FULL)

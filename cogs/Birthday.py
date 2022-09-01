@@ -3,9 +3,9 @@ from typing import List
 import discord
 from discord.ext import commands, tasks
 
-from ringon import Ringon
 from util.utils import util
 from util.birthday import birthdayDB
+from ringon import Ringon
 
 class Birthday(commands.Cog):
     def __init__(self, bot: Ringon):
@@ -17,6 +17,8 @@ class Birthday(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        birthdayDB.load()
+
         self.guild = self.bot.get_guild(self.bot.target_guild.id)
 
         self.notice_channel = self.guild.get_channel(

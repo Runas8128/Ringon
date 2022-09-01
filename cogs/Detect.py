@@ -11,6 +11,10 @@ class CogDetect(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
+    async def on_ready(self):
+        detect.load()
+
+    @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         rst = detect[message.content]
         if rst is not None:

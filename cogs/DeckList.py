@@ -18,7 +18,7 @@ class CogDeckList(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        deckList.load_histroy_channel(self.bot)
+        deckList.load(self.bot)
 
         self.emojiMap = {
             '엘프': self.bot.get_emoji(1004600679433777182),

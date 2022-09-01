@@ -4,11 +4,14 @@ Typical usage example:
     print(birthdayDB.get_today('06/02'))
 """
 
-from typing import List
+from typing import List, Dict
+import logging
 from datetime import datetime
 
 from pytion import ID, parser
 from pytion import Database, Parser
+
+logger = logging.getLogger(__name__)
 
 class BirthdayDB:
     """Provides wrapper for `birthday` database
@@ -16,8 +19,10 @@ class BirthdayDB:
     ### Example ::
         print(birthdayDB.get_today('06/02'))
     """
+
     def __init__(self):
-        self.load()
+        self.inited: bool = False
+        self.data: List[Dict[str, str]] = None
 
     def load(self):
         """Load data from notion database"""
@@ -37,8 +42,7 @@ class BirthdayDB:
 
         ### Returns ::
             ID of members whom birthday is today
-
-        ."""
+        """
 
         date = now.strftime("%m/%d")
 

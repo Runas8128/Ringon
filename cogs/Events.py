@@ -31,6 +31,8 @@ class CogEvent(commands.Cog):
             f"Ringon is alive since <t:{int(time())}>"
         )
 
+        util.load()
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:

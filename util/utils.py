@@ -1,9 +1,15 @@
 """Util database for Ringon."""
 
+from typing import List
+import logging
 from datetime import datetime, timedelta, timezone
 
 from pytion import ID
 from pytion import Block
+
+from util.logger import loader
+
+logger = logging.getLogger(__name__)
 
 class Util:
     """Util database for Ringon.
@@ -19,8 +25,13 @@ class Util:
             Pack name info
     """
     def __init__(self):
-        self.load()
+        self.inited: bool = False
 
+        self._block_words: List[str] = []
+        self.pack_block: Block
+        self._pack: str = ''
+
+    @loader(logger)
     def load(self):
         """Load blocks"""
         self._block_words = Block(blockID=ID.block.BLOCK_WORD).get_text_list()
