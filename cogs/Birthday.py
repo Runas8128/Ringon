@@ -15,10 +15,10 @@ class Birthday(commands.Cog):
         self.notice_channel: discord.TextChannel = None
         self.birthday_role: discord.Role = None
 
-    @commands.Cog.listener()
-    async def on_ready(self):
         birthdayDB.load()
 
+    @commands.Cog.listener()
+    async def on_ready(self):
         self.guild = self.bot.get_guild(self.bot.target_guild.id)
 
         self.notice_channel = self.guild.get_channel(

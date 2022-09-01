@@ -59,13 +59,8 @@ class DeckList:
         self.last_id: int = 0
 
     @loader(logger)
-    def load(self, bot: Ringon):
-        """Load all data from database
-
-        ### Args ::
-            bot (commands.Bot):
-                Readied ringon bot instance
-        """
+    def load(self):
+        """Load all data from database"""
         self.data_db = Database(dbID=ID.database.deck.DATA)
         self.contrib_db = Database(dbID=ID.database.deck.CONTRIB)
         self.id_block = Block(blockID=ID.block.DECK_ID)
@@ -97,6 +92,13 @@ class DeckList:
 
         self.last_id = int(self.id_block.get_text())
 
+    def load_history_channel(self, bot: Ringon):
+        """Load history channel object.
+
+        ### Args ::
+            bot (commands.Bot):
+                Readied ringon bot instance
+        """
         if bot.is_testing:
             self.history_channel: discord.TextChannel = bot.get_channel(1004611688802287626)
         else:

@@ -14,6 +14,8 @@ class CogEvent(commands.Cog):
         self.error_log_channel: discord.TextChannel = None
         self.admin_channel: discord.TextChannel = None
 
+        util.load()
+
     @commands.Cog.listener()
     async def on_ready(self):
         await self.bot.change_presence(
@@ -30,8 +32,6 @@ class CogEvent(commands.Cog):
         await self.bot.get_channel(1005348204965015563).send(
             f"Ringon is alive since <t:{int(time())}>"
         )
-
-        util.load()
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

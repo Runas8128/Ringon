@@ -14,11 +14,14 @@ from ringon import Ringon
 class CogDeckList(commands.Cog):
     def __init__(self, bot: Ringon):
         self.bot = bot
+
         self.emojiMap: Dict[str, discord.Emoji] = {}
+
+        deckList.load()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        deckList.load(self.bot)
+        deckList.load_history_channel(self.bot)
 
         self.emojiMap = {
             '엘프': self.bot.get_emoji(1004600679433777182),
