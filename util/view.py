@@ -147,7 +147,7 @@ class DeckListView(BaseView):
         super().__init__("vDeckList")
 
         self.guild = init_inter.guild
-        self.decks = sorted(decks, key=lambda deck: deck.ID)
+        self.decks = sorted(decks, key=lambda deck: deck.deck_id)
         self.emoji_map = emoji_map
         self.index = 0
 
@@ -215,8 +215,8 @@ class DeckListView(BaseView):
                     value=', '.join(['#' + tag for tag in hashtag_list])
                 )
 
-        embed.set_image(url=deck.imageURL)
-        embed.set_footer(text=f"ID: {deck.ID}")
+        embed.set_image(url=deck.image_url)
+        embed.set_footer(text=f"ID: {deck.deck_id}")
 
         return embed
 

@@ -121,7 +121,7 @@ class CogDeckList(commands.Cog):
                 self.emojiMap
             )
             await interaction.response.send_message(
-                embed=view.makeEmbed(),
+                embed=view.make_embed(),
                 view=view
             )
         except ValueError as E:
