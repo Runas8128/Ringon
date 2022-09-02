@@ -56,7 +56,6 @@ class DeckList:
 
         self.data: List[Deck] = None
         self.contrib: List[Dict[str, str]] = None
-        self.last_id: int = 0
 
     @loader(logger)
     def load(self):
@@ -90,8 +89,6 @@ class DeckList:
             except StopIteration as exc:
                 raise ValueError(_contrib['DeckID']) from exc
 
-        self.last_id = int(self.id_block.get_text())
-
     def load_history_channel(self, bot: Ringon):
         """Load history channel object.
 
@@ -103,6 +100,14 @@ class DeckList:
             self.history_channel: discord.TextChannel = bot.get_channel(1004611688802287626)
         else:
             self.history_channel: discord.TextChannel = bot.get_channel(804614670178320394)
+
+    @property
+    def last_id(self):
+        return int(self.id_block.get_text())
+
+    @last_id.setter
+    def last_id(self, value: int):
+        self.id_block.update_text(str(value))
 
     def search_id(self, deck_id: int):
         """Search decks by ID
@@ -223,7 +228,6 @@ class DeckList:
         """
 
         self.last_id += 1
-        self.id_block.update_text(str(self.last_id))
 
         timestamp = util.now.strftime("%Y/%m/%d")
 
