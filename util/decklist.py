@@ -17,7 +17,7 @@ from pytion import Database, Block, Filter, Parser
 
 from ringon import Ringon
 from .utils import util
-from .logger import loader
+from .decorator import database
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +43,11 @@ class Deck:
     version: int
     contrib: List[str] = field(default_factory=list)
 
+@database(logger)
 class DeckList:
     """Database for managing deck list.
     """
     def __init__(self):
-        self.inited: bool = False
         self.history_channel: discord.TextChannel = None
 
         self.data_db: Database = None
@@ -59,7 +59,6 @@ class DeckList:
 
         self._last_id: int = 0
 
-    @loader(logger)
     def load(self):
         """Load all data from database"""
         self.data_db = Database(dbID=ID.database.deck.DATA)
@@ -176,10 +175,7 @@ class DeckList:
 
         if clazz is not None:
             tmp = {deck.deck_id for deck in self.data if clazz == deck.clazz}
-            if rst:
-                rst &= tmp
-            else:
-                rst = tmp
+            rst = (rst & tmp) or tmp
 
         if author is not None:
             author = str(author.id)
@@ -190,10 +186,7 @@ class DeckList:
                     author in deck.contrib
                 ))
             }
-            if rst:
-                rst &= tmp
-            else:
-                rst = tmp
+            rst = (rst & tmp) or tmp
 
         return [self.search_id(id) for id in rst]
 
@@ -301,16 +294,18 @@ class DeckList:
         )[0]['pageID']
         self.data_db.update(pageID=page_id, **properties)
 
-        contributor_object = {'DeckID': deck_info.deck_id, 'ContribID': str(contrib)}
+        contrib = str(contrib)
+
+        contributor_object = {'DeckID': deck_info.deck_id, 'ContribID': contrib}
         if not any((
-            deck_info.author == str(contrib),
+            deck_info.author == contrib,
             contributor_object in self.contrib
         )):
-            deck_info.contrib.append(str(contrib))
+            deck_info.contrib.append(contrib)
             self.contrib.append(contributor_object)
             self.contrib_db.append(
                 DeckID=prop.Number(deck_info.deck_id),
-                ContribID=prop.Text(str(contrib))
+                ContribID=prop.Text(contrib)
             )
 
     def delete_deck(self, deck_id: int, req_id: int):

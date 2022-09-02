@@ -11,10 +11,11 @@ from datetime import datetime
 from pytion import ID, parser
 from pytion import Database, Parser
 
-from .logger import loader
+from .decorator import database
 
 logger = logging.getLogger(__name__)
 
+@database(logger)
 class BirthdayDB:
     """Provides wrapper for `birthday` database
 
@@ -23,20 +24,21 @@ class BirthdayDB:
     """
 
     def __init__(self):
-        self.inited: bool = False
-        self.data: List[Dict[str, str]] = None
+        self.data: Dict[str, str] = None
 
-    @loader(logger)
     def load(self):
         """Load data from notion database"""
-        database = Database(dbID=ID.database.BIRTHDAY)
+        _database = Database(dbID=ID.database.BIRTHDAY)
 
-        self.data = database.query(
+        self.data = dict(_database.query(
             filter=None,
-            parser=Parser(id=parser.Text, date=parser.Text)
-        )
+            parser=Parser(
+                only_values=True,
+                id=parser.Text, date=parser.Text
+            )
+        ))
 
-    def get_today(self, now: datetime) -> List[str]:
+    def __getitem__(self, now: datetime) -> List[str]:
         """get IDs for members whom birthday is today
 
         ### Args ::
@@ -49,6 +51,6 @@ class BirthdayDB:
 
         date = now.strftime("%m/%d")
 
-        return [_data['id'] for _data in self.data if _data['date'] == date]
+        return [_id for _id, _date in self.data.items() if _date == date]
 
 birthdayDB = BirthdayDB()

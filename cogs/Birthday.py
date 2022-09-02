@@ -38,7 +38,7 @@ class Birthday(commands.Cog):
 
         members: List[discord.Member] = [
             self.guild.get_member(id)
-            for id in birthdayDB.get_today(now)
+            for id in birthdayDB[now]
         ]
         if len(members) == 0:
             return

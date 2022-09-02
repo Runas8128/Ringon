@@ -81,12 +81,10 @@ class CogDeckList(commands.Cog):
                 if deckList.has_deck(name):
                     if await self.getIfUpdate(orgMsg):
                         await self._updateDeck(orgMsg, name)
-                        return
                     else:
                         continue
                 else:
                     await self._addDeck(orgMsg, name)
-                    return
         except asyncio.TimeoutError:
             await channel.send("시간 초과, 덱 등록을 취소합니다.")
             return

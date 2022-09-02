@@ -7,18 +7,17 @@ import random
 from pytion import parser, ID
 from pytion import Database, Parser
 
-from util.logger import loader
+from .decorator import database
 
 logger = logging.getLogger(__name__)
 
+@database(logger)
 class Detect:
     """Database for Detecting texts"""
     def __init__(self):
-        self.inited: bool = False
         self.full: List[Dict[str, str]] = []
         self.prob: List[Dict[str, str]] = []
 
-    @loader(logger)
     def load(self):
         """Load database things"""
         full_db = Database(dbID=ID.database.detect.FULL)
