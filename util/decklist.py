@@ -57,6 +57,8 @@ class DeckList:
         self.data: List[Deck] = None
         self.contrib: List[Dict[str, str]] = None
 
+        self._last_id: int = 0
+
     @loader(logger)
     def load(self):
         """Load all data from database"""
@@ -89,6 +91,8 @@ class DeckList:
             except StopIteration as exc:
                 raise ValueError(_contrib['DeckID']) from exc
 
+        self._last_id = int(self.id_block.get_text())
+
     def load_history_channel(self, bot: Ringon):
         """Load history channel object.
 
@@ -103,10 +107,11 @@ class DeckList:
 
     @property
     def last_id(self):
-        return int(self.id_block.get_text())
+        return self._last_id
 
     @last_id.setter
     def last_id(self, value: int):
+        self._last_id = value
         self.id_block.update_text(str(value))
 
     def search_id(self, deck_id: int):
@@ -296,7 +301,7 @@ class DeckList:
         )[0]['pageID']
         self.data_db.update(pageID=page_id, **properties)
 
-        contributor_object = {'DeckID': deck_info['ID'], 'ContribID': str(contrib)}
+        contributor_object = {'DeckID': deck_info.deck_id, 'ContribID': str(contrib)}
         if not any((
             deck_info.author == str(contrib),
             contributor_object in self.contrib
