@@ -47,6 +47,7 @@ class Detect:
         fields = []
         for data in self.full:
             tar, rst = data['target'], data['result']
+
             fields.append((tar, rst))
 
         _fields = {}

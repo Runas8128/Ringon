@@ -35,7 +35,9 @@ class CogDeckList(commands.Cog):
         }
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self,
+        message: discord.Message
+    ):
         if message.author.bot:
             return
 
@@ -54,7 +56,9 @@ class CogDeckList(commands.Cog):
         await message.add_reaction(self.emojiMap[message.channel.name])
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_add(self,
+        payload: discord.RawReactionActionEvent
+    ):
         channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
 
         if not (
@@ -111,8 +115,7 @@ class CogDeckList(commands.Cog):
             app_commands.Choice(name="네메시스", value="네메시스")
         ]
     )
-    async def cmdSearchDeck(
-        self, interaction: discord.Interaction,
+    async def cmdSearchDeck(self, interaction: discord.Interaction,
         query: str = None,
         clazz: str = None,
         author: discord.Member = None
@@ -134,9 +137,7 @@ class CogDeckList(commands.Cog):
         name="덱분석",
         description="현재 등록된 덱들을 간단하게 분석해줍니다. 클래스별 덱 갯수 및 점유율을 표시합니다."
     )
-    async def cmdAnalyze(
-        self, interaction: discord.Interaction
-    ):
+    async def cmdAnalyze(self, interaction: discord.Interaction):
         await interaction.response.send_message(embed=deckList.analyze())
 
     @app_commands.command(
@@ -146,8 +147,7 @@ class CogDeckList(commands.Cog):
     @app_commands.describe(
         deck_code="포탈 링크를 만들 덱 코드입니다."
     )
-    async def cmdPortalLink(
-        self, interaction: discord.Interaction,
+    async def cmdPortalLink(self, interaction: discord.Interaction,
         deck_code: str
     ):
         response = requests.get(
@@ -174,7 +174,9 @@ class CogDeckList(commands.Cog):
 
     @commands.command(name="팩이름")
     @commands.has_permissions(administrator=True)
-    async def cmdChangePackName(self, ctx: commands.Context, newName: str=None):
+    async def cmdChangePackName(self, ctx: commands.Context,
+        newName: str=None
+    ):
         if newName is None:
             await ctx.send("사용법: `!팩이름 (신팩 이름: 띄어쓰기 X)")
             return
@@ -195,11 +197,11 @@ class CogDeckList(commands.Cog):
 
         try:
             def check(msg: discord.Message):
-                return all([
+                return all((
                     msg.author == ctx.author,
                     msg.channel == ctx.channel,
                     msg.content == "확인"
-                ])
+                ))
 
             await self.bot.wait_for('message', check=check, timeout=60.0)
             deckList.change_pack(newName)
@@ -212,7 +214,10 @@ class CogDeckList(commands.Cog):
                 )
             )
 
-    async def _addDeck(self, orgMsg: discord.Message, name: str):
+    async def _addDeck(self,
+        orgMsg: discord.Message,
+        name: str
+    ):
         """front-end method for adding deck in database
 
         This function is coroutine.
@@ -239,7 +244,10 @@ class CogDeckList(commands.Cog):
         deckList.add_deck(name, clazz, desc, imageURL, author)
         await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
 
-    async def _updateDeck(self, orgMsg: discord.Message, name: str):
+    async def _updateDeck(self,
+        orgMsg: discord.Message,
+        name: str
+    ):
         """front-end method for updating deck in database
 
         This function is coroutine.
@@ -259,7 +267,10 @@ class CogDeckList(commands.Cog):
             await orgMsg.channel.send("시간 초과, 덱 업데이트를 취소합니다.")
             return
 
-        imageURL = '' if len(orgMsg.attachments) == 0 else orgMsg.attachments[0].url
+        if len(orgMsg.attachments) == 0:
+            imageURL = ''
+        else:
+            imageURL = orgMsg.attachments[0].url
 
         try:
             deckList.update_deck(name, orgMsg.author.id, imageURL, desc=desc)
@@ -267,7 +278,9 @@ class CogDeckList(commands.Cog):
         except ValueError as v:
             await orgMsg.reply(str(v))
 
-    async def getDeckName(self, orgMsg: discord.Message):
+    async def getDeckName(self,
+        orgMsg: discord.Message
+    ):
         """get deck name with origin message
 
         This function is coroutine.
@@ -285,20 +298,29 @@ class CogDeckList(commands.Cog):
 
         ."""
         def check(message: discord.Message):
-            return all([
+            return all((
                 orgMsg.author == message.author,
                 orgMsg.channel == message.channel
-            ])
+            ))
 
-        await orgMsg.reply(embed=discord.Embed(
-            title=":ledger: 덱의 이름을 입력해주세요!",
-            description="시간 제한: 1분"
-        ), mention_author=False)
+        await orgMsg.reply(
+            embed=discord.Embed(
+                title=":ledger: 덱의 이름을 입력해주세요!",
+                description="시간 제한: 1분"
+            ),
+            mention_author=False
+        )
 
-        msgName: discord.Message = await self.bot.wait_for('message', check=check, timeout=60.0)
+        msgName: discord.Message = await self.bot.wait_for(
+            'message',
+            check=check,
+            timeout=60.0
+        )
         return msgName.content
 
-    async def getIfUpdate(self, orgMsg: discord.Message):
+    async def getIfUpdate(self,
+        orgMsg: discord.Message
+    ):
         """get boolean data whether update deck or re-input name
 
         This function is coroutine.
@@ -342,15 +364,17 @@ class CogDeckList(commands.Cog):
         )
 
         def check(interaction: discord.Interaction):
-            return all([
+            return all((
                 orgMsg.author.id == interaction.user.id,
                 interaction.data.get('custom_id') in ['btn_update', 'btn_reinput']
-            ])
+            ))
 
         chk: discord.Interaction = await self.bot.wait_for('interaction', check=check, timeout=60.0)
         return chk.data['custom_id'] == "btn_update"
 
-    async def getDeckDesc(self, orgMsg: discord.Message):
+    async def getDeckDesc(self,
+        orgMsg: discord.Message
+    ):
         """get description of deck
 
         This function is coroutine.
@@ -369,10 +393,13 @@ class CogDeckList(commands.Cog):
         def check(message: discord.Message):
             return orgMsg.author == message.author and orgMsg.channel == message.channel
 
-        await orgMsg.reply(embed=discord.Embed(
-            title=":ledger: 덱의 설명을 입력해주세요!",
-            description="시간 제한 X\n덱 설명을 생략하려면 `생략`을 입력해주세요."
-        ), mention_author=False)
+        await orgMsg.reply(
+            embed=discord.Embed(
+                title=":ledger: 덱의 설명을 입력해주세요!",
+                description="시간 제한 X\n덱 설명을 생략하려면 `생략`을 입력해주세요."
+            ),
+            mention_author=False
+        )
 
         msgDesc: discord.Message = await self.bot.wait_for('message', check=check)
 

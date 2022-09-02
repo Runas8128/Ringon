@@ -34,7 +34,9 @@ class CogEvent(commands.Cog):
         )
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self,
+        message: discord.Message
+    ):
         if message.author.bot:
             return
 
@@ -63,18 +65,23 @@ class CogEvent(commands.Cog):
                 return
 
     @commands.Cog.listener()
-    async def on_thread_create(self, thread: discord.Thread):
+    async def on_thread_create(self,
+        thread: discord.Thread
+    ):
         if self.bot.is_testing:
             await thread.send("Hello! I found some new thread")
         else:
             await thread.add_user(discord.Object(272266200812093441))
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context, error):
+    async def on_command_error(self,
+        ctx: commands.Context,
+        error
+    ):
         if isinstance(error, commands.CommandNotFound):
             return
 
-        elif isinstance(error, commands.MissingPermissions):
+        if isinstance(error, commands.MissingPermissions):
             await ctx.send("관리자 전용 명령어입니다! It's only for Admin")
 
         elif isinstance(error, commands.NotOwner):

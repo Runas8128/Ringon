@@ -146,7 +146,11 @@ class DeckList:
         """
 
         query = query.split()
-        if len(query) == 0 and clazz is None and author is None:
+        if all((
+            len(query) == 0,
+            clazz is None,
+            author is None
+        )):
             raise ValueError("검색할 단어를 입력해주세요")
 
         rst = set()
@@ -171,7 +175,10 @@ class DeckList:
             author = str(author.id)
             tmp = {
                 deck.deck_id for deck in self.data
-                if author == deck.author or author in deck.contrib
+                if any((
+                    author == deck.author,
+                    author in deck.contrib
+                ))
             }
             if rst:
                 rst &= tmp
@@ -286,7 +293,10 @@ class DeckList:
         self.data_db.update(pageID=page_id, **properties)
 
         contributor_object = {'DeckID': deck_info['ID'], 'ContribID': str(contrib)}
-        if deck_info.author != str(contrib) and contributor_object not in self.contrib:
+        if not any((
+            deck_info.author == str(contrib),
+            contributor_object in self.contrib
+        )):
             deck_info.contrib.append(str(contrib))
             self.contrib.append(contributor_object)
             self.contrib_db.append(

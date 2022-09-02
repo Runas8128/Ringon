@@ -8,7 +8,9 @@ class CogDebug(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def cmg_dbg(self, ctx: commands.Context):
+    async def cmg_dbg(
+        self, ctx: commands.Context
+    ):
         pass
 
 async def setup(bot: Ringon):

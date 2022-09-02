@@ -26,9 +26,13 @@ class CogCheck(commands.Cog):
 
     @commands.command(name='인원점검')
     @commands.has_permissions(administrator=True)
-    async def cmd_CheckMembers(self, ctx: commands.Context, tarMsgLink: str=''):
+    async def cmd_CheckMembers(
+        self, ctx: commands.Context,
+        tarMsgLink: str=''
+    ):
         if self.bot.is_testing:
             await ctx.reply("해당 명령어는 테스트 모드에서 사용 불가능한 명령어입니다.", mention_author=False)
+            return
 
         try:
             _, _, _, _, guildID, channelID, messageID = tarMsgLink.split('/')
@@ -38,26 +42,38 @@ class CogCheck(commands.Cog):
             tarMsg = discord.Message = await channel.fetch_message(int(messageID))
 
         except discord.NotFound:
-            await ctx.send("잘못된 메시지 링크입니다. `메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!")
+            await ctx.send(
+                "잘못된 메시지 링크입니다. "
+                "`메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!"
+            )
         except ValueError:
-            await ctx.send("잘못된 메시지 링크 형식입니다. `메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!")
+            await ctx.send(
+                "잘못된 메시지 링크 형식입니다. "
+                "`메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!"
+            )
 
         else:
             notMsg = await ctx.send("인원점검중...")
-            userMap = await self.getMemberMap(ctx.guild, tarMsg.reactions, ['👍', '👎'])
+            userMap = await self.getMemberMap(
+                ctx.guild,
+                tarMsg.reactions,
+                ['👍', '👎']
+            )
 
             embed = discord.Embed(title="인원점검")
-            for emoji in userMap.keys():
+            for emoji, users in userMap.items():
                 embed.add_field(
                     name=emoji,
-                    value=", ".join([user.mention for user in userMap[emoji]]) or "없음",
+                    value=", ".join([user.mention for user in users]) or "없음",
                     inline=False
                 )
             await notMsg.edit(content="", embed=embed)
 
     async def getMemberMap(
         self,
-        guild: discord.Guild, allReact: List[discord.Reaction], indiEmoji: List[T_Emoji]
+        guild: discord.Guild,
+        allReact: List[discord.Reaction],
+        indiEmoji: List[T_Emoji]
     ) -> Dict[T_Emoji, List[discord.Member]]:
         """Makes emoji-member map.
         If member reacted with two or more emoji, then check first emoji only.
@@ -77,11 +93,17 @@ class CogCheck(commands.Cog):
                 all member who didn't reacted are stored in "반응 안함" key
         """
 
-        userList: List[discord.Member] = [user for user in guild.members if not user.bot]
+        userList: List[discord.Member] = [
+            user
+            for user in guild.members
+            if not user.bot
+        ]
 
-        userMap: Dict[T_Emoji, discord.Member] = { emoji : [] for emoji in indiEmoji }
+        userMap: Dict[T_Emoji, discord.Member] = {
+            emoji : []
+            for emoji in indiEmoji
+        }
         userMap['그 외'] = []
-        userMap['반응 안함'] = []
 
         react: discord.Reaction
         for react in allReact:
@@ -94,10 +116,14 @@ class CogCheck(commands.Cog):
                 else:
                     userMap['그 외'].append(user)
 
-        for ignoreRole in self.ignore_role:
-            userList = [user for user in userList if ignoreRole not in user.roles]
-
-        userMap['반응 안함'] = userList
+        userMap['반응 안함'] = [
+            user
+            for user in userList
+            if any(
+                ignore_role not in user.roles
+                for ignore_role in self.ignore_role
+            )
+        ]
 
         return userMap
 

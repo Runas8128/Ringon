@@ -21,12 +21,12 @@ class Birthday(commands.Cog):
     async def on_ready(self):
         self.guild = self.bot.get_guild(self.bot.target_guild.id)
 
-        self.notice_channel = self.guild.get_channel(
-            823359663973072960 if self.bot.is_testing else 864518975253119007
-        )
-        self.birthday_role = self.guild.get_role(
-            854505668785602561 if self.bot.is_testing else 952236601331810437
-        )
+        if self.bot.is_testing:
+            self.notice_channel = self.guild.get_channel(823359663973072960)
+            self.birthday_role = self.guild.get_role(854505668785602561)
+        else:
+            self.notice_channel = self.guild.get_channel(864518975253119007)
+            self.birthday_role = self.guild.get_role(952236601331810437)
 
     @tasks.loop(hours = 1)
     async def birthdayCheckLoop(self):

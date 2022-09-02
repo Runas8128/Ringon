@@ -13,7 +13,9 @@ class CogDetect(commands.Cog):
         detect.load()
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self,
+        message: discord.Message
+    ):
         rst = detect[message.content]
         if rst is not None:
             await message.channel.typing()
