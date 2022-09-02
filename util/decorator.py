@@ -18,7 +18,7 @@ def database(logger: Logger):
                 logger.info("Loading module '%s'", logger.name)
 
                 try:
-                    self.load()
+                    super().load()
                     self.inited = True
                     logger.info("module '%s' loaded", logger.name)
                 except Exception as exc:
