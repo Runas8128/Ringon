@@ -94,7 +94,7 @@ class Ringon(commands.Bot):
         ])
 
         await self.tree.sync(guild=self.target_guild)
-        logger.info("Syncing success. all loaded cogs: %s", self.cogs.keys())
+        logger.info("Syncing success. all loaded cogs: %s", ', '.join(self.cogs.keys()))
 
     async def _load(self, name: str):
         """this coroutine loads extension, ignore `NotLoaded` exception.
