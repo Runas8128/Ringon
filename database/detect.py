@@ -4,7 +4,7 @@ from typing import List, Dict
 import logging
 import random
 
-from pytion import parser, ID
+from pytion import parser
 from pytion import Database, Parser
 
 from util import database
@@ -20,7 +20,7 @@ class Detect:
 
     def load(self):
         """Load database things"""
-        full_db = Database(dbID=ID.database.detect.FULL)
+        full_db = Database(dbID="481b6de47c6a41debf83fe1b93700622")
         self.full = full_db.query(
             filter=None,
             parser=Parser(
@@ -28,7 +28,7 @@ class Detect:
             )
         )
 
-        prob_db = Database(dbID=ID.database.detect.PROB)
+        prob_db = Database(dbID="5e22777f724b4f27a336cdce350bc1a2")
         self.prob = prob_db.query(
             filter=None,
             parser=Parser(

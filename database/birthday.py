@@ -8,7 +8,7 @@ from typing import List, Dict
 import logging
 from datetime import datetime
 
-from pytion import ID, parser
+from pytion import parser
 from pytion import Database, Parser
 
 from util import database
@@ -28,7 +28,7 @@ class BirthdayDB:
 
     def load(self):
         """Load data from notion database"""
-        _database = Database(dbID=ID.database.BIRTHDAY)
+        _database = Database(dbID="a66f05422b91471da108737db205c7c7")
 
         self.data = dict(_database.query(
             filter=None,

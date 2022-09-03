@@ -10,8 +10,6 @@ Supported feature list:
             Title, Text, Number, Select
 """
 
-from . import ID
-
 from .database import Database
 from .block import Block
 from .version import Version

@@ -3,7 +3,6 @@
 from typing import List
 import logging
 
-from pytion import ID
 from pytion import Block
 
 from util import database
@@ -28,8 +27,8 @@ class Util:
 
     def load(self):
         """Load blocks"""
-        self._block_words = Block(blockID=ID.block.BLOCK_WORD).get_text_list()
-        self.pack_block = Block(blockID=ID.block.PACK)
+        self._block_words = Block(blockID="233288a3891f4c008504470c8fbefc88").get_text_list()
+        self.pack_block = Block(blockID="b65b0b9652d04da58f960045aa01568c")
         self._pack = self.pack_block.get_text()
 
     @property

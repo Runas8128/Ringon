@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 import discord
 
 # pylint: disable=redefined-builtin
-from pytion import filter, parser, prop, ID
+from pytion import filter, parser, prop
 from pytion import Database, Block, Filter, Parser
 
 from ringon import Ringon
@@ -61,9 +61,9 @@ class DeckList:
 
     def load(self):
         """Load all data from database"""
-        self.data_db = Database(dbID=ID.database.deck.DATA)
-        self.contrib_db = Database(dbID=ID.database.deck.CONTRIB)
-        self.id_block = Block(blockID=ID.block.DECK_ID)
+        self.data_db = Database(dbID="8ef3fed5a101492882ba96dab96c096b")
+        self.contrib_db = Database(dbID="7a5aec5497b64aa5a9e0942fbeb81c97")
+        self.id_block = Block(blockID="69a8691b44f24839a041717de11ecad1")
 
         self.data: List[Deck] = self.data_db.query(
             filter=None,
