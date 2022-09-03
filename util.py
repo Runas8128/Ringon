@@ -39,11 +39,19 @@ class TokenProvider:
     Else, it uses environment variable to load token
     """
     def __init__(self):
+        self.test = False
         self.load_token = self._load_deploy
 
-    def enable_test(self):
-        """change token loader for test"""
-        self.load_token = self._load_test
+    def __getitem__(self, token_key: str):
+        """Token loader proxy.
+
+        ### Returns ::
+            Token value that proxy returns.
+        """
+
+        return (
+            self._load_test if self.test else self._load_deploy
+        )(token_key)
 
     def _load_test(self, token_key: str):
         """Load token from "/TOKEN.json" file.
@@ -94,4 +102,4 @@ class TokenProvider:
                 f"[ERROR] `{token_key}` is not set in your environment variables."
             ) from exc
 
-provider = TokenProvider()
+token = TokenProvider()

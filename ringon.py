@@ -7,7 +7,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from util import provider
+from util import token
 
 logger = logging.getLogger(__name__)
 
@@ -62,10 +62,7 @@ class Ringon(commands.Bot):
             case_insensitive=True
         )
 
-        self.is_testing = is_testing
-
-        if self.is_testing:
-            provider.enable_test()
+        self.is_testing = token.test = is_testing
 
         if self.is_testing:
             self.target_guild = discord.Object(id=823359663973072957)
@@ -81,8 +78,7 @@ class Ringon(commands.Bot):
 
     def run(self):
         """get token automatically and run bot."""
-        token = provider.load_token('discord')
-        super().run(token, log_handler=None)
+        super().run(token['discord'], log_handler=None)
 
     async def setup_hook(self):
         logger.info("Setup hook starts")

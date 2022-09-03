@@ -13,7 +13,7 @@ from typing import Optional
 import json
 import httpx
 
-from util import provider
+from util import token
 
 from .version import Version
 from .db.property import Text
@@ -35,7 +35,7 @@ class Block:
         self.client = httpx.Client(
             base_url=f"https://api.notion.com/v1/blocks/{blockID}",
             headers={
-                "Authorization":    "Bearer " + provider.load_token('notion'),
+                "Authorization":    "Bearer " + token['notion'],
                 "Content-Type":     "application/json",
                 "Notion-Version":   version
             }
