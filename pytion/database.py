@@ -13,7 +13,7 @@ from typing import Optional, Callable, Any
 import json
 import httpx
 
-from util.load_token import provider
+from util import provider
 
 from .version import Version
 from .db.filter import Filter

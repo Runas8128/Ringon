@@ -3,8 +3,8 @@ from typing import List
 import discord
 from discord.ext import commands, tasks
 
-from util.utils import util
-from util.birthday import birthdayDB
+from database.utils import util
+from database.birthday import birthdayDB
 from ringon import Ringon
 
 class Birthday(commands.Cog):

@@ -9,7 +9,7 @@ import re
 
 import discord
 
-from .decklist import deckList, Deck
+from database.decklist import deckList, Deck
 
 class BaseView(discord.ui.View):
     """Base class for making View class.

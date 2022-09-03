@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from util.utils import util
+from database.utils import util
 from ringon import Ringon
 
 class CogOther(commands.Cog):

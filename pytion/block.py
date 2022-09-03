@@ -13,7 +13,7 @@ from typing import Optional
 import json
 import httpx
 
-from util.load_token import provider
+from util import provider
 
 from .version import Version
 from .db.property import Text

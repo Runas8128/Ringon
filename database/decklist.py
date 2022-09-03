@@ -16,8 +16,8 @@ from pytion import filter, parser, prop, ID
 from pytion import Database, Block, Filter, Parser
 
 from ringon import Ringon
+from util import database
 from .utils import util
-from .decorator import database
 
 logger = logging.getLogger(__name__)
 

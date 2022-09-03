@@ -7,8 +7,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from util.decklist import deckList
-from util.view import DeckListView
+from database.decklist import deckList
+from view import DeckListView
 from ringon import Ringon
 
 class CogDeckList(commands.Cog):

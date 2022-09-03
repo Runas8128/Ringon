@@ -7,7 +7,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from util.load_token import provider
+from util import provider
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ import random
 from pytion import parser, ID
 from pytion import Database, Parser
 
-from .decorator import database
+from util import database
 
 logger = logging.getLogger(__name__)
 

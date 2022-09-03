@@ -2,8 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from util.detect import detect
-from util.view import EmbedView
+from database.detect import detect
+from view import EmbedView
 from ringon import Ringon
 
 class CogDetect(commands.Cog):

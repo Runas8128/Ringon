@@ -4,7 +4,7 @@ from time import time
 import discord
 from discord.ext import commands
 
-from util.utils import util
+from database.utils import util
 from ringon import Ringon
 
 class CogEvent(commands.Cog):

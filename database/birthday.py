@@ -11,7 +11,7 @@ from datetime import datetime
 from pytion import ID, parser
 from pytion import Database, Parser
 
-from .decorator import database
+from util import database
 
 logger = logging.getLogger(__name__)
 

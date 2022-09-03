@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from pytion import ID
 from pytion import Block
 
-from .decorator import database
+from util import database
 
 logger = logging.getLogger(__name__)
 
