@@ -1,5 +1,6 @@
 from os import environ
 from logging import Logger
+from datetime import datetime, timedelta
 import json
 
 def database(logger: Logger):
@@ -103,3 +104,6 @@ class TokenProvider:
             ) from exc
 
 token = TokenProvider()
+
+def now():
+    return datetime.utcnow() + timedelta(hours=9)

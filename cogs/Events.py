@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 from database.utils import util
+from util import now
 from ringon import Ringon
 
 class CogEvent(commands.Cog):
@@ -92,7 +93,7 @@ class CogEvent(commands.Cog):
 
         await self.error_log_channel.send(
             embed=discord.Embed(
-                title="Bug report", timestamp=util.now
+                title="Bug report", timestamp=now()
             ).add_field(
                 name="error string", value=str(error), inline=False
             ).add_field(

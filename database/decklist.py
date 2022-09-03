@@ -16,7 +16,7 @@ from pytion import filter, parser, prop, ID
 from pytion import Database, Block, Filter, Parser
 
 from ringon import Ringon
-from util import database
+from util import database, now
 from .utils import util
 
 logger = logging.getLogger(__name__)
@@ -227,7 +227,7 @@ class DeckList:
 
         self.last_id += 1
 
-        timestamp = util.now.strftime("%Y/%m/%d")
+        timestamp = now().strftime("%Y/%m/%d")
 
         self.data_db.append(
             name=prop.Title(name),

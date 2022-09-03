@@ -2,7 +2,6 @@
 
 from typing import List
 import logging
-from datetime import datetime, timedelta, timezone
 
 from pytion import ID
 from pytion import Block
@@ -16,9 +15,6 @@ class Util:
     """Util database for Ringon.
 
     ### Attributes ::
-        now (datetime.datetime):
-            Datetime object of now (with KST)
-
         block_words (list of str):
             List of loaded block words
 
@@ -35,11 +31,6 @@ class Util:
         self._block_words = Block(blockID=ID.block.BLOCK_WORD).get_text_list()
         self.pack_block = Block(blockID=ID.block.PACK)
         self._pack = self.pack_block.get_text()
-
-    @property
-    def now(self):
-        """Indicates datetime object of now (with KST)"""
-        return datetime.now(tz=timezone(offset=timedelta(hours=9)))
 
     @property
     def block_words(self):

@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 
 from database.utils import util
 from database.birthday import birthdayDB
+from util import now
 from ringon import Ringon
 
 class Birthday(commands.Cog):
@@ -30,15 +31,15 @@ class Birthday(commands.Cog):
 
     @tasks.loop(hours = 1)
     async def birthdayCheckLoop(self):
-        now = util.now
+        _now = now()
         if (
-            now - now.replace(hour=0, minute=0, second=0, microsecond=0)
+            _now - _now.replace(hour=0, minute=0, second=0, microsecond=0)
         ).total_seconds() >= 1*60*60:
             return
 
         members: List[discord.Member] = [
             self.guild.get_member(id)
-            for id in birthdayDB[now]
+            for id in birthdayDB[_now]
         ]
         if len(members) == 0:
             return
