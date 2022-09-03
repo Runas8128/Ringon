@@ -1,6 +1,7 @@
 from typing import List, Dict, Union
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 from ringon import Ringon
@@ -24,15 +25,16 @@ class CogCheck(commands.Cog):
                 guild.get_role(805451727859613707)  # 고3
             ]
 
-    @commands.command(name='인원점검')
-    @commands.has_permissions(administrator=True)
+    @app_commands.command(name="인원점검")
+    @app_commands.default_permissions(administrator=True)
     async def cmd_CheckMembers(
-        self, ctx: commands.Context,
+        self, interaction: discord.Interaction,
         tarMsgLink: str=''
     ):
         if self.bot.is_testing:
-            await ctx.reply("해당 명령어는 테스트 모드에서 사용 불가능한 명령어입니다.", mention_author=False)
-            return
+            return await interaction.response.send_message(
+                "해당 명령어는 테스트 모드에서 사용 불가능한 명령어입니다."
+            )
 
         try:
             _, _, _, _, guildID, channelID, messageID = tarMsgLink.split('/')
@@ -42,32 +44,33 @@ class CogCheck(commands.Cog):
             tarMsg = discord.Message = await channel.fetch_message(int(messageID))
 
         except discord.NotFound:
-            await ctx.send(
+            return await interaction.response.send_message(
                 "잘못된 메시지 링크입니다. "
                 "`메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!"
             )
         except ValueError:
-            await ctx.send(
+            return await interaction.response.send_message(
                 "잘못된 메시지 링크 형식입니다. "
                 "`메시지 링크 복사` 버튼을 이용해 복사한 메시지 링크를 넣어주세요!"
             )
 
-        else:
-            notMsg = await ctx.send("인원점검중...")
-            userMap = await self.getMemberMap(
-                ctx.guild,
-                tarMsg.reactions,
-                ['👍', '👎']
-            )
+        await interaction.response.defer()
 
-            embed = discord.Embed(title="인원점검")
-            for emoji, users in userMap.items():
-                embed.add_field(
-                    name=emoji,
-                    value=", ".join([user.mention for user in users]) or "없음",
-                    inline=False
-                )
-            await notMsg.edit(content="", embed=embed)
+        notMsg = await interaction.followup.send("인원점검중...")
+        userMap = await self.getMemberMap(
+            interaction.guild,
+            tarMsg.reactions,
+            ['👍', '👎']
+        )
+
+        embed = discord.Embed(title="인원점검")
+        for emoji, users in userMap.items():
+            embed.add_field(
+                name=emoji,
+                value=", ".join([user.mention for user in users]) or "없음",
+                inline=False
+            )
+        await interaction.followup.edit_message(notMsg.id, content="", embed=embed)
 
     async def getMemberMap(
         self,

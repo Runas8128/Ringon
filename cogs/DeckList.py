@@ -170,16 +170,14 @@ class CogDeckList(commands.Cog):
                 )
             )
 
-    @commands.command(name="팩이름")
-    @commands.has_permissions(administrator=True)
-    async def cmdChangePackName(self, ctx: commands.Context,
-        newName: str=None
+    @app_commands.command(name="팩이름")
+    @app_commands.default_permissions(administrator=True)
+    async def cmdChangePackName(self, interaction: discord.Interaction,
+        newName: str
     ):
-        if newName is None:
-            await ctx.send("사용법: `!팩이름 (신팩 이름: 띄어쓰기 X)")
-            return
+        await interaction.response.defer()
 
-        notify: discord.Message = await ctx.send(
+        notify: discord.Message = await interaction.followup.send(
             embed=discord.Embed(
                 title=(
                     "⚠️ 이 명령어는 현재 등록된 덱리를 "
@@ -196,14 +194,14 @@ class CogDeckList(commands.Cog):
         try:
             def check(msg: discord.Message):
                 return all((
-                    msg.author == ctx.author,
-                    msg.channel == ctx.channel,
+                    msg.author.id == interaction.user.id,
+                    msg.channel.id == interaction.channel.id,
                     msg.content == "확인"
                 ))
 
             await self.bot.wait_for('message', check=check, timeout=60.0)
             deckList.change_pack(newName)
-            await ctx.send("팩 이름을 {newName}로 고쳤습니다!")
+            await interaction.followup.send("팩 이름을 {newName}로 고쳤습니다!")
         except asyncio.TimeoutError:
             await notify.edit(
                 embed=discord.Embed(

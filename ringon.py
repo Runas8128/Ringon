@@ -109,5 +109,9 @@ class Ringon(commands.Bot):
             await self.load_extension('cogs.' + name)
         except commands.ExtensionAlreadyLoaded:
             logger.warning("skipping loading cog: %s: Already loaded", name)
-        except Exception: # pylint: disable=broad-except
-            logger.error("skipping loading cog: %s: Unexpected exception raised", name)
+        except Exception as exc: # pylint: disable=broad-except
+            logger.error(
+                "skipping loading cog: %s: Unexpected exception raised",
+                name,
+                exc_info=exc
+            )
