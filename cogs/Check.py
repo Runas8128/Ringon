@@ -25,11 +25,16 @@ class CogCheck(commands.Cog):
                 guild.get_role(805451727859613707)  # 고3
             ]
 
-    @app_commands.command(name="인원점검")
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.command(
+        name="인원점검",
+        description="지정된 메시지에 달린 반응들을 분석해줍니다. 관리자 권한 명령어입니다."
+    )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     async def cmd_CheckMembers(
         self, interaction: discord.Interaction,
-        tarMsgLink: str=''
+        target_msg_link: str=''
     ):
         if self.bot.is_testing:
             return await interaction.response.send_message(
@@ -37,7 +42,7 @@ class CogCheck(commands.Cog):
             )
 
         try:
-            _, _, _, _, guildID, channelID, messageID = tarMsgLink.split('/')
+            _, _, _, _, guildID, channelID, messageID = target_msg_link.split('/')
             guild: discord.Guild = self.bot.get_guild(int(guildID))
             channel: discord.TextChannel = guild.get_channel(int(channelID))
 

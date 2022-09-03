@@ -170,10 +170,15 @@ class CogDeckList(commands.Cog):
                 )
             )
 
-    @app_commands.command(name="팩이름")
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.command(
+        name="팩이름",
+        description="팩 이름을 변경합니다. 이 명령어는 관리자 권한이며, 실행시 모든 덱이 삭제됩니다."
+    )
+    @app_commands.default_permissions(
+        administrator=True
+    )
     async def cmdChangePackName(self, interaction: discord.Interaction,
-        newName: str
+        new_pack: str
     ):
         await interaction.response.defer()
 
@@ -200,7 +205,7 @@ class CogDeckList(commands.Cog):
                 ))
 
             await self.bot.wait_for('message', check=check, timeout=60.0)
-            deckList.change_pack(newName)
+            deckList.change_pack(new_pack)
             await interaction.followup.send("팩 이름을 {newName}로 고쳤습니다!")
         except asyncio.TimeoutError:
             await notify.edit(
