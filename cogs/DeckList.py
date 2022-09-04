@@ -180,9 +180,12 @@ class CogDeckList(commands.Cog):
         new_pack: str
     ):
         await interaction.response.defer()
-
-        notify: discord.Message = await interaction.followup.send(
-            embed=discord.Embed(
+        resp = await util.get_by_button(
+            bot=self.bot,
+            origin=interaction,
+            options=['확인'],
+            emojis=['✅'],
+            notice_embed=discord.Embed(
                 title=(
                     "⚠️ 해당 명령어 사용시, "
                     "현재 등록된 덱리가 모두 삭제합니다."
@@ -195,29 +198,20 @@ class CogDeckList(commands.Cog):
             )
         )
 
-        try:
-            def check(msg: discord.Message):
-                return all((
-                    msg.author.id == interaction.user.id,
-                    msg.channel.id == interaction.channel.id,
-                    msg.content == "확인"
-                ))
-
-            await self.bot.wait_for('message', check=check, timeout=60.0)
-
+        if resp is None:
+            await interaction.followup.edit(
+                embed=discord.Embed(
+                    title="⚠️ 시간 초과, 명령어 사용을 취소합니다.",
+                    color=0x2b5468
+                )
+            )
+        else:
             for deck in deckList.change_pack(new_pack):
                 await deckList.history_channel.send(
                     embed=util.build_deck_embed(deck, interaction.guild)
                 )
 
             await interaction.followup.send(f"팩 이름을 {new_pack}로 고쳤습니다!")
-        except asyncio.TimeoutError:
-            await notify.edit(
-                embed=discord.Embed(
-                    title="⚠️ 시간 초과, 명령어 사용을 취소합니다.",
-                    color=0x2b5468
-                )
-            )
 
     async def _addDeck(self,
         origin: discord.Message,
