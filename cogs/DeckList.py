@@ -180,6 +180,10 @@ class CogDeckList(commands.Cog):
     async def cmdChangePackName(self, interaction: discord.Interaction,
         new_pack: str
     ):
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message(
+                "관리자 전용 명령어입니다."
+            )
         await interaction.response.defer()
         resp = await util.get_by_button(
             bot=self.bot,

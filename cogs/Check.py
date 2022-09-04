@@ -40,6 +40,10 @@ class CogCheck(commands.Cog):
             return await interaction.response.send_message(
                 "해당 명령어는 테스트 모드에서 사용 불가능한 명령어입니다."
             )
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message(
+                "관리자 전용 명령어입니다."
+            )
 
         try:
             _, _, _, _, guildID, channelID, messageID = target_msg_link.split('/')
