@@ -34,7 +34,7 @@ class BirthdayDB:
             filter=None,
             parser=Parser(
                 only_values=True,
-                id=parser.Text, date=parser.Text
+                ID=parser.Text, date=parser.Text
             )
         ))
 

@@ -54,7 +54,7 @@ class Detect:
             tar, rst, ratio = data['target'], data['result'], data['ratio']
 
             if tar in _fields:
-                _fields[tar] += f", {rst}(가중치: {ratio})"
+                _fields[tar] += f"{rst}(가중치: {ratio})\n"
             else:
                 _fields[tar] = f"{rst}(가중치: {ratio})"
 
