@@ -231,7 +231,7 @@ async def get_by_button(
     view = discord.ui.View(timeout=timeout)
 
     for label, emoji in zip(options, emojis):
-        button = discord.ui.Button(label=label, emoji=emoji)
+        button = discord.ui.Button(label=label, emoji=emoji, custom_id=label)
         async def on_click(interaction: discord.Interaction):
             await interaction.response.defer()
         button.callback = on_click
@@ -262,13 +262,13 @@ async def get_by_button(
     def check(interaction: discord.Interaction):
         return all((
             origin_id == interaction.user.id,
-            interaction.data.get('label') in options
+            interaction.data.get('custom_id') in options
         ))
 
     try:
         chk: discord.Interaction = await bot.wait_for(
             'interaction', check=check, timeout=timeout
         )
-        return chk.data.get('label')
+        return chk.data.get('custom_id')
     except asyncio.TimeoutError:
         return None

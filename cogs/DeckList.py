@@ -200,7 +200,7 @@ class CogDeckList(commands.Cog):
         )
 
         if resp is None:
-            await interaction.followup.edit(
+            await interaction.followup.send(
                 embed=discord.Embed(
                     title="⚠️ 시간 초과, 명령어 사용을 취소합니다.",
                     color=0x2b5468

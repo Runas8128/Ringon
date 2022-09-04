@@ -359,7 +359,6 @@ class DeckList:
 
         for payload in pages:
             yield self.search_id(payload['deck_id'])
-            print("payload:", payload)
             self.data_db.delete(payload['page_id'])
 
         util.pack = new_pack
