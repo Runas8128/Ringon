@@ -9,17 +9,16 @@ class CogDebug(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
-        name="admin_only_test"
+        name="log"
     )
     @app_commands.default_permissions(
         administrator=True
     )
-    async def test(self, interaction: discord.Interaction):
-        """Admin only command example.
-
-        This command is not visible to general user.
-        """
-        await interaction.response.send_message(interaction.user.mention)
+    async def log(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            file=discord.File('.log'),
+            ephemeral=True
+        )
 
 async def setup(bot: Ringon):
     await bot.add_cog(CogDebug(bot), guild=bot.target_guild)

@@ -19,7 +19,8 @@ class CogArgs:
         detect: bool = False,
         birthday: bool = False,
         check: bool = False,
-        other: bool = False
+        other: bool = False,
+        debug: bool = False
     ):
         self.cog_list = []
 
@@ -35,13 +36,16 @@ class CogArgs:
             self.cog_list.append('Check')
         if other:
             self.cog_list.append('Other')
+        if debug:
+            self.cog_list.append('Debug')
 
     @classmethod
     def all(cls):
         return cls(
             events=True,
             decklist=True, detect=True,
-            birthday=True, check=True, other=True
+            birthday=True, check=True,
+            other=True, debug=True
         )
 
 class Ringon(commands.Bot):
@@ -74,7 +78,7 @@ class Ringon(commands.Bot):
         if self.is_testing:
             self.all_cogs.append('Debug')
 
-        logger.info("Bot Init: is testing=%s, test cogs=%s", is_testing, self.all_cogs)
+        logger.info("Bot init success: is testing=%s, test cogs=%s", is_testing, self.all_cogs)
 
     def run(self):
         """get token automatically and run bot."""
