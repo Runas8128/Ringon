@@ -9,6 +9,7 @@ from discord.ext import commands
 
 from database.decklist import deckList
 from view import DeckListView
+import util
 from ringon import Ringon
 
 class CogDeckList(commands.Cog):
@@ -185,8 +186,8 @@ class CogDeckList(commands.Cog):
         notify: discord.Message = await interaction.followup.send(
             embed=discord.Embed(
                 title=(
-                    "⚠️ 이 명령어는 현재 등록된 덱리를 "
-                    "모두 삭제할 수 있습니다."
+                    "⚠️ 해당 명령어 사용시, "
+                    "현재 등록된 덱리가 모두 삭제합니다."
                 ),
                 description=(
                     "사용하시려면 `확인`을 입력해주세요! "
@@ -205,8 +206,13 @@ class CogDeckList(commands.Cog):
                 ))
 
             await self.bot.wait_for('message', check=check, timeout=60.0)
-            deckList.change_pack(new_pack)
-            await interaction.followup.send("팩 이름을 {newName}로 고쳤습니다!")
+
+            for deck in deckList.change_pack(new_pack):
+                await deckList.history_channel.send(
+                    embed=util.build_deck_embed(deck, interaction.guild)
+                )
+
+            await interaction.followup.send(f"팩 이름을 {new_pack}로 고쳤습니다!")
         except asyncio.TimeoutError:
             await notify.edit(
                 embed=discord.Embed(

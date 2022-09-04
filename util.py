@@ -1,7 +1,26 @@
+from typing import TYPE_CHECKING
+
 from os import environ
 from logging import Logger
 from datetime import datetime, timedelta
+import re
 import json
+
+import discord
+
+if TYPE_CHECKING:
+    from database.decklist import Deck
+else:
+    from collections import namedtuple
+    Deck = namedtuple(
+        'Deck',
+        [
+            'name', 'clazz', 'desc',
+            'author', 'image_url',
+            'timestamp', 'version',
+            'contrib'
+        ]
+    )
 
 def database(logger: Logger):
     def deco(cls):
@@ -107,3 +126,55 @@ token = TokenProvider()
 
 def now():
     return datetime.utcnow() + timedelta(hours=9)
+
+def fetch_author_mention(guild: discord.Guild, _id: int):
+    member = guild.get_member(_id)
+
+    if member is None:
+        return "(정보 없음)"
+    else:
+        return member.mention
+
+def fetch_author_info(guild: discord.Guild, _id: str):
+    member = guild.get_member(int(_id))
+
+    if member is None:
+        return {
+            'name': "(정보 없음"
+        }
+    else:
+        return {
+            'name': member.display_name,
+            'icon_url': member.display_avatar.url
+        }
+
+def build_deck_embed(deck: Deck, guild: discord.Guild):
+    embed = discord.Embed(title=deck.name, color=0x2b5468)
+    embed.set_author(**fetch_author_info(guild, deck.author))
+
+    embed.add_field(name="클래스", value=deck.clazz)
+    embed.add_field(name="등록일", value=deck.timestamp)
+
+    if deck.version > 1:
+        embed.add_field(name="업데이트 횟수", value=deck.version - 1)
+        if len(deck.contrib) != 0:
+            embed.add_field(
+                name="기여자 목록",
+                value=', '.join([
+                    fetch_author_mention(guild, id) for id in deck.contrib
+                ])
+            )
+
+    if deck.desc != '':
+        embed.add_field(name="덱 설명", value=deck.desc, inline=False)
+        hashtag_list = re.findall(r"#(\w+)", deck.desc)
+        if len(hashtag_list) > 0:
+            embed.add_field(
+                name="해시태그",
+                value=', '.join(['#' + tag for tag in hashtag_list])
+            )
+
+    embed.set_image(url=deck.image_url)
+    embed.set_footer(text=f"ID: {deck.deck_id}")
+
+    return embed

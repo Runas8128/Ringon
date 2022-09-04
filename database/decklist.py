@@ -5,7 +5,6 @@ Typical usage example:
 """
 
 from typing import List, Dict
-import shutil
 import logging
 from dataclasses import dataclass, field
 
@@ -91,6 +90,8 @@ class DeckList:
                 raise ValueError(_contrib['DeckID']) from exc
 
         self._last_id = int(self.id_block.get_text())
+
+        util.load()
 
     def load_history_channel(self, bot: Ringon):
         """Load history channel object.
@@ -334,8 +335,8 @@ class DeckList:
 
         page_id = self.data_db.query(
             filter=Filter(deck_id=filter.Number(equals=deck_id)),
-            parser=Parser(pageID=parser.PageID)
-        )[0]['pageID']
+            parser=Parser(only_values=True, pageID=parser.PageID)
+        )[0]
 
         self.data.remove(deck_info)
         self.data_db.delete(page_id)
@@ -345,18 +346,21 @@ class DeckList:
     def change_pack(self, new_pack: str):
         """Delete all deck in database, and change pack name
 
-        ### DEPRECATED ::
-            I didnt added `delete all database` feature
-            will be updated soon
-
         ### WARNING ::
-            This method will delete all deck.
-            Although this method make backup automatically,
-            you should double check before calling this method.
+            This method will delete all deck,
+            and this method DOES NOT make backup automatically.
+            So you should backup database before calling this method.
         """
-        shutil.copy("./DB/decklist.db", f"./DB/decklist_backup_{util.pack}.db")
-        #self._runSQL("DELETE FROM DECKLIST")
-        #self._runSQL("DELETE FROM sqlite_sequence WHERE name='DECKLIST'")
+        pages = self.data_db.query(
+            filter=None,
+            parser=Parser(page_id=parser.PageID, deck_id=parser.Number)
+        )
+
+        for payload in pages:
+            yield self.search_id(payload['deck_id'])
+            print("payload:", payload)
+            self.data_db.delete(payload['page_id'])
+
         util.pack = new_pack
 
     def analyze(self):
