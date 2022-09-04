@@ -143,7 +143,7 @@ def fetch_author_info(guild: discord.Guild, _id: str):
 
     if member is None:
         return {
-            'name': "(정보 없음"
+            'name': "(정보 없음)"
         }
     else:
         return {
