@@ -167,7 +167,6 @@ class DeckListView(BaseView):
                 description="더 일반적인 / 다른 / 더 적은 키워드를 사용해보시는건 어떤가요?",
                 color=0x2b5468
             )
-
         return util.build_deck_embed(self.decks[self.index], self.guild)
 
     async def update(self, interaction: discord.Interaction):
@@ -267,5 +266,6 @@ class DeckListView(BaseView):
         """Delete deck from database and move to next deck"""
         await decklist.history_channel.send(embed=self.make_embed())
         target = self.decks.pop(self.index)
+        self.index -= 1
         decklist.delete_deck(target.deck_id, interaction.user.id)
         await self.update(interaction)

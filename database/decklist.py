@@ -234,7 +234,7 @@ class DeckList:
             name=prop.Title(name),
             desc=prop.Text(desc),
             clazz=prop.Select(clazz),
-            author=prop.Text(author),
+            author=prop.Text(str(author)),
             image_url=prop.Text(image_url),
             timestamp=prop.Text(timestamp),
             version=prop.Number(1),
@@ -340,6 +340,7 @@ class DeckList:
 
         self.data.remove(deck_info)
         self.data_db.delete(page_id)
+        self.last_id -= 1
 
         return deck_info
 

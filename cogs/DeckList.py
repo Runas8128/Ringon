@@ -84,6 +84,7 @@ class CogDeckList(commands.Cog):
                         continue
                 else:
                     await self._addDeck(origin, name)
+                break
         except asyncio.TimeoutError:
             await channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
