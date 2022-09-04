@@ -385,4 +385,4 @@ class DeckList:
             )
         return embed
 
-deckList = DeckList()
+decklist = DeckList()

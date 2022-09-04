@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from database.decklist import deckList
+from database import decklist
 from view import DeckListView
 import util
 from ringon import Ringon
@@ -18,11 +18,11 @@ class CogDeckList(commands.Cog):
 
         self.emojiMap: Dict[str, discord.Emoji] = {}
 
-        deckList.load()
+        decklist.load()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        deckList.load_history_channel(self.bot)
+        decklist.load_history_channel(self.bot)
 
         self.emojiMap = {
             '엘프': self.bot.get_emoji(1004600679433777182),
@@ -77,7 +77,7 @@ class CogDeckList(commands.Cog):
             while True:
                 name = await self.getDeckName(origin)
 
-                if deckList.has_deck(name):
+                if decklist.has_deck(name):
                     if await self.getIfUpdate(origin):
                         await self._updateDeck(origin, name)
                     else:
@@ -120,7 +120,7 @@ class CogDeckList(commands.Cog):
         try:
             view = DeckListView(
                 interaction,
-                deckList.search_query(query or '', clazz, author),
+                decklist.search_query(query or '', clazz, author),
                 self.emojiMap
             )
             await interaction.response.send_message(
@@ -135,7 +135,7 @@ class CogDeckList(commands.Cog):
         description="현재 등록된 덱들을 간단하게 분석해줍니다. 클래스별 덱 갯수 및 점유율을 표시합니다."
     )
     async def cmdAnalyze(self, interaction: discord.Interaction):
-        await interaction.response.send_message(embed=deckList.analyze())
+        await interaction.response.send_message(embed=decklist.analyze())
 
     @app_commands.command(
         name="포탈링크",
@@ -206,8 +206,8 @@ class CogDeckList(commands.Cog):
                 )
             )
         else:
-            for deck in deckList.change_pack(new_pack):
-                await deckList.history_channel.send(
+            for deck in decklist.change_pack(new_pack):
+                await decklist.history_channel.send(
                     embed=util.build_deck_embed(deck, interaction.guild)
                 )
 
@@ -240,7 +240,7 @@ class CogDeckList(commands.Cog):
         imageURL = origin.attachments[0].url
         author = origin.author.id
 
-        deckList.add_deck(name, clazz, desc, imageURL, author)
+        decklist.add_deck(name, clazz, desc, imageURL, author)
         await origin.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
 
     async def _updateDeck(self,
@@ -272,7 +272,7 @@ class CogDeckList(commands.Cog):
             imageURL = origin.attachments[0].url
 
         try:
-            deckList.update_deck(name, origin.author.id, imageURL, desc=desc)
+            decklist.update_deck(name, origin.author.id, imageURL, desc=desc)
             await origin.reply("덱 업데이트를 성공적으로 마쳤습니다!", mention_author=False)
         except ValueError as v:
             await origin.reply(str(v))

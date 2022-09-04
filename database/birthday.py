@@ -53,4 +53,4 @@ class BirthdayDB:
 
         return [_id for _id, _date in self.data.items() if _date == date]
 
-birthdayDB = BirthdayDB()
+birthday = BirthdayDB()

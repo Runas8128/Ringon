@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from database.detect import detect
+from database import detect
 from view import EmbedView
 from ringon import Ringon
 

@@ -4,7 +4,7 @@ from time import time
 import discord
 from discord.ext import commands
 
-from database.utils import util
+from database import util
 from util import now
 from ringon import Ringon
 

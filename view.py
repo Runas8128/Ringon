@@ -8,7 +8,7 @@ from typing import Tuple, Dict, List
 
 import discord
 
-from database.decklist import deckList, Deck
+from database.decklist import decklist, Deck
 import util
 
 class BaseView(discord.ui.View):
@@ -265,7 +265,7 @@ class DeckListView(BaseView):
         interaction: discord.Interaction, _button: discord.ui.Button
     ):
         """Delete deck from database and move to next deck"""
-        await deckList.history_channel.send(embed=self.make_embed())
+        await decklist.history_channel.send(embed=self.make_embed())
         target = self.decks.pop(self.index)
-        deckList.delete_deck(target.deck_id, interaction.user.id)
+        decklist.delete_deck(target.deck_id, interaction.user.id)
         await self.update(interaction)

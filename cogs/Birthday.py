@@ -3,7 +3,7 @@ from typing import List
 import discord
 from discord.ext import commands, tasks
 
-from database.birthday import birthdayDB
+from database import birthday
 import util
 from ringon import Ringon
 
@@ -15,7 +15,7 @@ class Birthday(commands.Cog):
         self.notice_channel: discord.TextChannel = None
         self.birthday_role: discord.Role = None
 
-        birthdayDB.load()
+        birthday.load()
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -38,7 +38,7 @@ class Birthday(commands.Cog):
 
         members: List[discord.Member] = [
             self.guild.get_member(id)
-            for id in birthdayDB[now]
+            for id in birthday[now]
         ]
         if len(members) == 0:
             return
