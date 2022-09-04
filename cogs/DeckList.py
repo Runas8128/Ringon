@@ -39,22 +39,20 @@ class CogDeckList(commands.Cog):
     async def on_message(self,
         message: discord.Message
     ):
-        if message.author.bot:
-            return
+        if all((
+            # on_message event should not react with bot's message
+            not message.author.bot,
 
-        if message.channel.category.name != "Lab":
-            # This auto-add logic only deal with `Lab` category
-            return
+            # Auto-add logic triggered when the message has at least one attachment
+            len(message.attachments) > 0,
 
-        if len(message.attachments) == 0:
-            # This auto-add logic triggered when the message has at least one attachment
-            return
+            # Auto-add logic only deal with `Lab` category
+            message.channel.category.name == "Lab",
 
-        if message.channel.name in ["덱리커스텀_상성확인실", "unlimited", "2pick"]:
-            # This auto-add Logic is not triggered in above channels
-            return
-
-        await message.add_reaction(self.emojiMap[message.channel.name])
+            # Auto-add Logic is not triggered in above channels
+            message.channel.name not in ["덱리커스텀_상성확인실", "unlimited", "2pick"]
+        )):
+            await message.add_reaction(self.emojiMap[message.channel.name])
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self,
@@ -69,23 +67,23 @@ class CogDeckList(commands.Cog):
             # This auto-add Logic triggered with pre-defined emoji
             return
 
-        orgMsg = await channel.fetch_message(payload.message_id)
+        origin = await channel.fetch_message(payload.message_id)
 
-        if orgMsg.author != payload.member:
+        if origin.author != payload.member:
             # This auto-add Logic triggered when author add reaction
             return
 
         try:
             while True:
-                name = await self.getDeckName(orgMsg)
+                name = await self.getDeckName(origin)
 
                 if deckList.has_deck(name):
-                    if await self.getIfUpdate(orgMsg):
-                        await self._updateDeck(orgMsg, name)
+                    if await self.getIfUpdate(origin):
+                        await self._updateDeck(origin, name)
                     else:
                         continue
                 else:
-                    await self._addDeck(orgMsg, name)
+                    await self._addDeck(origin, name)
         except asyncio.TimeoutError:
             await channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
@@ -222,7 +220,7 @@ class CogDeckList(commands.Cog):
             )
 
     async def _addDeck(self,
-        orgMsg: discord.Message,
+        origin: discord.Message,
         name: str
     ):
         """front-end method for adding deck in database
@@ -230,7 +228,7 @@ class CogDeckList(commands.Cog):
         This function is coroutine.
 
         ### Args ::
-            orgMsg (discord.Message):
+            origin (discord.Message):
                 origin message to reply
             name (str):
                 name of deck which will be added
@@ -239,20 +237,20 @@ class CogDeckList(commands.Cog):
             deck with same name should not be in database
         """
         try:
-            desc = await self.getDeckDesc(orgMsg)
+            desc = await self.getDeckDesc(origin)
         except asyncio.TimeoutError:
-            await orgMsg.channel.send("시간 초과, 덱 등록을 취소합니다.")
+            await origin.channel.send("시간 초과, 덱 등록을 취소합니다.")
             return
 
-        clazz = orgMsg.channel.name
-        imageURL = orgMsg.attachments[0].url
-        author = orgMsg.author.id
+        clazz = origin.channel.name
+        imageURL = origin.attachments[0].url
+        author = origin.author.id
 
         deckList.add_deck(name, clazz, desc, imageURL, author)
-        await orgMsg.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
+        await origin.reply("덱 등록을 성공적으로 마쳤습니다!", mention_author=False)
 
     async def _updateDeck(self,
-        orgMsg: discord.Message,
+        origin: discord.Message,
         name: str
     ):
         """front-end method for updating deck in database
@@ -260,7 +258,7 @@ class CogDeckList(commands.Cog):
         This function is coroutine.
 
         ### Args ::
-            orgMsg (discord.Message):
+            origin (discord.Message):
                 origin message to reply
             name (str):
                 name of deck which will be updated
@@ -269,31 +267,31 @@ class CogDeckList(commands.Cog):
             deck with same name should be in database
         """
         try:
-            desc = await self.getDeckDesc(orgMsg)
+            desc = await self.getDeckDesc(origin)
         except asyncio.TimeoutError:
-            await orgMsg.channel.send("시간 초과, 덱 업데이트를 취소합니다.")
+            await origin.channel.send("시간 초과, 덱 업데이트를 취소합니다.")
             return
 
-        if len(orgMsg.attachments) == 0:
+        if len(origin.attachments) == 0:
             imageURL = ''
         else:
-            imageURL = orgMsg.attachments[0].url
+            imageURL = origin.attachments[0].url
 
         try:
-            deckList.update_deck(name, orgMsg.author.id, imageURL, desc=desc)
-            await orgMsg.reply("덱 업데이트를 성공적으로 마쳤습니다!", mention_author=False)
+            deckList.update_deck(name, origin.author.id, imageURL, desc=desc)
+            await origin.reply("덱 업데이트를 성공적으로 마쳤습니다!", mention_author=False)
         except ValueError as v:
-            await orgMsg.reply(str(v))
+            await origin.reply(str(v))
 
     async def getDeckName(self,
-        orgMsg: discord.Message
+        origin: discord.Message
     ):
         """get deck name with origin message
 
         This function is coroutine.
 
         ### Args ::
-            orgMsg (discord.Message):
+            origin (discord.Message):
                 origin message to reply
 
         ### Returns ::
@@ -306,11 +304,11 @@ class CogDeckList(commands.Cog):
         ."""
         def check(message: discord.Message):
             return all((
-                orgMsg.author == message.author,
-                orgMsg.channel == message.channel
+                origin.author == message.author,
+                origin.channel == message.channel
             ))
 
-        await orgMsg.reply(
+        await origin.reply(
             embed=discord.Embed(
                 title=":ledger: 덱의 이름을 입력해주세요!",
                 description="시간 제한: 1분"
@@ -326,14 +324,14 @@ class CogDeckList(commands.Cog):
         return msgName.content
 
     async def getIfUpdate(self,
-        orgMsg: discord.Message
+        origin: discord.Message
     ):
         """get boolean data whether update deck or re-input name
 
         This function is coroutine.
 
         ### Args ::
-            orgMsg (discord.Message):
+            origin (discord.Message):
                 origin message to reply
 
         ### Returns ::
@@ -344,50 +342,30 @@ class CogDeckList(commands.Cog):
                 raised when response is timed out (1min)
         """
 
-        btnUpdate = discord.ui.Button(label="업데이트", custom_id="btn_update", emoji="↩️")
-        async def onClick_btnUpdate(interaction: discord.Interaction):
-            await interaction.response.send_message("덱을 업데이트합니다.", ephemeral=True)
-        btnUpdate.callback = onClick_btnUpdate
-
-        btnReinput = discord.ui.Button(label="재입력", custom_id="btn_reinput", emoji="➡️")
-        async def onClick_btnReinput(interaction: discord.Interaction):
-            await interaction.response.send_message("덱 이름을 재입력받습니다.", ephemeral=True)
-        btnReinput.callback = onClick_btnReinput
-
-        chkView = discord.ui.View(timeout=60.0)\
-            .add_item(btnUpdate)\
-            .add_item(btnReinput)
-
-        await orgMsg.reply(
-            embed=discord.Embed(
+        resp = await util.get_by_button(
+            bot=self.bot,
+            origin=origin,
+            options=['업데이트', '재입력'],
+            emojis=['↩️', '➡️'],
+            notice_embed=discord.Embed(
                 title=":pause_button: 이미 있는 덱 이름입니다!",
                 description=(
                     "이름을 바꾸려면 `재입력`을, 덱을 업데이트하려면 "
                     "`업데이트`를 선택해주세요.\n시간 제한: 1분"
                 )
-            ),
-            view=chkView,
-            mention_author=False
+            )
         )
-
-        def check(interaction: discord.Interaction):
-            return all((
-                orgMsg.author.id == interaction.user.id,
-                interaction.data.get('custom_id') in ['btn_update', 'btn_reinput']
-            ))
-
-        chk: discord.Interaction = await self.bot.wait_for('interaction', check=check, timeout=60.0)
-        return chk.data['custom_id'] == "btn_update"
+        return resp == '업데이트'
 
     async def getDeckDesc(self,
-        orgMsg: discord.Message
+        origin: discord.Message
     ):
         """get description of deck
 
         This function is coroutine.
 
         ### Args ::
-            orgMsg (discord.Message):
+            origin (discord.Message):
                 origin message to reply
 
         ### Returns ::
@@ -398,9 +376,9 @@ class CogDeckList(commands.Cog):
                 raised when response is timed out (15min)
         """
         def check(message: discord.Message):
-            return orgMsg.author == message.author and orgMsg.channel == message.channel
+            return origin.author == message.author and origin.channel == message.channel
 
-        await orgMsg.reply(
+        await origin.reply(
             embed=discord.Embed(
                 title=":ledger: 덱의 설명을 입력해주세요!",
                 description="시간 제한 X\n덱 설명을 생략하려면 `생략`을 입력해주세요."

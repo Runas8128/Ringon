@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from os import environ
 from logging import Logger
@@ -10,6 +10,7 @@ import discord
 
 if TYPE_CHECKING:
     from database.decklist import Deck
+    from ringon import Ringon
 else:
     from collections import namedtuple
     Deck = namedtuple(
@@ -21,6 +22,7 @@ else:
             'contrib'
         ]
     )
+    Ringon = discord.ext.commands.Bot
 
 def database(logger: Logger):
     def deco(cls):
@@ -178,3 +180,72 @@ def build_deck_embed(deck: Deck, guild: discord.Guild):
     embed.set_footer(text=f"ID: {deck.deck_id}")
 
     return embed
+
+async def get_by_button(
+    bot: Ringon,
+    origin: discord.Message,
+    options: List[str],
+    emojis: List[str],
+    *,
+    timeout: float = 60.0,
+    notice_msg: str = None,
+    notice_embed: discord.Embed = None
+) -> str:
+    """get input by button
+
+    This function is coroutine.
+
+    ### Args ::
+        bot (Ringon):
+            bot instance to get response
+        origin (discord.Message):
+            origin message to reply
+        options (List[str]):
+            select options. length should be less than 10.
+        emojis (List[str]):
+            emoji of option. length should be equal to `options`'s.
+        timeout (float):
+            second to timeout. default is 60.0 (1 min)
+        notice_msg (str):
+            message to send with check view.
+        notice_embed (discord.Embed):
+            embed to send with check view.
+
+    ### Returns ::
+        str: label of clicked button
+
+    ### Raises ::
+        asyncio.TimeoutError
+            raised when response is timed out (1min)
+    """
+
+    if len(options) >= 10:
+        raise ValueError("length of options should be less than 10")
+
+    view = discord.ui.View(timeout=timeout)
+
+    for label, emoji in zip(options, emojis):
+        button = discord.ui.Button(label=label, emoji=emoji)
+        async def on_click(interaction: discord.Interaction):
+            await interaction.response.defer()
+        button.callback = on_click
+
+        view.add_item(button)
+
+    await origin.reply(
+        content=notice_msg,
+        embed=notice_embed,
+        view=view,
+        mention_author=False
+    )
+
+    def check(interaction: discord.Interaction):
+        return all((
+            origin.author.id == interaction.user.id,
+            interaction.data.get('label') in options
+        ))
+
+    chk: discord.Interaction = await bot.wait_for(
+        'interaction', check=check, timeout=timeout
+    )
+    return chk.data['custom_id']
