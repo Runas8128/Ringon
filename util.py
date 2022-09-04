@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 from os import environ
 from logging import Logger
@@ -184,7 +184,7 @@ def build_deck_embed(deck: Deck, guild: discord.Guild):
 
 async def get_by_button(
     bot: Ringon,
-    origin: discord.Message,
+    origin: Union[discord.Message, discord.Interaction],
     options: List[str],
     emojis: List[str],
     *,
@@ -199,8 +199,8 @@ async def get_by_button(
     ### Args ::
         bot (Ringon):
             bot instance to get response
-        origin (discord.Message):
-            origin message to reply
+        origin (discord.Message | discord.Interaction):
+            origin message or interaction to reply
         options (List[str]):
             select options. length should be less than 10.
         emojis (List[str]):
@@ -216,6 +216,13 @@ async def get_by_button(
         Optional[str]:
             None if timeouted,
             label of clicked button if not.
+
+    ### Raises ::
+        ValueError
+            raised when length of `options` is not less than 10.
+        TypeError
+            raised when type of `origin` is neither `discord.Message`
+            nor `discord.Interaction`
     """
 
     if len(options) >= 10:
@@ -231,16 +238,30 @@ async def get_by_button(
 
         view.add_item(button)
 
-    await origin.reply(
-        content=notice_msg,
-        embed=notice_embed,
-        view=view,
-        mention_author=False
-    )
+    if isinstance(origin, discord.Message):
+        origin_id = origin.author.id
+        await origin.reply(
+            content=notice_msg,
+            embed=notice_embed,
+            view=view,
+            mention_author=False
+        )
+    elif isinstance(origin, discord.Interaction):
+        origin_id = origin.user.id
+        await origin.followup.send(
+            content=notice_msg,
+            embed=notice_embed,
+            view=view
+        )
+    else:
+        raise TypeError(
+            "variable `origin` should be discord.Message or discord.Interaction, "
+            f"not {type(origin)}"
+        )
 
     def check(interaction: discord.Interaction):
         return all((
-            origin.author.id == interaction.user.id,
+            origin_id == interaction.user.id,
             interaction.data.get('label') in options
         ))
 
