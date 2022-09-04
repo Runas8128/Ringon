@@ -5,6 +5,7 @@ from logging import Logger
 from datetime import datetime, timedelta
 import re
 import json
+import asyncio
 
 import discord
 
@@ -212,11 +213,9 @@ async def get_by_button(
             embed to send with check view.
 
     ### Returns ::
-        str: label of clicked button
-
-    ### Raises ::
-        asyncio.TimeoutError
-            raised when response is timed out (1min)
+        Optional[str]:
+            None if timeouted,
+            label of clicked button if not.
     """
 
     if len(options) >= 10:
@@ -245,7 +244,10 @@ async def get_by_button(
             interaction.data.get('label') in options
         ))
 
-    chk: discord.Interaction = await bot.wait_for(
-        'interaction', check=check, timeout=timeout
-    )
-    return chk.data['custom_id']
+    try:
+        chk: discord.Interaction = await bot.wait_for(
+            'interaction', check=check, timeout=timeout
+        )
+        return chk.data.get('label')
+    except asyncio.TimeoutError:
+        return None
