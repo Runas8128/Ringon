@@ -9,7 +9,8 @@ class CogDebug(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
-        name="log"
+        name="log",
+        description="send log file"
     )
     @app_commands.default_permissions(
         administrator=True
