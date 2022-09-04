@@ -362,6 +362,7 @@ class DeckList:
             self.data_db.delete(payload['page_id'])
 
         util.pack = new_pack
+        self.last_id = 0
 
     def analyze(self):
         """Get deck analyze report by embed object
