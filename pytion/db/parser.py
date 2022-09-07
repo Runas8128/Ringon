@@ -75,10 +75,11 @@ def _parser_base(result: dict, name: str, type: Type):
 
     if type == PageID:
         return result['id']
-    elif type in parser_map:
+
+    if type in parser_map:
         return parser_map[type](result['properties'][name])
-    else:
-        raise NotImplementedError(type)
+
+    raise NotImplementedError(type)
 
 class Parser:
     """Notion-API object to python dictionary parser
