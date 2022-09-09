@@ -48,9 +48,7 @@ class CogDeckList(commands.Cog):
 
             # Auto-add logic only deal with `Lab` category
             isinstance(message.channel, discord.TextChannel) and \
-            message.channel.category.name == "Lab",
-
-            # Auto-add Logic is not triggered in above channels
+            message.channel.category.name == "Lab" and \
             message.channel.name not in ["덱리커스텀_상성확인실", "unlimited", "2pick"]
         )):
             await message.add_reaction(self.emojiMap[message.channel.name])
