@@ -267,5 +267,5 @@ class DeckListView(BaseView):
         await decklist.history_channel.send(embed=self.make_embed())
         target = self.decks.pop(self.index)
         self.index -= 1
-        decklist.delete_deck(target.deck_id, interaction.user.id)
+        decklist.delete_deck(target.deck_id)
         await self.update(interaction)

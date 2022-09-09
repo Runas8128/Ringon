@@ -309,40 +309,21 @@ class DeckList:
                 ContribID=prop.Text(contrib)
             )
 
-    def delete_deck(self, deck_id: int, req_id: int):
+    def delete_deck(self, deck_id: int):
         """Delete deck from database
-
-        Only uploader must be able to delete the deck.
 
         ### Args ::
             name (str):
                 name of deck which will be deleted
-            reqID (int):
-                ID of member who requested to delete this deck
-
-        ### Returns ::
-            Deck: Deck info for provided id.
-
-        ### Raises ::
-            ValueError
-                raised when requester is not deck author
         """
 
-        deck_info = next(deck for deck in self.data if deck.deck_id == deck_id)
-
-        if deck_info.author != str(req_id):
-            raise ValueError("덱을 등록한 사람만 삭제할 수 있습니다")
+        self.data = [deck for deck in self.data if deck.deck_id != deck_id]
 
         page_id = self.data_db.query(
             filter=Filter(deck_id=filter.Number(equals=deck_id)),
             parser=Parser(only_values=True, pageID=parser.PageID)
         )[0]
-
-        self.data.remove(deck_info)
         self.data_db.delete(page_id)
-        self.last_id -= 1
-
-        return deck_info
 
     def change_pack(self, new_pack: str):
         """Delete all deck in database, and change pack name
@@ -362,6 +343,7 @@ class DeckList:
             self.data_db.delete(payload['page_id'])
 
         util.pack = new_pack
+        self.data = []
         self.last_id = 0
 
     def analyze(self):
