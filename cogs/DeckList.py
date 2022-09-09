@@ -47,7 +47,7 @@ class CogDeckList(commands.Cog):
             len(message.attachments) > 0,
 
             # Auto-add logic only deal with `Lab` category
-            isinstance(message.channel, discord.TextChannel),
+            isinstance(message.channel, discord.TextChannel) and \
             message.channel.category.name == "Lab",
 
             # Auto-add Logic is not triggered in above channels
