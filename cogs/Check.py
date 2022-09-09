@@ -49,11 +49,6 @@ class CogCheck(commands.Cog):
             emoji.strip() for emoji in indi_emoji.split(' ')
             if len(emoji.strip()) != 0
         ]
-        if not all(len(emoji) == 1 for emoji in indi_emoji):
-            logger.info("indi_emoji: %s", str([f"'{emoji}'({len(emoji)})" for emoji in indi_emoji]))
-            return await interaction.response.send_message(
-                "이모지는 띄어쓰기로 분리해서 적어주세요."
-            )
 
         try:
             _, _, _, _, guildID, channelID, messageID = target_msg_link.split('/')
@@ -95,7 +90,7 @@ class CogCheck(commands.Cog):
         self,
         guild: discord.Guild,
         allReact: List[discord.Reaction],
-        indiEmoji: List[T_Emoji]
+        indiEmoji: List[str]
     ) -> Dict[T_Emoji, List[discord.Member]]:
         """Makes emoji-member map.
         If member reacted with two or more emoji, then check first emoji only.
@@ -106,7 +101,7 @@ class CogCheck(commands.Cog):
                 guild object for this context
             allReact (List[discord.Reaction]):
                 all reaction of target message.
-            indiEmoji (List[TEmoji]):
+            indiEmoji (List[str]):
                 emoji which will be counted individually.
 
         ### Returns ::
@@ -133,7 +128,7 @@ class CogCheck(commands.Cog):
                 if user in userList:
                     user = userList.pop(userList.index(user))
 
-                if react.emoji in indiEmoji:
+                if str(react.emoji) in indiEmoji:
                     userMap[react.emoji].append(user)
                 else:
                     userMap['그 외'].append(user)
