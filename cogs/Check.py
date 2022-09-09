@@ -34,15 +34,21 @@ class CogCheck(commands.Cog):
     )
     async def cmd_CheckMembers(
         self, interaction: discord.Interaction,
-        target_msg_link: str=''
+        target_msg_link: str,
+        indi_emoji: str
     ):
-        if self.bot.is_testing:
-            return await interaction.response.send_message(
-                "해당 명령어는 테스트 모드에서 사용 불가능한 명령어입니다."
-            )
         if not interaction.user.guild_permissions.administrator:
             return await interaction.response.send_message(
                 "관리자 전용 명령어입니다."
+            )
+
+        indi_emoji = [
+            emoji.strip() for emoji in indi_emoji.split(' ')
+            if len(emoji.strip()) != 0
+        ]
+        if not all(len(emoji) == 1 for emoji in indi_emoji):
+            return await interaction.response.send_message(
+                "이모지는 띄어쓰기로 분리해서 적어주세요."
             )
 
         try:
@@ -69,7 +75,7 @@ class CogCheck(commands.Cog):
         userMap = await self.getMemberMap(
             interaction.guild,
             tarMsg.reactions,
-            ['👍', '👎']
+            indi_emoji
         )
 
         embed = discord.Embed(title="인원점검")
