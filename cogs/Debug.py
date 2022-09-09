@@ -1,16 +1,29 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 
-from util.myBot import MyBot
+from ringon import Ringon
 
-class CogDebug(commands.Cog):    
-    def __init__(self, bot: MyBot):
+class CogDebug(commands.Cog):
+    def __init__(self, bot: Ringon):
         self.bot = bot
-    
-    @commands.command()
-    @commands.is_owner()
-    async def dbgCmd(self, ctx: commands.Context):
-        pass
 
-async def setup(bot: MyBot):
+    @app_commands.command(
+        name="log",
+        description="send log file"
+    )
+    @app_commands.default_permissions(
+        administrator=True
+    )
+    async def log(self, interaction: discord.Interaction):
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message(
+                "관리자 전용 명령어입니다."
+            )
+        await interaction.response.send_message(
+            file=discord.File('.log'),
+            ephemeral=True
+        )
+
+async def setup(bot: Ringon):
     await bot.add_cog(CogDebug(bot), guild=bot.target_guild)
