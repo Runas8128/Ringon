@@ -116,7 +116,7 @@ class CogCheck(commands.Cog):
             if not user.bot
         ]
 
-        userMap: Dict[T_Emoji, discord.Member] = {
+        userMap: Dict[str, discord.Member] = {
             emoji : []
             for emoji in indiEmoji
         }
@@ -129,7 +129,7 @@ class CogCheck(commands.Cog):
                     user = userList.pop(userList.index(user))
 
                 if str(react.emoji) in indiEmoji:
-                    userMap[react.emoji].append(user)
+                    userMap[str(react.emoji)].append(user)
                 else:
                     userMap['그 외'].append(user)
 
