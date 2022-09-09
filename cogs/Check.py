@@ -1,4 +1,5 @@
 from typing import List, Dict, Union
+import logging
 
 import discord
 from discord import app_commands
@@ -7,6 +8,8 @@ from discord.ext import commands
 from ringon import Ringon
 
 T_Emoji = Union[discord.Emoji, discord.PartialEmoji, str]
+
+logger = logging.getLogger(__name__)
 
 class CogCheck(commands.Cog):
     def __init__(self, bot: Ringon):
@@ -47,6 +50,7 @@ class CogCheck(commands.Cog):
             if len(emoji.strip()) != 0
         ]
         if not all(len(emoji) == 1 for emoji in indi_emoji):
+            logger.info("indi_emoji: %s", str([f"'{emoji}'({len(emoji)})" for emoji in indi_emoji]))
             return await interaction.response.send_message(
                 "이모지는 띄어쓰기로 분리해서 적어주세요."
             )
