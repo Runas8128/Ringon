@@ -74,6 +74,26 @@ class CogEvent(commands.Cog):
         else:
             await thread.add_user(discord.Object(272266200812093441))
 
+        select = discord.ui.Select(
+            placeholder="보관 기간을 골라주세요!",
+            options=[
+                discord.SelectOption(label="1시간", value=60),
+                discord.SelectOption(label="24시간", value=1440),
+                discord.SelectOption(label="3일", value=4320),
+                discord.SelectOption(label="일주일", value=10080),
+            ]
+        )
+
+        async def select_callback(interaction: discord.Interaction):
+            await interaction.response.defer()
+            await thread.edit(auto_archive_duration=select.values[0])
+            await interaction.message.delete()
+            await thread.send(
+                "설정이 완료되었습니다. 스레드의 이름과 설명을 링곤이 DM으로 보내주세요!"
+            )
+        select.callback = select_callback
+        await thread.send(view=discord.ui.View().add_item(select))
+
     @commands.Cog.listener()
     async def on_command_error(self,
         ctx: commands.Context,
