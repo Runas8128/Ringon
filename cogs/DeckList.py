@@ -48,6 +48,7 @@ class CogDeckList(commands.Cog):
 
             # Auto-add logic only deal with `Lab` category
             isinstance(message.channel, discord.TextChannel) and \
+            message.channel.category is not None and \
             message.channel.category.name == "Lab" and \
             message.channel.name not in ["덱리커스텀_상성확인실", "unlimited", "2pick"]
         )):
@@ -60,6 +61,7 @@ class CogDeckList(commands.Cog):
         channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
 
         if not (
+            channel.name in self.emojiMap and
             isinstance(payload.emoji, (discord.Emoji, discord.PartialEmoji)) and
             payload.emoji.id == self.emojiMap[channel.name].id
         ):
