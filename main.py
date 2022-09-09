@@ -8,6 +8,6 @@ if __name__ == '__main__':
     setup_logging()
     setup_logging(handler=logging.FileHandler('.log'))
     Ringon(
-        is_testing=True,
+        is_testing=False,
         test_cogs=CogArgs().all()
     ).run()
