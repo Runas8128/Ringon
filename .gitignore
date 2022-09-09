@@ -1,11 +1,8 @@
 *.pyc
 test*
-.db
-
 *_Old
 TODO
-
 TOKEN.json
-
 venv
 .vscode
+*.pem
