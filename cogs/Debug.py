@@ -17,6 +17,41 @@ class CogDebug(commands.Cog):
             file=discord.File('.log'),
             ephemeral=True
         )
+    
+    @app_commands.command(
+        name="prune"
+    )
+    @app_commands.default_permissions(
+        administrator=True
+    )
+    async def cmdPurgeMessage(self, interaction: discord.Interaction,
+        count: int
+    ):
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message(
+                "관리자 전용 명령어입니다."
+            )
+        if count <= 0:
+            return await interaction.response.send_message(
+                "자연수를 입력해주세요."
+            )
+        await interaction.response.defer()
+        await interaction.channel.purge(count)
+        await interaction.followup.send_message("Done.")
+
+    @app_commands.command(
+        name="kill"
+    )
+    @app_commands.default_permissions(
+        administrator=True
+    )
+    async def cmdKill(self, interaction: discord.Interaction):
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message(
+                "관리자 전용 명령어입니다."
+            )
+        await interaction.response.send_message("강제종료중...")
+        await self.bot.close()
 
 async def setup(bot: Ringon):
     await bot.add_cog(CogDebug(bot), guild=bot.target_guild)
