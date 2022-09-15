@@ -16,6 +16,9 @@ class CogDetect(commands.Cog):
     async def on_message(self,
         message: discord.Message
     ):
+        if message.author.bot:
+            return
+
         rst = detect[message.content]
         if rst is not None:
             await message.channel.typing()
