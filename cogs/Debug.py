@@ -17,7 +17,7 @@ class CogDebug(commands.Cog):
             file=discord.File('.log'),
             ephemeral=True
         )
-    
+
     @app_commands.command(
         name="prune"
     )
@@ -36,8 +36,7 @@ class CogDebug(commands.Cog):
                 "자연수를 입력해주세요."
             )
         await interaction.response.defer()
-        await interaction.channel.purge(count)
-        await interaction.followup.send_message("Done.")
+        await interaction.channel.purge(limit=count+1)
 
     @app_commands.command(
         name="kill"
