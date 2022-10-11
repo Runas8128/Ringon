@@ -293,7 +293,7 @@ class DeckList:
             filter=Filter(name=filter.Text(equals=name)),
             parser=Parser(pageID=parser.PageID)
         )[0]['pageID']
-        self.data_db.update(pageID=page_id, **properties)
+        self.data_db.update(page_id=page_id, **properties)
 
         contrib = str(contrib)
 
